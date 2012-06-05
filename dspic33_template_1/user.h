@@ -4,7 +4,7 @@
 
 /* TODO Application specific user parameters used in user.c may go here */
 
-#define led PORTAbits.RA0
+#define led LATAbits.LATA0
 
 /******************************************************************************/
 /* User Function Prototypes                                                   */

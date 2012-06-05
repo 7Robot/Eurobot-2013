@@ -38,11 +38,12 @@ int16_t main(void)
 
     /* TODO <INSERT USER APPLICATION CODE HERE> */
 
+
+
     while(1)
     {
         __delay_ms(500);
-        led = led ^ 1;
-//        led = 0;
-//        __delay_ms(500);
+        led = led^1;
+
     }
 }
