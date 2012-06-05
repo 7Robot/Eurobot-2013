@@ -14,6 +14,8 @@
 
 #include "user.h"            /* variables/params used by user.c               */
 
+#include <timer.h>
+
 /******************************************************************************/
 /* User Functions                                                             */
 /******************************************************************************/
@@ -30,4 +32,8 @@ void InitApp(void)
     /* Setup analog functionality and port direction */
 
     /* Initialize peripherals */
+
+    OpenTimer1(T1_ON & T1_GATE_OFF & T1_PS_1_8 & T1_SYNC_EXT_OFF & T1_SOURCE_INT, 0xFF);
+    EnableIntT1;
+
 }
