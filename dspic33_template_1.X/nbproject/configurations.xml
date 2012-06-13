@@ -48,7 +48,7 @@
         <platformTool>PKOBSKDEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
-        <platform>3</platform>
+        <platform>2</platform>
       </toolsSet>
       <compileType>
         <linkerTool>
@@ -77,8 +77,8 @@
       </C30-LD>
       <C30Global>
       </C30Global>
-      <ICD3PlatformTool>
-      </ICD3PlatformTool>
+      <PKOBSKDEPlatformTool>
+      </PKOBSKDEPlatformTool>
     </conf>
   </confs>
 </configurationDescriptor>

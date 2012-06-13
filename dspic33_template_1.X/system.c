@@ -35,7 +35,7 @@ __builtin functions.*/
 void ConfigureOscillator(void)
 {
 
-#if 0
+#if 1
         /* Disable Watch Dog Timer */
         RCONbits.SWDTEN = 0;
 
@@ -43,6 +43,15 @@ void ConfigureOscillator(void)
         __builtin_write_OSCCONH(0x02);  /* Set OSCCONH for clock switch */
         __builtin_write_OSCCONL(0x01);  /* Start clock switching */
         while(OSCCONbits.COSC != 0b011);
+
+        // Configure PLL prescaler, PLL postscaler, PLL divisor
+        PLLFBD=41;
+        // M=43
+        CLKDIVbits.PLLPOST=0;
+        // N1=2
+        CLKDIVbits.PLLPRE=0;
+        // N2=2
+
 
         /* Wait for Clock switch to occur */
         /* Wait for PLL to lock, only if PLL is needed */

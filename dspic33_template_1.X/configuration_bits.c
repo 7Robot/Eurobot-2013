@@ -29,7 +29,7 @@
 _FOSCSEL(FNOSC_FRC & IESO_OFF);
 
 /* Disables clock switching and selects pri osc of HS with OSCIO clock output */
-_FOSC(FCKSM_CSECME & OSCIOFNC_ON & POSCMD_HS);
+_FOSC(FCKSM_CSECME & OSCIOFNC_OFF & POSCMD_XT);
 
 /* Turns off JTAG and selects debug channel */
 _FICD(JTAGEN_OFF & ICS_PGD1);
