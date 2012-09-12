@@ -26,35 +26,17 @@
 /* User Functions                                                             */
 /******************************************************************************/
 
-/* <Initialize variables in user.h and insert code for user algorithms.> */
-
-void SwitchOscillator(void)
+void ConfigureOscillator(void)
 {
-        // Configure PLL prescaler, PLL postscaler, PLL divisor
-        PLLFBD=30; // M=32
-        CLKDIVbits.PLLPOST=0; // N1=2
-        CLKDIVbits.PLLPRE=0; // N2=2
-        // Fosc = M/(N1.N2)*Fin
-
-//        OSCTUN = 0;
-//        RCONbits.SWDTEN = 0;
-
-        // Initiate Clock Switch to Primary Oscillator with PLL
-//        _NOSC=0b011;
-        __builtin_write_OSCCONH(0x03);
-        __builtin_write_OSCCONL(0x01);
-        // Wait for Clock switch to occur
-        while(OSCCONbits.COSC != 0b011);
-        // Wait for PLL to lock
-        while(OSCCONbits.LOCK != 1);
-
-
+    // Configure PLL prescaler, PLL postscaler, PLL divisor
+    PLLFBDbits.PLLDIV = 41; // M=43
+    CLKDIVbits.PLLPOST = 0; // N1=2
+    CLKDIVbits.PLLPRE  = 0; // N2=2
+    // Fosc = M/(N1.N2)*Fin
 }
 
 void InitApp(void)
 {
-    /* TODO Initialize User Ports/Peripherals/Project here */
-
     _TRISA0 = 0;
     led = 0;
 
@@ -62,9 +44,9 @@ void InitApp(void)
     _NSTDIS = 0;
 
     OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_ON & T2_SOURCE_INT, 0x9FFF);
-    EnableIntT2;    /* Activation de l'interruption T23  */
+//    ConfigIntTimer2()
+//    EnableIntT2;    /* Activation de l'interruption T23  */
     _T2IP = 3;      /* Priorité de l'interruption       */
-
 }
 
 /******************************************************************************/

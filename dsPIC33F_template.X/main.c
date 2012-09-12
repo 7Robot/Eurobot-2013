@@ -30,14 +30,14 @@
 /* Configuartion                                                              */
 /******************************************************************************/
 
-    // Select Internal FRC at POR
-    _FOSCSEL(FNOSC_FRC);
-    // Enable Clock Switching and Configure POSC in XT mode
-    _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_HS);
-    /* Turns off JTAG and selects debug channel */
-    _FICD(JTAGEN_OFF & ICS_PGD1);
-    // Watchdog Timer disabled
-    _FWDT(FWDTEN_OFF);
+// Select Oscillator and switching.
+_FOSCSEL(FNOSC_FRCPLL & IESO_OFF);
+// Select clock.
+_FOSC(POSCMD_NONE & OSCIOFNC_ON & IOL1WAY_ON & FCKSM_CSDCMD);
+// Watchdog Timer.
+_FWDT(FWDTEN_OFF);
+// Select debug channel.
+_FICD(ICS_PGD1 & JTAGEN_OFF);
 
 
 /******************************************************************************/
@@ -46,16 +46,14 @@
 
 int16_t main(void)
 {
-
-    /* Configure the oscillator for the device */
-    SwitchOscillator();
-    /* Initialize IO ports and peripherals */
+    // Initialize IO ports and peripherals.
+    ConfigureOscillator();
     InitApp();
 
     while(1)
     {
-//        __delay32(5000000);
-//        led = led^1;
+        __delay_ms(500);
+        led = led^1;
     }
 }
 
