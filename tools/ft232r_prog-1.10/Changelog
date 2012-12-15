@@ -1,0 +1,9 @@
+Version 1.10:
+	-- now able to invert _all_ the serial and handshake lines (not just DTR).
+	   (courtesy of Jonas Meyer, thanks!)
+Version 1.09:
+Version 1.08:
+	-- fix compiler warning from newer gcc
+	-- Makefile fixes for latest Ubuntu & binutils
+Version 1.06:
+	-- fix libftdi-0.19 API breakage by not using "BM_type_chip" from libftdi0-0.18.

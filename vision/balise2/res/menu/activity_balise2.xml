@@ -1,0 +1,6 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/menu_fake_picture" android:title="Fake picture" android:checkable="true" android:checked="true" android:enabled="true"></item>
+    <item android:id="@+id/menu_calibrate_colors" android:title="Calibrate colors"></item>
+    <item android:id="@+id/menu_fix_distorsions" android:title="Fix distortions"></item>
+
+</menu>
