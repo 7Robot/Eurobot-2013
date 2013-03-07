@@ -1,1 +1,3 @@
-build/default/debug/main.o: main.c header.h
+build/default/debug/main.o:  \
+main.c  \
+header.h 

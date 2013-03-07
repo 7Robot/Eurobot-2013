@@ -38,17 +38,18 @@ void ConfigureOscillator(void)
 void InitApp(void)
 {
     _TRISA0 = 0;
-    led = 0;
 
     // activation de la priorité des interruptions
     _NSTDIS = 0;
 
-    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_ON & T2_SOURCE_INT, 0x9FFF);
-//    ConfigIntTimer2()
-//    EnableIntT2;    /* Activation de l'interruption T23  */
-    _T2IP = 3;      /* Priorité de l'interruption       */
-}
+    OpenTimer23(T2_ON &
+                    T2_IDLE_CON &
+                    T2_GATE_OFF &
+                    T2_PS_1_1 &
+                    T2_SOURCE_INT, 0x01 );
 
+    ConfigIntTimer2(T2_INT_PRIOR_4 & T2_INT_ON);
+}
 /******************************************************************************/
 /* Interrupt Vector Options                                                   */
 /******************************************************************************/
@@ -116,8 +117,8 @@ void InitApp(void)
 
 /* TODO Add interrupt routine code here. */
 
-void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
+void __attribute__((interrupt, auto_psv)) _T2Interrupt(void)
 {
-    led = led^1;    // On bascule l'état de la LED
+    led = !led;    // On bascule l'état de la LED
     _T2IF = 0;      // On baisse le FLAG
 }
