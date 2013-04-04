@@ -40,7 +40,6 @@ unsigned int config2;
 unsigned int config3;
 unsigned int U1MODEvalue;
 unsigned int U1STAvalue;
-unsigned int baud;
 unsigned int sptime;
 unsigned int period;
 
@@ -59,8 +58,7 @@ int16_t main(void)
     TRISAbits.TRISA0 = 0; // Microstick LED
     LATAbits.LATA0 = 1;
 
-    TRISBbits.TRISB4 = 1;
-    
+    TRISBbits.TRISB4 = 1; 
 
      __builtin_write_OSCCONL(OSCCON & 0xBF); // Unlock registers.
     RPOR3bits.RP6R = 3; // U1TX sur RP6
@@ -72,7 +70,6 @@ int16_t main(void)
 
     CloseUART1();
     ConfigIntUART1(UART_RX_INT_DIS & UART_TX_INT_DIS);
-    baud = 5;
     
     OpenUART1(UART_EN & UART_IDLE_CON & UART_IrDA_DISABLE & UART_MODE_FLOW
         & UART_UEN_00 & UART_DIS_WAKE & UART_DIS_LOOPBACK
@@ -81,7 +78,7 @@ int16_t main(void)
           UART_INT_TX_BUF_EMPTY & UART_IrDA_POL_INV_ZERO
         & UART_SYNC_BREAK_DISABLED & UART_TX_ENABLE & UART_TX_BUF_NOT_FUL & UART_INT_RX_CHAR
         & UART_ADR_DETECT_DIS & UART_RX_OVERRUN_CLEAR,
-          5);
+          baud);
 
 
     OpenTimer1(T1_ON & T1_IDLE_STOP & T1_GATE_OFF & T1_PS_1_64 & T1_SYNC_EXT_OFF & T1_SOURCE_INT, 0x1FFF);
@@ -97,11 +94,9 @@ int16_t main(void)
     config3 = (PWM1_SEVOPS1 & PWM1_OSYNC_PWM & PWM1_UEN);
     OpenMCPWM1(period,sptime,config1,config2,config3);
 
-
-
     while(1)
     {
-        WriteUART1(0x69);
+        WriteUART1(0x55);
         while(BusyUART1());
         __delay_ms(1);
         
