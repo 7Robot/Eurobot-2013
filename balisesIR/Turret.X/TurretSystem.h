@@ -5,8 +5,11 @@
 /* TODO Define system operating frequency */
 
 /* Microcontroller MIPs (FCY) */
-#define SYS_FREQ        7370000L
-#define FCY             SYS_FREQ/2
+#define SYS_FREQ            7370000L
+#define FCY                 SYS_FREQ/2
+#define bit_periode_us      90
+#define taille_uart         8
+#define nombre_recepteurs   2
 
 /******************************************************************************/
 /* System Function Prototypes                                                 */

@@ -95,7 +95,7 @@ int16_t main(void)
 
     while(1)
     {
-        WriteUART1(0x55);
+        WriteUART1(0x69);
         while(BusyUART1());
         __delay_ms(1);
         
