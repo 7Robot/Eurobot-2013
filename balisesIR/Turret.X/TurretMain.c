@@ -33,6 +33,10 @@
 #include <timer.h>
 
 volatile unsigned int i;
+#define bit_periode_us 90
+#define taille_uart 8
+
+int comparer(int donnees[], int adversaire[]);
 
 int16_t main(void)
 {
@@ -43,14 +47,11 @@ int16_t main(void)
     /* Initialize IO ports and peripherals */
     InitApp();
 
+
+
     TRISAbits.TRISA0 = 0; // Microstick LED
     LATAbits.LATA0 = 1;
 
-    TRISAbits.TRISA1 = 0;   /*Pin pour le 0V*/
-    LATAbits.LATA1 = 0;
-
-    TRISBbits.TRISB6 = 0;   /*Pin pour le 5V*/
-    LATBbits.LATB6 = 1;
 
 
      __builtin_write_OSCCONL(OSCCON & 0xBF); // Unlock registers.
@@ -58,8 +59,10 @@ int16_t main(void)
     RPINR18bits.U1RXR = 10; /*UART RX sur RP10*/
     __builtin_write_OSCCONL(OSCCON | 0x40); // Relock registers.
 
-
-
+    int donnees[taille_uart];
+    int adversaire[taille_uart] = {1,0,0,1,0,1,1,0}; /*Mettre la donnée complémentée*/
+    int recu = 0;
+    
     __delay_ms(2000);
 
 
@@ -73,20 +76,44 @@ OpenUART1(UART_EN & UART_IDLE_STOP & UART_DIS_WAKE & UART_DIS_LOOPBACK
 ConfigIntUART1(UART_RX_INT_DIS & UART_RX_INT_PR4 & UART_TX_INT_DIS);
 
 
+
     while(1)
     {
         if (PORTBbits.RB10 == 0)
         {
-            __delay_us(82);
-            LATAbits.LATA0 = PORTBbits.RB10;
-            if (PORTBbits.RB10==1){__delay_us(124)} else {__delay_us(80)}
-            if (PORTBbits.RB10==1){__delay_us(124)} else {__delay_us(80)}
-            if (PORTBbits.RB10==1){__delay_us(124)} else {__delay_us(80)}
-            if (PORTBbits.RB10==1){__delay_us(124)} else {__delay_us(80)}
-            if (PORTBbits.RB10==1){__delay_us(124)} else {__delay_us(80)}
-            if (PORTBbits.RB10==1){__delay_us(124)} else {__delay_us(80)}
-            if (PORTBbits.RB10==1){__delay_us(124)} else {__delay_us(80)}
+            __delay_us(bit_periode_us+bit_periode_us/2);
+            for(i = 0;i<taille_uart;i++)
+            {
+                donnees[i] = PORTBbits.RB10;
+                __delay_us(bit_periode_us);
+            }
+            recu = 1;
+        }
+
+        if(recu)
+        {
+            if (comparer(donnees,adversaire))
+            {
+                recu = 0;
+                LATAbits.LATA0 = 1;
+            }
+            else
+            {
+                recu = 0;
+                LATAbits.LATA0 = 0;
+            }
         }
     }
 
+
+}
+
+comparer(int donnees[], int adversaire[])
+{
+    int egal = 1;
+    for(i = 0;i<taille_uart && egal;i++)
+    {
+        if(donnees[i] != adversaire[i]){egal = 0;}
+    }
+    return egal;
 }
