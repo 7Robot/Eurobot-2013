@@ -1,3 +1,17 @@
+/*
+* Beacon dsPIC33F
+* Compiler : Microchip xC16
+* µC : 33FJ64MC802
+* Avril 2013
+*    ____________      _           _
+*   |___  /| ___ \    | |         | |
+*      / / | |_/ /___ | |__   ___ | |_
+*     / /  |    // _ \| '_ \ / _ \| __|
+*    / /   | |\ \ (_) | |_) | (_) | |_
+*   /_/    |_| \_\___/|____/ \___/'\__|
+*			      7robot.fr
+*/
+
 /******************************************************************************/
 /* Files to Include                                                           */
 /******************************************************************************/
@@ -42,7 +56,6 @@ unsigned int U1STAvalue;
 unsigned int sptime;
 unsigned int period;
 
-
 int16_t main(void)
 {
 
@@ -66,7 +79,6 @@ int16_t main(void)
     ConfigIntCN(CHANGE_INT_ON & CHANGE_INT_PRI_4 & 0xFF000002); /*Interrupt sur CN1*/
     CNEN2 = 0;
     
-
     CloseUART1();
     ConfigIntUART1(UART_RX_INT_DIS & UART_TX_INT_DIS);
     
@@ -95,10 +107,9 @@ int16_t main(void)
 
     while(1)
     {
-        WriteUART1(0x69);
+        WriteUART1(adversaire1);
         while(BusyUART1());
-        __delay_ms(1);
-        
+        __delay_ms(10);
     }
 
 }

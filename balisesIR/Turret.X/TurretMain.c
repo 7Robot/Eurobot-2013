@@ -1,3 +1,17 @@
+/*
+* Turret dsPIC33F
+* Compiler : Microchip xC16
+* µC : 33FJ64MC802
+* Avril 2013
+*    ____________      _           _
+*   |___  /| ___ \    | |         | |
+*      / / | |_/ /___ | |__   ___ | |_
+*     / /  |    // _ \| '_ \ / _ \| __|
+*    / /   | |\ \ (_) | |_) | (_) | |_
+*   /_/    |_| \_\___/|____/ \___/'\__|
+*			      7robot.fr
+*/
+
 /******************************************************************************/
 /* Files to Include                                                           */
 /******************************************************************************/
@@ -46,9 +60,13 @@ int16_t main(void)
     InitApp();
 
     TRISAbits.TRISA0 = 0; // Microstick LED
-    LATAbits.LATA0 = 1;   // affichage recepteur 1
+    LATAbits.LATA0 = 1;   // affichage recepteur 1 - adversaire 1
     TRISAbits.TRISA1 = 0;
-    LATAbits.LATA1 = 1;   // affichage recepteur 2
+    LATAbits.LATA0 = 1;   // affichage recepteur 2 - adversaire 1
+    TRISBbits.TRISB0 = 0;
+    LATBbits.LATB1 = 1;   // affichage recepteur 1 - adversaire 2
+    TRISBbits.TRISB1 = 0;
+    LATBbits.LATB1 = 1;   // affichage recepteur 2 - adversaire 2
     TRISBbits.TRISB10 = 1;  // lecture recepteur 1
     TRISBbits.TRISB11 = 1;  // lecture recepteur 2
 
@@ -59,7 +77,8 @@ int16_t main(void)
     __builtin_write_OSCCONL(OSCCON | 0x40); // Relock registers.*/
 
     int donnees[nombre_recepteurs*taille_uart];
-    int adversaire[taille_uart] = {1,0,0,1,0,1,1,0}; //Mettre la donnée complémentée
+    int adversaire1[taille_uart] = {1,0,0,1,0,1,1,0}; // Mettre la donnée envoyée
+    int adversaire2[taille_uart] = {1,0,1,0,1,0,1,0}; // mais complémentée
     int recu = 0;
     
     __delay_ms(2000);
@@ -88,19 +107,20 @@ ConfigIntUART1(UART_RX_INT_DIS & UART_RX_INT_PR4 & UART_TX_INT_DIS);*/
 
         if(recu)
         {
-            if (comparer(donnees,adversaire,1) && comparer(donnees,adversaire,2))
+            // DETECTION ADVERSAIRE 1 //////////////////////////////////////////
+            if (comparer(donnees,adversaire1,1) && comparer(donnees,adversaire1,2))
             {
                 recu = 0;
                 LATAbits.LATA0 = 1;
                 LATAbits.LATA1 = 1;
             }
-            else if (!comparer(donnees,adversaire,1) && comparer(donnees,adversaire,2))
+            else if (!comparer(donnees,adversaire1,1) && comparer(donnees,adversaire1,2))
             {
                 recu = 0;
                 LATAbits.LATA0 = 0;
                 LATAbits.LATA1 = 1;
             }
-            else if (comparer(donnees,adversaire,1) && !comparer(donnees,adversaire,2))
+            else if (comparer(donnees,adversaire1,1) && !comparer(donnees,adversaire1,2))
             {
                 recu = 0;
                 LATAbits.LATA0 = 1;
@@ -111,6 +131,31 @@ ConfigIntUART1(UART_RX_INT_DIS & UART_RX_INT_PR4 & UART_TX_INT_DIS);*/
                 recu = 0;
                 LATAbits.LATA0 = 0;
                 LATAbits.LATA1 = 0;
+            }
+            // DETECTION ADVERSAIRE 2 //////////////////////////////////////////
+            if (comparer(donnees,adversaire2,1) && comparer(donnees,adversaire2,2))
+            {
+                recu = 0;
+                LATBbits.LATB0 = 1;
+                LATBbits.LATB1 = 1;
+            }
+            else if (!comparer(donnees,adversaire2,1) && comparer(donnees,adversaire2,2))
+            {
+                recu = 0;
+                LATBbits.LATB0 = 0;
+                LATBbits.LATB1 = 1;
+            }
+            else if (comparer(donnees,adversaire2,1) && !comparer(donnees,adversaire2,2))
+            {
+                recu = 0;
+                LATBbits.LATB0 = 1;
+                LATBbits.LATB1 = 0;
+            }
+            else
+            {
+                recu = 0;
+                LATBbits.LATB0 = 0;
+                LATBbits.LATB1 = 0;
             }
         }
     }
