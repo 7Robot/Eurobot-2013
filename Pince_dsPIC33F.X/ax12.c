@@ -191,11 +191,13 @@ byte RegisterLenAX(byte address) {
 
 /* Write a value to a registry, guessing its width. */
 void PutAX(byte id, byte address, int value) {
+    responseReadyAX = 0;
     WriteAX(id, address, RegisterLenAX(address),
                    (byte*)&value /* C18 and AX12 are little-endian */);
 }
 
 /* Read a value from a registry, guessing its width. */
 void GetAX(byte id, byte address) {
+    responseReadyAX = 0;
     ReadAX(id, address, RegisterLenAX(address));
 }

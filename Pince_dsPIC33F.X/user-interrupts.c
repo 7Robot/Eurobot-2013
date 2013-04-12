@@ -22,13 +22,12 @@
 #include "header.h"        /* Function / Parameters                           */
 #include <timer.h>         /* Include timer fonctions                         */
 #include <uart.h>
+#include <libpic30.h>
+#include "ax12.h"
 
 /******************************************************************************/
 /* User Functions                                                             */
 /******************************************************************************/
-
-
-extern void InterruptAX(void);
 
 
 void ConfigureOscillator()
@@ -68,6 +67,40 @@ void InitApp()
 
 }
 
+int valeur[6];
+
+void Cinematique_inverse()
+{
+    GetAX(AX_BD, AX_PRESENT_POSITION);
+    while(!responseReadyAX);
+    valeur[0] = (responseAX.params[1]*256 + responseAX.params[0]);
+    __delay_ms(10);
+
+    GetAX(AX_BG, AX_PRESENT_POSITION);
+    while(!responseReadyAX);
+    valeur[1] = (responseAX.params[1]*256 + responseAX.params[0]);
+    __delay_ms(10);
+
+    GetAX(AX_HD1, AX_PRESENT_POSITION);
+    while(!responseReadyAX);
+    valeur[2] = (responseAX.params[1]*256 + responseAX.params[0]);
+    __delay_ms(10);
+
+    GetAX(AX_HD2, AX_PRESENT_POSITION);
+    while(!responseReadyAX);
+    valeur[3] = (responseAX.params[1]*256 + responseAX.params[0]);
+    __delay_ms(10);
+
+    GetAX(AX_HG1, AX_PRESENT_POSITION);
+    while(!responseReadyAX);
+    valeur[4] = (responseAX.params[1]*256 + responseAX.params[0]);
+    __delay_ms(10);
+
+    GetAX(AX_HG2, AX_PRESENT_POSITION);
+    while(!responseReadyAX);
+    valeur[5] = (responseAX.params[1]*256 + responseAX.params[0]);
+    __delay_ms(10);
+}
 
 /******************************************************************************/
 /* Interrupt Vector Options                                                   */

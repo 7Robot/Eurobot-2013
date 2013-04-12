@@ -54,50 +54,54 @@ int16_t main(void)
 
     ODCBbits.ODCB5 = 1;
 
-//    __delay_ms(100);
-//    PutAX(8, AX_MOVING_SPEED, 0x0100);
-//    __delay_ms(10);
-//    PutAX(11, AX_MOVING_SPEED, 0x0100);
+    __delay_ms(10);
+    PutAX(AX_BROADCAST, AX_MOVING_SPEED, 250);
+    __delay_ms(10);
+    PutAX(AX_BROADCAST, AX_MAX_TORQUE, 1100);
+    __delay_ms(10);
 
     while(1) {
 
+        //Cinematique_inverse();
+        //0->BD, 1->HD, 2->HD1, 3->HD2, 4->HG1, 5->HG2
+        __delay_ms(1000);
 
-        PutAX(AX_HD1, AX_GOAL_POSITION, 512);
-        __delay_ms(500);
-
+        //Serrer un verre en position basse :
+		PutAX(AX_BG, AX_GOAL_POSITION, 845);
+        __delay_ms(10);
+        PutAX(AX_BD, AX_GOAL_POSITION, 170);
+        __delay_ms(400);
+        PutAX(AX_BG, AX_GOAL_POSITION, 800);
+        __delay_ms(10);
+        PutAX(AX_BD, AX_GOAL_POSITION, 220);
         __delay_ms(200);
+        PutAX(AX_BG, AX_GOAL_POSITION, 845);
+        __delay_ms(10);
+        PutAX(AX_BD, AX_GOAL_POSITION, 170);
+        __delay_ms(10);
 
-//        GetAX(AX_HD1, AX_PRESENT_POSITION);
-//        while(!responseReadyAX);
-//        responseReadyAX = 0;
-//        __delay_ms(500);
-//        PutAX(AX_HD1, AX_GOAL_POSITION, 512);
-//        while(!responseReadyAX);
-//        responseReadyAX = 0;
-//        __delay_ms(500);
-//
-//        GetAX(AX_HD1, AX_PRESENT_POSITION);
-//        while(!responseReadyAX);
-//        responseReadyAX = 0;
-//        __delay_ms(500);
-//        PutAX(AX_HD1, AX_GOAL_POSITION, 200);
-//        while(!responseReadyAX);
-//        responseReadyAX = 0;
-//        __delay_ms(500);
+        __delay_ms(300);
 
+        //Serrer la pince stockage
+        PutAX(AX_HD1, AX_GOAL_POSITION, 273);
+        __delay_ms(10);
+        PutAX(AX_HD2, AX_GOAL_POSITION, 622);
+        __delay_ms(10);
+        PutAX(AX_HG1, AX_GOAL_POSITION, 738);
+        __delay_ms(10);
+        PutAX(AX_HG2, AX_GOAL_POSITION, 371);
+        __delay_ms(10);
 
-//        PutAX(AX_BG, AX_GOAL_POSITION, 800);
-//        __delay_ms(10);
-//        PutAX(AX_BD, AX_GOAL_POSITION, 200);
-//        __delay_ms(10);
-//        PutAX(AX_HG1, AX_GOAL_POSITION, 512);
-//        __delay_ms(10);
-//        PutAX(AX_HG2, AX_GOAL_POSITION, 512);
-//        __delay_ms(10);
-//        PutAX(AX_HD1, AX_GOAL_POSITION, 512);
-//        __delay_ms(10);
-//        PutAX(AX_HD2, AX_GOAL_POSITION, 512);
-//        __delay_ms(10);
+        __delay_ms(3000);
+
+        //Ouvrir pince en position basse :
+        PutAX(AX_BG, AX_GOAL_POSITION, 710);
+        __delay_ms(10);
+        PutAX(AX_BD, AX_GOAL_POSITION, 310);
+        __delay_ms(400);
+
 
     }
 }
+
+

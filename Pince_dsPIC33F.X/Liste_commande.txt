@@ -1,0 +1,31 @@
+//Liste des opérations pour pince :
+
+//Ouvrir pince en position basse :
+        PutAX(AX_BG, AX_GOAL_POSITION, 710);
+        __delay_ms(10);
+        PutAX(AX_BD, AX_GOAL_POSITION, 310);
+        __delay_ms(400);
+
+//Serrer un verre en position basse :
+		PutAX(AX_BG, AX_GOAL_POSITION, 845);
+        __delay_ms(10);
+        PutAX(AX_BD, AX_GOAL_POSITION, 170);
+        __delay_ms(400);
+        PutAX(AX_BG, AX_GOAL_POSITION, 800);
+        __delay_ms(10);
+        PutAX(AX_BD, AX_GOAL_POSITION, 220);
+        __delay_ms(200);
+        PutAX(AX_BG, AX_GOAL_POSITION, 845);
+        __delay_ms(10);
+        PutAX(AX_BD, AX_GOAL_POSITION, 170);
+        __delay_ms(10);
+	
+ //Serrer la pince stockage
+        PutAX(AX_HD1, AX_GOAL_POSITION, 273);
+        __delay_ms(10);
+        PutAX(AX_HD2, AX_GOAL_POSITION, 622);
+        __delay_ms(10);
+        PutAX(AX_HG1, AX_GOAL_POSITION, 738);
+        __delay_ms(10);
+        PutAX(AX_HG2, AX_GOAL_POSITION, 371);
+        __delay_ms(10);

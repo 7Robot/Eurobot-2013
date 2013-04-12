@@ -48,3 +48,7 @@ void ConfigureOscillator(void);    /* Handles clock switching/osc initialization
 
 void InitApp(void);             /* I/O and Peripheral Initialization          */
 
+extern void InterruptAX(void);
+
+void Cinematique_inverse();
+
