@@ -27,9 +27,6 @@
 /* User Functions                                                             */
 /******************************************************************************/
 
-#define BAUDRATE 9600
-#define BRGVAL ((FCY / BAUDRATE / 16) - 1)
-
 
 extern void InterruptAX(void);
 
@@ -59,21 +56,8 @@ void InitApp()
     ConfigIntUART1(UART_RX_INT_PR4 & UART_RX_INT_EN
                  & UART_TX_INT_PR4 & UART_TX_INT_DIS);
 
-    /* MARCHE PAS
-    _U1TXIE = 1; // Active l'interruption du TX
-    _U1TXIP = 5; // Donne la priorité de l'interruptionTX (=5)
-    _U1RXIE = 1; // Active l'interruption du RX
-    _U1RXIP = 5; // Donne la priorité de l'interruptionRX (=5)
-    */
-
     // activation de la priorité des interruptions
     _NSTDIS = 0;
-
-
-
-
-
-
             
     /*
     OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_ON & T2_SOURCE_INT, 0x9FFF);
@@ -152,7 +136,7 @@ void InitApp()
 
 /* TODO Add interrupt routine code here. */
 /*
-void __int i=0attribute__((interrupt,auto_psv)) _T2Interrupt(void)
+void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 {
     //led = led^1;    // On bascule l'état de la LED
     //_T2IF = 0;      // On baisse le FLAG

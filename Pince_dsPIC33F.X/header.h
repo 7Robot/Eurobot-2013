@@ -26,9 +26,17 @@
 /* User Level #define Macros                                                  */
 /******************************************************************************/
 
-/* TODO Application specific user parameters used in user.c may go here */
+//Baud Rate pour la liaison UART AX_12
+#define BAUDRATE 57600
+#define BRGVAL ((FCY / BAUDRATE / 16) - 1)
 
 #define led _LATA0
+#define AX_BG 8
+#define AX_BD 11
+#define AX_HG1 16
+#define AX_HG2 17
+#define AX_HD1 6
+#define AX_HD2 7
 
 /******************************************************************************/
 /* Function Prototypes                                                        */

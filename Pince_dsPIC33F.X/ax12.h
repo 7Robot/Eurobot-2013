@@ -23,8 +23,6 @@
 typedef unsigned char byte;
 
 
-
-
 // EEPROM Registers
 #define AX_MODEL_NUMBER             0
 #define AX_VERSION                  2

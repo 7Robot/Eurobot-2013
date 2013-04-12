@@ -18,11 +18,7 @@
 #include "header.h"        /* Function / Parameters                           */
 #include <libpic30.h>
 #include <uart.h>
-
 #include "ax12.h"
-
-
-
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
@@ -44,16 +40,9 @@ _FWDT(FWDTEN_OFF);
 // Select debug channel.
 _FICD(ICS_PGD1 & JTAGEN_OFF);
 
-
-
 /******************************************************************************/
 /* Main Program                                                               */
 /******************************************************************************/
-
-
-
-
-
 
 int16_t main(void)
 {
@@ -65,26 +54,50 @@ int16_t main(void)
 
     ODCBbits.ODCB5 = 1;
 
-    __delay_ms(100);
-    PutAX(8, AX_MOVING_SPEED, 0x0100);
-    __delay_ms(10);
-    PutAX(11, AX_MOVING_SPEED, 0x0100);
-
+//    __delay_ms(100);
+//    PutAX(8, AX_MOVING_SPEED, 0x0100);
+//    __delay_ms(10);
+//    PutAX(11, AX_MOVING_SPEED, 0x0100);
 
     while(1) {
 
 
-        PutAX(8, AX_GOAL_POSITION, 0x01ff);
-        __delay_ms(50);
-        PutAX(11, AX_GOAL_POSITION, 0x01ff);
+        PutAX(AX_HD1, AX_GOAL_POSITION, 512);
+        __delay_ms(500);
 
-        __delay_ms(3000);
+        __delay_ms(200);
 
-        PutAX(8, AX_GOAL_POSITION, 0x0354);
-        __delay_ms(50);
-        PutAX(11, AX_GOAL_POSITION, 0x00AA);
+//        GetAX(AX_HD1, AX_PRESENT_POSITION);
+//        while(!responseReadyAX);
+//        responseReadyAX = 0;
+//        __delay_ms(500);
+//        PutAX(AX_HD1, AX_GOAL_POSITION, 512);
+//        while(!responseReadyAX);
+//        responseReadyAX = 0;
+//        __delay_ms(500);
+//
+//        GetAX(AX_HD1, AX_PRESENT_POSITION);
+//        while(!responseReadyAX);
+//        responseReadyAX = 0;
+//        __delay_ms(500);
+//        PutAX(AX_HD1, AX_GOAL_POSITION, 200);
+//        while(!responseReadyAX);
+//        responseReadyAX = 0;
+//        __delay_ms(500);
 
-        __delay_ms(3000);
+
+//        PutAX(AX_BG, AX_GOAL_POSITION, 800);
+//        __delay_ms(10);
+//        PutAX(AX_BD, AX_GOAL_POSITION, 200);
+//        __delay_ms(10);
+//        PutAX(AX_HG1, AX_GOAL_POSITION, 512);
+//        __delay_ms(10);
+//        PutAX(AX_HG2, AX_GOAL_POSITION, 512);
+//        __delay_ms(10);
+//        PutAX(AX_HD1, AX_GOAL_POSITION, 512);
+//        __delay_ms(10);
+//        PutAX(AX_HD2, AX_GOAL_POSITION, 512);
+//        __delay_ms(10);
 
     }
 }
