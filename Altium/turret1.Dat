@@ -1,0 +1,18 @@
+Field=Comment~String~Comment~100|Field=Description~String~Description~100|Field=Designator~String~Designator~100|Field=Footprint~String~Footprint~100|Field=LibRef~String~LibRef~100|Field=Quantity~Integer~Quantity~100|ReportField=Currency~<none>|ReportField=ProductionQuantity~1|ReportField=ProjectFileName~turret1.PrjPCB|ReportField=ProjectFullPath~C:\Users\Thomas\Documents\GitHub\Eurobot-2013\Altium\turret1.PrjPCB|ReportField=Title~Bill of Materials For Project [turret1.PrjPCB] (No PCB Document Selected)|ReportField=TotalQuantity~79|ReportField=ReportTime~17:03:18|ReportField=ReportDate~17/04/2013|ReportField=ReportDateTime~17/04/2013 17:03:18|ReportField=OutputName~Bill of Materials|ReportField=OutputType~BOM_PartType|ReportField=GeneratorName~BOM|ReportField=GeneratorDescription~Bill of Materials|ReportField=VariantName~None|ReportField=Address1~|ReportField=Address2~|ReportField=Address3~|ReportField=Address4~|ReportField=ApprovedBy~|ReportField=Author~|ReportField=CheckedBy~|ReportField=CompanyName~|ReportField=CurrentDate~17/04/2013|ReportField=CurrentTime~17:02:56|ReportField=Date~|ReportField=DocumentFullPathAndName~C:\Users\Thomas\Documents\GitHub\Eurobot-2013\Altium\turret1.SchDoc|ReportField=DocumentName~turret1.SchDoc|ReportField=DocumentNumber~|ReportField=DrawnBy~|ReportField=Engineer~|ReportField=ImagePath~|ReportField=ModifiedDate~03/04/2013|ReportField=Organization~|ReportField=ProjectName~turret1.PrjPCB|ReportField=Revision~|ReportField=Rule~|ReportField=SheetNumber~|ReportField=SheetTotal~|ReportField=Time~|ReportField=Title~|ReportField=DataSourceFileName~turret1.PrjPCB|ReportField=DataSourceFullPath~C:\Users\Thomas\Documents\GitHub\Eurobot-2013\Altium\turret1.PrjPCB
+CAP|Capacitor|C2, C6, C7, C8, C9, C_S1, C_S2, C_S3, C_S4, C_S5, C_S6, C_S7, C_S8, C_S9, C_S10, C_S11, C_S12, C_S13, C_S14, C_S15, C_S16|C0805C|CAP|21
+|Capacitor (Semiconductor SIM Model)|C3, C4, C5|C0805C|Cap Semi|3
+5.6V|Zener Diode|D1|DSO-C2/X1.8|Zener|1
+DSPIC33FJ64MC804-I/PT|High-Performance 16-bit Digital Signal Controller, 64 KB Flash, 16 KB RAM, 44-Pin TQFP, Industrial Temperature|DSPIC|TQFP-PT44_N|DSPIC33FJ64MC804-I/PT|1
+FT232RL|USB UART Asynchronous Serial Data Transfer Chip, SSOP-28, Tube|FTDI|SSOP-28_M|FT232RL|1
+Hole|Mounting Hole for screws|HOLE1, HOLE2, HOLE3, HOLE4|SCREW|Hole|4
+USB Vertical|USB Connector|P1|USB type B Vert|USB Con|1
+PICkit|Header, 6-Pin, Right Angle|P2|HDR1X6H|Header ICSP|1
+LED|Typical LED|POWER|LED1206G|LED|1
+|Resistor|R2|C0805R|Res3|1
+RES|Resistor|R3, R4, R5, R6, R7, R_S1, R_S2, R_S3, R_S4, R_S5, R_S6, R_S7, R_S8, R_S9, R_S10, R_S11, R_S12, R_S13, R_S14, R_S15, R_S16|C0805R|RES|21
+LED|Typical RED, GREEN, YELLOW, AMBER GaAs LED|RA1, RA2|LED1206R|LED2|2
+LED|Typical RED, GREEN, YELLOW, AMBER GaAs LED|RX, TX|LED1206Y|LED2|2
+SW-DPDT/Reset|Double-Pole, Double-Throw Switch, ref MCLSS22|S1|MCLSS22|SW-DPDT|1
+RC2|Tactile Switch 7.3mm, SMD|S2|SPST-NO|SPST-NO|1
+TSOP7000|Vishay 455kHz IR Receiver|T_S1, T_S2, T_S3, T_S4, T_S5, T_S6, T_S7, T_S8, T_S9, T_S10, T_S11, T_S12, T_S13, T_S14, T_S15, T_S16|TSOP IR|TSOP7000|16
+LM2937IMP-3.3|500 mA Low Dropout Regulator|U1|SOT-223|LM2937IMP-3.3|1
