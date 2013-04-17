@@ -127,10 +127,6 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 
 [GeneratedDocument1]
-DocumentPath=Project Outputs for turret1\Design Rule Check - turret1.html
-DItemRevisionGUID=
-
-[GeneratedDocument2]
 DocumentPath=turret1.PcbDoc.htm
 DItemRevisionGUID=
 
@@ -719,7 +715,7 @@ PageOptions29=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|Print
 [OutputGroup8]
 Name=Validation Outputs
 Description=
-TargetPrinter=EPSON SX210 Series
+TargetPrinter=Brother HL-4050CDN
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintWhat=1
 OutputType1=Design Rules Check
 OutputName1=Design Rules Check
@@ -748,7 +744,7 @@ OutputDefault4=0
 [OutputGroup9]
 Name=Export Outputs
 Description=
-TargetPrinter=EPSON SX210 Series
+TargetPrinter=Brother HL-4050CDN
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintWhat=1
 OutputType1=ExportSTEP
 OutputName1=Export STEP
