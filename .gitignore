@@ -165,6 +165,9 @@ pip-log.txt
 
 # Spécifiques à 7Robot 
 Makefile
-dist/*
-nbproject/*
-build/*
+dist/
+nbproject/
+build/
+dist\
+nbproject\
+build\
