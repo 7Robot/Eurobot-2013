@@ -28,8 +28,7 @@
 
 /* TODO Application specific user parameters used in user.c may go here */
 
-#define Nl _LATA0
-#define Nr _
+#define led _LATA0
 
 /******************************************************************************/
 /* Function Prototypes                                                        */

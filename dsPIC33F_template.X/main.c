@@ -50,6 +50,10 @@ int16_t main(void)
     ConfigureOscillator();
     InitApp();
 
-    while (true);
+    while (1)
+    {
+        led = !led;
+        __delay_ms(1000);
+    }
 }
 
