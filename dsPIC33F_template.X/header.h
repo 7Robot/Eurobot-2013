@@ -30,6 +30,7 @@
 
 #define led _LATA0
 
+
 /******************************************************************************/
 /* Function Prototypes                                                        */
 /******************************************************************************/
@@ -39,5 +40,3 @@
 void ConfigureOscillator(void);    /* Handles clock switching/osc initialization */
 
 void InitApp(void);             /* I/O and Peripheral Initialization          */
-
-
