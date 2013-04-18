@@ -120,7 +120,7 @@ void InterruptAX() {
             ((byte*)&responseAX.params)[posAX++] = b;
             checksumAX += b;
         }
-        else if(posAX == responseAX.len && (b ^ checksumAX) == 0) {
+        else if(posAX == responseAX.len && (b & checksumAX) == 0) {
             responseReadyAX = 1;
             posAX = -5;
         }

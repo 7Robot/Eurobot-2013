@@ -66,40 +66,26 @@ int16_t main(void)
         //0->BD, 1->HD, 2->HD1, 3->HD2, 4->HG1, 5->HG2
         __delay_ms(1000);
 
-        //Serrer un verre en position basse :
-		PutAX(AX_BG, AX_GOAL_POSITION, 845);
-        __delay_ms(10);
-        PutAX(AX_BD, AX_GOAL_POSITION, 170);
-        __delay_ms(400);
-        PutAX(AX_BG, AX_GOAL_POSITION, 800);
-        __delay_ms(10);
-        PutAX(AX_BD, AX_GOAL_POSITION, 220);
-        __delay_ms(200);
-        PutAX(AX_BG, AX_GOAL_POSITION, 845);
-        __delay_ms(10);
-        PutAX(AX_BD, AX_GOAL_POSITION, 170);
-        __delay_ms(10);
-
-        __delay_ms(300);
-
         //Serrer la pince stockage
         PutAX(AX_HD1, AX_GOAL_POSITION, 273);
         __delay_ms(10);
-        PutAX(AX_HD2, AX_GOAL_POSITION, 622);
+        PutAX(AX_HD2, AX_GOAL_POSITION, 645);
         __delay_ms(10);
         PutAX(AX_HG1, AX_GOAL_POSITION, 738);
         __delay_ms(10);
         PutAX(AX_HG2, AX_GOAL_POSITION, 371);
+        __delay_ms(100);
+
+        __delay_ms(100);
+//Semi_ouvrir pince stockage
+        PutAX(AX_HD1, AX_GOAL_POSITION, 307);
         __delay_ms(10);
-
-        __delay_ms(3000);
-
-        //Ouvrir pince en position basse :
-        PutAX(AX_BG, AX_GOAL_POSITION, 710);
+        PutAX(AX_HD2, AX_GOAL_POSITION, 657);
         __delay_ms(10);
-        PutAX(AX_BD, AX_GOAL_POSITION, 310);
-        __delay_ms(400);
-
+        PutAX(AX_HG1, AX_GOAL_POSITION, 728);
+        __delay_ms(10);
+        PutAX(AX_HG2, AX_GOAL_POSITION, 368);
+        __delay_ms(10);
 
     }
 }

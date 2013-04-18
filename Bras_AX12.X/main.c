@@ -18,7 +18,6 @@
 #include "header.h"        /* Function / Parameters                           */
 #include <libpic30.h>
 #include <uart.h>
-
 #include "ax12.h"
 
 
@@ -65,26 +64,53 @@ int16_t main(void)
 
     ODCBbits.ODCB5 = 1;
 
-    __delay_ms(100);
-    PutAX(8, AX_MOVING_SPEED, 0x0100);
-    __delay_ms(10);
-    PutAX(11, AX_MOVING_SPEED, 0x0100);
+    __delay_ms(500);
+    //PutAX(AX_BROADCAST, AX_MOVING_SPEED, 0x0000);
+    //PutAX(AX_BROADCAST, AX_BAUD_RATE, 0x0022);
+    //Les AX12 sont à 57600 BAUD
 
 
     while(1) {
+        __delay_ms(300);
+        PutAX(4, AX_GOAL_POSITION, 400);
+        __delay_ms(200);
+        PutAX(13, AX_GOAL_POSITION, 200);
+        __delay_ms(10);
+        PutAX(10, AX_GOAL_POSITION, 560);
+
+        __delay_ms(600);
+        PutAX(4, AX_GOAL_POSITION, 860);
+        __delay_ms(100);
+        PutAX(13, AX_GOAL_POSITION, 200);
+        __delay_ms(10);
+        PutAX(10, AX_GOAL_POSITION, 560);
+
+         __delay_ms(300);
+        PutAX(4, AX_GOAL_POSITION, 860);
+        __delay_ms(10);
+        PutAX(13, AX_GOAL_POSITION, 200);
+        __delay_ms(10);
+        PutAX(10, AX_GOAL_POSITION, 200);
+
+         __delay_ms(230);
+        PutAX(4, AX_GOAL_POSITION, 710);
+        __delay_ms(10);
+        PutAX(13, AX_GOAL_POSITION, 200);
+        __delay_ms(10);
+        PutAX(10, AX_GOAL_POSITION, 200);
+
+        __delay_ms(200);
+        PutAX(4, AX_GOAL_POSITION, 860);
+        __delay_ms(10);
+        PutAX(13, AX_GOAL_POSITION, 200);
+        __delay_ms(160);
+        PutAX(10, AX_GOAL_POSITION, 560);
 
 
-        PutAX(8, AX_GOAL_POSITION, 0x01ff);
-        __delay_ms(50);
-        PutAX(11, AX_GOAL_POSITION, 0x01ff);
+      //GetAX(13,AX_PRESENT_POSITION);
+      //while(!responseReadyAX);
 
-        __delay_ms(3000);
 
-        PutAX(8, AX_GOAL_POSITION, 0x0354);
-        __delay_ms(50);
-        PutAX(11, AX_GOAL_POSITION, 0x00AA);
-
-        __delay_ms(3000);
 
     }
 }

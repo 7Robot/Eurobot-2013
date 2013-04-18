@@ -20,7 +20,7 @@
         PutAX(AX_BD, AX_GOAL_POSITION, 170);
         __delay_ms(10);
 	
- //Serrer la pince stockage
+//Serrer la pince stockage
         PutAX(AX_HD1, AX_GOAL_POSITION, 273);
         __delay_ms(10);
         PutAX(AX_HD2, AX_GOAL_POSITION, 622);
@@ -28,4 +28,30 @@
         PutAX(AX_HG1, AX_GOAL_POSITION, 738);
         __delay_ms(10);
         PutAX(AX_HG2, AX_GOAL_POSITION, 371);
+        __delay_ms(10);
+		
+//Rangement pince stockage
+		PutAX(AX_HD1, AX_GOAL_POSITION, 585);
+        __delay_ms(10);
+        PutAX(AX_HD2, AX_GOAL_POSITION, 170);
+        __delay_ms(10);
+        PutAX(AX_HG1, AX_GOAL_POSITION, 450);
+        __delay_ms(10);
+        PutAX(AX_HG2, AX_GOAL_POSITION, 850);
+        __delay_ms(10);
+		
+//Rangement pince bas à refaire après modif des pinces
+        PutAX(AX_BD, AX_GOAL_POSITION, 621);
+        __delay_ms(10);
+        PutAX(AX_BG, AX_GOAL_POSITION, 393);
+        __delay_ms(10);
+		
+//Semi_ouvrir pince stockage
+        PutAX(AX_HD1, AX_GOAL_POSITION, 307);
+        __delay_ms(10);
+        PutAX(AX_HD2, AX_GOAL_POSITION, 657);
+        __delay_ms(10);
+        PutAX(AX_HG1, AX_GOAL_POSITION, 728);
+        __delay_ms(10);
+        PutAX(AX_HG2, AX_GOAL_POSITION, 368);
         __delay_ms(10);

@@ -27,7 +27,7 @@
 /* User Functions                                                             */
 /******************************************************************************/
 
-#define BAUDRATE 9600
+#define BAUDRATE 57600
 #define BRGVAL ((FCY / BAUDRATE / 16) - 1)
 
 
