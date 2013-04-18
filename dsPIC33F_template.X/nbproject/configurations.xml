@@ -29,7 +29,6 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>dsPIC33FJ64MC802</targetDevice>
         <targetHeader></targetHeader>
-        <targetPluginBoard></targetPluginBoard>
         <platformTool>Simulator</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.11</languageToolchainVersion>
