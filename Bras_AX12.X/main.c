@@ -72,7 +72,7 @@ int16_t main(void)
 
     while(1) {
         __delay_ms(300);
-        PutAX(4, AX_GOAL_POSITION, 400);
+        PutAX(4, AX_GOAL_POSITION, 350);
         __delay_ms(200);
         PutAX(13, AX_GOAL_POSITION, 200);
         __delay_ms(10);
