@@ -191,10 +191,6 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 
 [GeneratedDocument1]
-DocumentPath=Project Outputs for mother1\Design Rule Check - Mother_2.html
-DItemRevisionGUID=
-
-[GeneratedDocument2]
 DocumentPath=mother1.PcbDoc.htm
 DItemRevisionGUID=
 
