@@ -48,6 +48,24 @@ void InitApp(void)
     ConfigIntTimer2(T2_INT_PRIOR_3 & T2_INT_ON); //Interruption ON et priorité 3
 
 
+
+    	/**** PTCON: PWM Time Base Control Register ****/
+	P1TCONbits.PTEN   = 0;   // Timer Enable bit:		    DISABLE MCPWM
+	_PEN1H = 1;  // PWM1H (pin 25) is enabled for PWM output
+        _PEN2H = 1;  // PWM2H (pin 23) is enabled for PWM output
+	_PTCKPS = 1;   // Input Clock Prescale bits:   1:4
+	_PTOPS  = 0;   // Output Clock Postscale bits: 1:1
+	_PTSIDL = 1;	// Stop in Idle Mode:           YES
+	_PTMOD  = 0;   // Mode Select bits:			Free Running Mode
+	P1TCONbits.PTEN   = 1;   // Timer Enable bit:		 	ENABLE MCPWM
+
+	/**** PTPER: PWM Time Base Period Register ****/
+	_PTPER = 0x270F; // Period Value bits
+
+        /**** PDCx: PWM Duty Cycle Register ****/
+        PDC1 = 0x270F;
+        PDC2 = 0x1388;
+
     OpenQEI1(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1 & QEI_NORMAL_IO & QEI_MODE_x4_MATCH & QEI_UP_COUNT,0);
     //ConfigIntQEI1(QEI_INT_ENABLE & QEI_INT_PRI_1);
     WriteQEI1(65535);        //Valeur pour déclancher l'interruption du module QEI
@@ -132,7 +150,7 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 
     
     led = led^1;    // On bascule l'état de la LED
-    tic = (int16_t) POS1CNT; ReadQEI1();
+    tic = (int16_t) POS1CNT; //ReadQEI1();
     diff = tic-old_tic;
     old_tic = tic;
     compteur_tic += diff;
