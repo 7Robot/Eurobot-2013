@@ -51,11 +51,12 @@ int16_t main(void)
     ConfigureOscillator();
     InitApp();
 
+    //float angle = 0;
 
     while(1)
     {
-//        __delay_ms(500);
-//        led = led^1;
+        __delay_ms(50);
+        
     }
 }
 

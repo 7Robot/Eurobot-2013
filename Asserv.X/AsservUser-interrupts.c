@@ -48,30 +48,27 @@ void InitApp(void)
     ConfigIntTimer2(T2_INT_PRIOR_3 & T2_INT_ON); //Interruption ON et priorité 3
 
 
-
-    	/**** PTCON: PWM Time Base Control Register ****/
-	P1TCONbits.PTEN   = 0;   // Timer Enable bit:		    DISABLE MCPWM
-	_PEN1H = 1;  // PWM1H (pin 25) is enabled for PWM output
-        _PEN2H = 1;  // PWM2H (pin 23) is enabled for PWM output
-	_PTCKPS = 1;   // Input Clock Prescale bits:   1:4
-	_PTOPS  = 0;   // Output Clock Postscale bits: 1:1
-	_PTSIDL = 1;	// Stop in Idle Mode:           YES
-	_PTMOD  = 0;   // Mode Select bits:			Free Running Mode
-	P1TCONbits.PTEN   = 1;   // Timer Enable bit:		 	ENABLE MCPWM
-
-	/**** PTPER: PWM Time Base Period Register ****/
-	_PTPER = 0x270F; // Period Value bits
-
-        /**** PDCx: PWM Duty Cycle Register ****/
-        PDC1 = 0x270F;
-        PDC2 = 0x1388;
-
     OpenQEI1(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1 & QEI_NORMAL_IO & QEI_MODE_x4_MATCH & QEI_UP_COUNT,0);
-    //ConfigIntQEI1(QEI_INT_ENABLE & QEI_INT_PRI_1);
-    WriteQEI1(65535);        //Valeur pour déclancher l'interruption du module QEI
+    OpenQEI2(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1 & QEI_NORMAL_IO & QEI_MODE_x4_MATCH & QEI_UP_COUNT,0);
+    ConfigIntQEI1(QEI_INT_DISABLE);
+    ConfigIntQEI2(QEI_INT_DISABLE);
+    //WriteQEI1(65535);        //Valeur pour déclancher l'interruption du module QEI
+    //WriteQEI2(65535);        //Valeur pour déclancher l'interruption du module QEI
+
+    Init_PWM();
+
     _QEA1R = 5;     //Module QEI 1 phase A sur RB5
     _QEB1R = 6;     //Module QEI 1 phase B sur RB6
+    
+    _QEA2R = 7;     //Module QEI 2 phase A sur RB7
+    _QEB2R = 8;     //Module QEI 2 phase B sur RB8
+
+
+
     POS1CNT = 0;
+    POS2CNT = 0;
+
+
 }
 
 /******************************************************************************/
@@ -139,21 +136,87 @@ void InitApp(void)
 /* Interrupt Routines                                                         */
 /******************************************************************************/
 
-    volatile int16_t tic = 0, old_tic = 0, diff = 0;
-    volatile int32_t compteur_tic = 0;
+    volatile int16_t ticd = 0, old_ticd = 0, diffd = 0;
+    volatile int16_t ticg = 0, old_ticg = 0, diffg = 0;
+    volatile int32_t compteur_ticd = 0;
+    volatile int32_t compteur_ticg = 0;
+    volatile float Consigne_Vitesse = 0.0;
+    volatile float Consigne_Theta = 0.0;
 
+    volatile float KPv = 0, KDv = 0,KIv = 0;
+    volatile float Diff_Vitesse_Actu = 0, Diff_Vitesse_Old = 0, Diff_Vitesse_All = 0;
+    volatile float KPt = 0, KDt = 0, KIt = 0;
+    volatile float Diff_Theta_Actu = 0, Diff_Theta_Old = 0, Diff_Theta_All = 0;
+    //volatile float posx = 0.0, posy = 0.0;
+   // volatile float posx = 0.0, posy = 0.0;
 
 /* TODO Add interrupt routine code here. */
 
 void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 {
-
+    float Vitesse_Actu, Theta_Actu;
+    float Consigne_Commune, Consigne_Diff;
+    char Overshoot = 0;
     
     led = led^1;    // On bascule l'état de la LED
-    tic = (int16_t) POS1CNT; //ReadQEI1();
-    diff = tic-old_tic;
-    old_tic = tic;
-    compteur_tic += diff;
+    ticd = (int16_t) POS1CNT;// ReadQEI1();
+    diffd = ticd-old_ticd;
+    old_ticd = ticd;
+    compteur_ticd += diffd;
+
+    ticg = (int16_t) POS2CNT;// ReadQEI2();
+    diffg = ticg-old_ticg;
+    old_ticg = ticg;
+    compteur_ticg += diffg;
+
+    Incremente_Position(diffd, diffg, &Vitesse_Actu, &Theta_Actu);      // mise à jour de la position actuelle, récupération de la vitesse et de l'angle
+
+    Vitesse_Actu *= 1000;       // (fournie en metres/milisecondes)
+
+    Diff_Vitesse_Actu = Consigne_Vitesse - Vitesse_Actu;        // calcul de la difference entre réel et consigne
+    Diff_Theta_Actu = Consigne_Theta - Theta_Actu;
+
+    Diff_Theta_All += Diff_Theta_Actu;                  // mise à jour du terme intégral
+    Diff_Vitesse_All += Diff_Vitesse_Actu;
+
+    // overshoot
+
+    if (Diff_Vitesse_All > 1500.0)
+    {   Diff_Vitesse_All = 1500.0;  Overshoot = 1;  }
+    if (Diff_Vitesse_All < -1500.0)
+    {   Diff_Vitesse_All = -1500.0; Overshoot = 1;  } // 1500 = 3m/S * 1/2 seconde à 1000 coups d'interupti/s
+    if (Diff_Theta_All > 1500.0)
+    {   Diff_Theta_All = 1500.0;    Overshoot = 1;  }
+    if (Diff_Theta_All < -1500.0)
+    {   Diff_Theta_All = -1500.0;   Overshoot = 1;  }       // 1500 ~=  PI * 1/2 seconde à 1000 coups d'interrupt/s
+    
+
+    // calcul des consignes
+    Consigne_Commune = KPv * Diff_Vitesse_Actu + KIv * Diff_Vitesse_All + KDv * (Diff_Vitesse_Old - Diff_Vitesse_Actu);
+    Consigne_Diff = KPt * Diff_Theta_Actu + KIt * Diff_Theta_All + KDt * (Diff_Theta_Old - Diff_Theta_Actu);
+
+
+    Diff_Theta_Old = Diff_Theta_Actu;               // mise à jour de la precedente valeur (pour le terme differentiel)
+    Diff_Vitesse_Old = Diff_Vitesse_Actu;
+
+
+    Set_Vitesse_MoteurD(Consigne_Commune + Consigne_Diff);        // calcul des consignes moteurs
+    Set_Vitesse_MoteurG(Consigne_Commune - Consigne_Diff);
+
+    
     _T2IF = 0;      // On baisse le FLAG
 }
 
+void Set_Asserv_V(float KPv_new, float KDv_new, float KIv_new)
+{
+    KPv = KPv_new;
+    KDv = KDv_new;
+    KIv = KIv_new;
+}
+
+void Set_Asserv_T(float KPt_new, float KDt_new, float KIt_new)
+{
+    KPt = KPt_new;
+    KDt = KDt_new;
+    KIt = KIt_new;
+}
