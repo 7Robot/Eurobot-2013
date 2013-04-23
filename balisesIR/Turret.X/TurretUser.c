@@ -13,10 +13,6 @@
 #include <stdbool.h>         /* For true/false definition                     */
 #include "TurretUser.h"      /* variables/params used by user.c               */
 
-#define TSOP1		PORTCbits.RC9
-#define TSOP2		PORTBbits.RB5
-// ...
-
 /******************************************************************************/
 /* User Functions                                                             */
 /******************************************************************************/

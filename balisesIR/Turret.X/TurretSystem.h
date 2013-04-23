@@ -23,7 +23,7 @@
 #define FCY                 SYS_FREQ/2
 #define bit_periode_us      90
 #define taille_uart         8
-#define nombre_recepteurs   2
+#define nombre_recepteurs   16
 
 /******************************************************************************/
 /* System Function Prototypes                                                 */

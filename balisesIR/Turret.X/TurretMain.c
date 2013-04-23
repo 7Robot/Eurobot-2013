@@ -46,10 +46,13 @@
 #include <libpic30.h>
 #include <timer.h>
 
+// Declarations de variable globales
 volatile unsigned int i;
 int adversaire1[taille_uart] = {1,0,0,1,0,1,1,0}; // Mettre la donnée envoyée
 int adversaire2[taille_uart] = {1,0,1,0,1,0,1,0}; // mais complémentée
+int reperage[nombre_recepteurs]; // Contient : 0 non recu, 1 adversaire1, 2 adversaire2 pour chaque TSOP
 
+// Prototypes des fonctions
 void acquisition(int donnees[]);
 int comparer(int donnees[], int recepteur);
 void lissage(void);
@@ -71,25 +74,24 @@ int16_t main(void)
     LATBbits.LATB1 = 1;   // affichage recepteur 1 - adversaire 2
     TRISBbits.TRISB1 = 0;
     LATBbits.LATB1 = 1;   // affichage recepteur 2 - adversaire 2
-    TRISCbits.TRISC9 = 1;  // TSOP1
+    TRISCbits.TRISC9 = 1;  // TSOP1 RC9 non present sur 33FJ64MC802
     TRISBbits.TRISB5 = 1;  // TSOP2
 	// ...
 
     int donnees[nombre_recepteurs*taille_uart];
     int recu = 0;
-	int reperage[nombre_recepteurs]; // Contient : 0 non recu, 1 adversaire1, 2 adversaire2 pour chaque TSOP
     
     __delay_ms(2000);
 
     while(1)
     {
-		// Detection du bit de Start
+	// Detection du bit de Start
         if ((TSOP1 == 0) || (TSOP2 == 0) || (TSOP3 == 0) || (TSOP4 == 0) || (TSOP5 == 0) || (TSOP6 == 0) || (TSOP7 == 0) || (TSOP8 == 0) || 
-			(TSOP9 == 0) || (TSOP10 == 0) || (TSOP11 == 0) || (TSOP12 == 0) || (TSOP13 == 0) || (TSOP14 == 0) || (TSOP15 == 0) || (TSOP16 == 0) || )
+            (TSOP9 == 0) || (TSOP10 == 0) || (TSOP11 == 0) || (TSOP12 == 0) || (TSOP13 == 0) || (TSOP14 == 0) || (TSOP15 == 0) || (TSOP16 == 0) || )
         {
             __delay_us(bit_periode_us/2); // Se place au millieu du bit de Start
             acquisition(int donnees[]);
-			__delay_us(bit_periode_us); // Sort de la trame envoyee
+            __delay_us(bit_periode_us); // Sort de la trame envoyee
             recu = 1;
         }
 
@@ -109,23 +111,23 @@ void acquisition(int donnees[])
 {
     for(i = 0 ; i<taille_uart ; i++)
     {
-		__delay_us(bit_periode_us); // Passe au bit suivant
+	__delay_us(bit_periode_us); // Passe au bit suivant
         donnees[i] = TSOP1;
         donnees[taille_uart+i] = TSOP2;
-		donnees[2*taille_uart+i] = TSOP3;
-		donnees[3*taille_uart+i] = TSOP4;
-		donnees[4*taille_uart+i] = TSOP5;
-		donnees[5*taille_uart+i] = TSOP6;
-		donnees[6*taille_uart+i] = TSOP7;
-		donnees[7*taille_uart+i] = TSOP8;
-		donnees[8*taille_uart+i] = TSOP9;
-		donnees[9*taille_uart+i] = TSOP10;
-		donnees[10*taille_uart+i] = TSOP11;
-		donnees[11*taille_uart+i] = TSOP12;
-		donnees[12*taille_uart+i] = TSOP13;
-		donnees[13*taille_uart+i] = TSOP14;
-		donnees[14*taille_uart+i] = TSOP15;
-		donnees[15*taille_uart+i] = TSOP16;
+	donnees[2*taille_uart+i] = TSOP3;
+	donnees[3*taille_uart+i] = TSOP4;
+	donnees[4*taille_uart+i] = TSOP5;
+	donnees[5*taille_uart+i] = TSOP6;
+	donnees[6*taille_uart+i] = TSOP7;
+	donnees[7*taille_uart+i] = TSOP8;
+	donnees[8*taille_uart+i] = TSOP9;
+	donnees[9*taille_uart+i] = TSOP10;
+	donnees[10*taille_uart+i] = TSOP11;
+	donnees[11*taille_uart+i] = TSOP12;
+	donnees[12*taille_uart+i] = TSOP13;
+	donnees[13*taille_uart+i] = TSOP14;
+	donnees[14*taille_uart+i] = TSOP15;
+	donnees[15*taille_uart+i] = TSOP16;
     }
 }
 
@@ -138,14 +140,14 @@ int comparer(int donnees[], int recepteur)
     {
         if(donnees[recepteur*taille_uart+i] != adversaire1[i]){egal = 0;}
     }
-	if(i == taille_uart-1 && egal) {adversaire = 1;}
+	if(i == taille_uart && egal) {adversaire = 1;}
 	// Detection Adversaire 2
 	int egal = 1;
     for(i = 0 ; i<taille_uart && egal ; i++)
     {
         if(donnees[recepteur*taille_uart+i] != adversaire2[i]){egal = 0;}
     }
-	if(i == taille_uart-1 && egal) {adversaire = 2;}
+	if(i == taille_uart && egal) {adversaire = 2;}
 	
     return adversaire;
 }
