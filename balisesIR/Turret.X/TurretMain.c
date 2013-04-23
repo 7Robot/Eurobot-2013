@@ -47,8 +47,12 @@
 #include <timer.h>
 
 volatile unsigned int i;
+int adversaire1[taille_uart] = {1,0,0,1,0,1,1,0}; // Mettre la donnée envoyée
+int adversaire2[taille_uart] = {1,0,1,0,1,0,1,0}; // mais complémentée
 
-int comparer(int donnees[], int adversaire[], int recepteur);
+void acquisition(int donnees[]);
+int comparer(int donnees[], int recepteur);
+void lissage(void);
 
 int16_t main(void)
 {
@@ -67,106 +71,91 @@ int16_t main(void)
     LATBbits.LATB1 = 1;   // affichage recepteur 1 - adversaire 2
     TRISBbits.TRISB1 = 0;
     LATBbits.LATB1 = 1;   // affichage recepteur 2 - adversaire 2
-    TRISBbits.TRISB10 = 1;  // lecture recepteur 1
-    TRISBbits.TRISB11 = 1;  // lecture recepteur 2
-
-
-    /* __builtin_write_OSCCONL(OSCCON & 0xBF); // Unlock registers.
-    //RPOR3bits.RP7R = 3; // U1TX sur RP7.
-    //RPINR18bits.U1RXR = 10; // UART RX sur RP10
-    __builtin_write_OSCCONL(OSCCON | 0x40); // Relock registers.*/
+    TRISCbits.TRISC9 = 1;  // TSOP1
+    TRISBbits.TRISB5 = 1;  // TSOP2
+	// ...
 
     int donnees[nombre_recepteurs*taille_uart];
-    int adversaire1[taille_uart] = {1,0,0,1,0,1,1,0}; // Mettre la donnée envoyée
-    int adversaire2[taille_uart] = {1,0,1,0,1,0,1,0}; // mais complémentée
     int recu = 0;
+	int reperage[nombre_recepteurs]; // Contient : 0 non recu, 1 adversaire1, 2 adversaire2 pour chaque TSOP
     
     __delay_ms(2000);
 
-/*OpenUART1(UART_EN & UART_IDLE_STOP & UART_DIS_WAKE & UART_DIS_LOOPBACK
-            & UART_DIS_ABAUD & UART_NO_PAR_8BIT & UART_1STOPBIT & UART_IrDA_DISABLE
-            & UART_MODE_FLOW & UART_UEN_00 & UART_UXRX_IDLE_ONE & UART_BRGH_SIXTEEN,
-              UART_INT_TX_BUF_EMPTY & UART_IrDA_POL_INV_ZERO & UART_SYNC_BREAK_DISABLED & UART_TX_DISABLE
-            & UART_INT_RX_CHAR,
-              ((FCY/9600)/16) - 1); // 9600 bauds
-ConfigIntUART1(UART_RX_INT_DIS & UART_RX_INT_PR4 & UART_TX_INT_DIS);*/
-
     while(1)
     {
-        if ((PORTBbits.RB10 == 0) || (PORTBbits.RB11 == 0)) // détection du bit de Start
+		// Detection du bit de Start
+        if ((TSOP1 == 0) || (TSOP2 == 0) || (TSOP3 == 0) || (TSOP4 == 0) || (TSOP5 == 0) || (TSOP6 == 0) || (TSOP7 == 0) || (TSOP8 == 0) || 
+			(TSOP9 == 0) || (TSOP10 == 0) || (TSOP11 == 0) || (TSOP12 == 0) || (TSOP13 == 0) || (TSOP14 == 0) || (TSOP15 == 0) || (TSOP16 == 0) || )
         {
-            __delay_us(bit_periode_us+bit_periode_us/2); // se place au millieu du 1er bit de Donnees
-            for(i = 0;i<taille_uart;i++)
-            {
-                donnees[i] = PORTBbits.RB10;
-                donnees[taille_uart+i] = PORTBbits.RB11;
-                __delay_us(bit_periode_us);
-            }
+            __delay_us(bit_periode_us/2); // Se place au millieu du bit de Start
+            acquisition(int donnees[]);
+			__delay_us(bit_periode_us); // Sort de la trame envoyee
             recu = 1;
         }
 
         if(recu)
         {
-            // DETECTION ADVERSAIRE 1 //////////////////////////////////////////
-            if (comparer(donnees,adversaire1,1) && comparer(donnees,adversaire1,2))
-            {
-                recu = 0;
-                LATAbits.LATA0 = 1;
-                LATAbits.LATA1 = 1;
-            }
-            else if (!comparer(donnees,adversaire1,1) && comparer(donnees,adversaire1,2))
-            {
-                recu = 0;
-                LATAbits.LATA0 = 0;
-                LATAbits.LATA1 = 1;
-            }
-            else if (comparer(donnees,adversaire1,1) && !comparer(donnees,adversaire1,2))
-            {
-                recu = 0;
-                LATAbits.LATA0 = 1;
-                LATAbits.LATA1 = 0;
-            }
-            else
-            {
-                recu = 0;
-                LATAbits.LATA0 = 0;
-                LATAbits.LATA1 = 0;
-            }
-            // DETECTION ADVERSAIRE 2 //////////////////////////////////////////
-            if (comparer(donnees,adversaire2,1) && comparer(donnees,adversaire2,2))
-            {
-                recu = 0;
-                LATBbits.LATB0 = 1;
-                LATBbits.LATB1 = 1;
-            }
-            else if (!comparer(donnees,adversaire2,1) && comparer(donnees,adversaire2,2))
-            {
-                recu = 0;
-                LATBbits.LATB0 = 0;
-                LATBbits.LATB1 = 1;
-            }
-            else if (comparer(donnees,adversaire2,1) && !comparer(donnees,adversaire2,2))
-            {
-                recu = 0;
-                LATBbits.LATB0 = 1;
-                LATBbits.LATB1 = 0;
-            }
-            else
-            {
-                recu = 0;
-                LATBbits.LATB0 = 0;
-                LATBbits.LATB1 = 0;
-            }
+            for(i = 0 ; i < nombre_recepteurs ; i++)
+			{
+				reperage[i] = comparer(donnees, i);
+			}
+			lissage(); // Corrige les recepteurs defaillants
+			recu = 0;
         }
     }
 }
 
-int comparer(int donnees[], int adversaire[], int recepteur)
+void acquisition(int donnees[])
 {
-    int egal = 1;
-    for(i = 0;i<taille_uart && egal;i++)
+    for(i = 0 ; i<taille_uart ; i++)
     {
-        if(donnees[(recepteur-1)*taille_uart+i] != adversaire[i]){egal = 0;}
+		__delay_us(bit_periode_us); // Passe au bit suivant
+        donnees[i] = TSOP1;
+        donnees[taille_uart+i] = TSOP2;
+		donnees[2*taille_uart+i] = TSOP3;
+		donnees[3*taille_uart+i] = TSOP4;
+		donnees[4*taille_uart+i] = TSOP5;
+		donnees[5*taille_uart+i] = TSOP6;
+		donnees[6*taille_uart+i] = TSOP7;
+		donnees[7*taille_uart+i] = TSOP8;
+		donnees[8*taille_uart+i] = TSOP9;
+		donnees[9*taille_uart+i] = TSOP10;
+		donnees[10*taille_uart+i] = TSOP11;
+		donnees[11*taille_uart+i] = TSOP12;
+		donnees[12*taille_uart+i] = TSOP13;
+		donnees[13*taille_uart+i] = TSOP14;
+		donnees[14*taille_uart+i] = TSOP15;
+		donnees[15*taille_uart+i] = TSOP16;
     }
-    return egal;
+}
+
+int comparer(int donnees[], int recepteur)
+{
+	int adversaire = 0;
+	// Detection Adversaire 1
+	int egal = 1;
+    for(i = 0 ; i < taille_uart && egal ; i++)
+    {
+        if(donnees[recepteur*taille_uart+i] != adversaire1[i]){egal = 0;}
+    }
+	if(i == taille_uart-1 && egal) {adversaire = 1;}
+	// Detection Adversaire 2
+	int egal = 1;
+    for(i = 0 ; i<taille_uart && egal ; i++)
+    {
+        if(donnees[recepteur*taille_uart+i] != adversaire2[i]){egal = 0;}
+    }
+	if(i == taille_uart-1 && egal) {adversaire = 2;}
+	
+    return adversaire;
+}
+
+void lissage(void)
+{
+	if((reperage[nombre_recepteurs-1] != 0) && (reperage[nombre_recepteurs-1] == reperage[1]) && (reperage[0] != reperage[nombre_recepteurs-1])) {reperage[0] = reperage[nombre_recepteurs-1];}
+	for(i= 0 ; i < nombre_recepteurs-2 ; i++)
+	{
+		if((reperage[i] != 0) && (reperage[i] == reperage[i+2]) && (reperage[i+1] != reperage[i])) {reperage[i+1] = reperage[i];}
+	}
+	if((reperage[nombre_recepteurs-2] != 0) && (reperage[nombre_recepteurs-2] == reperage[0]) && (reperage[nombre_recepteurs-1] != reperage[nombre_recepteurs-2])) {reperage[nombre_recepteurs-1] = reperage[nombre_recepteurs-2];}
 }
