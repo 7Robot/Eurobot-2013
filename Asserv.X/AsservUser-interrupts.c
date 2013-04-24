@@ -208,7 +208,7 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 
 
     Set_Vitesse_MoteurD(Consigne_Commune + Consigne_Diff);        // calcul des consignes moteurs
-    Set_Vitesse_MoteurG(Consigne_Commune - Consigne_Diff);
+    Set_Vitesse_MoteurG(Consigne_Commune - Consigne_Diff);             // NIM: C'est pas Consigne_Diff/2 ?
 
 
     _T2IF = 0;      // On baisse le FLAG

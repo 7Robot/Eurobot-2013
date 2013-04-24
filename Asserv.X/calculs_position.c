@@ -83,7 +83,7 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
      else
      {
          *Consigne_Theta = Consigne_Thet;
-         *Consigne_Vitesse = Consigne_Vit;
+         *Consigne_Vitesse = Consigne_Vit; // NIM: cette variable n'existe nulle part ailleurs :)
      }
  }
 
