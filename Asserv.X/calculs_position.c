@@ -1,4 +1,16 @@
-
+/*
+* Asserv dsPIC33F
+* Compiler : Microchip xC16
+* µC : 33FJ64MC802
+* Avril 2013
+*    ____________      _           _
+*   |___  /| ___ \    | |         | |
+*      / / | |_/ /___ | |__   ___ | |_
+*     / /  |    // _ \| '_ \ / _ \| __|
+*    / /   | |\ \ (_) | |_) | (_) | |_
+*   /_/    |_| \_\___/|____/ \___/'\__|
+*			      7robot.fr
+*/
 
 
 #include <stdint.h>        /* Includes uint16_t definition                    */
@@ -6,10 +18,15 @@
 #include "AsservHeader.h"  /* Function / Parameters                           */
 #include <libpic30.h>
 #include <p33Fxxxx.h>      /* Includes device header file                     */
+#include <math.h>
 
 
     volatile float PosX = 0.0, PosY = 0.0, Theta = 0.0;
     volatile float avancement = 0.0, delta_theta = 0.0;
+    volatile float Consigne_PosX = 0, Consigne_PosY = 0, Consigne_Thet = 0;
+    volatile float Consigne Vit = 0;
+    volatile float Vitesse_Max = 1; // M/s, à revoir dans le futur pour l'étalonage
+    volatile char Mode_Consigne = 0;
 
 
 
@@ -33,6 +50,10 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
      *Y = PosY;
      *angle = Theta;
  }
+ float Get_Distance (void)
+ {
+     return sqrt((PosX - Consigne_PosX)^2 + (PosY - Consigne_PosY)^2);
+ }
 
  void Incremente_Position(int16_t Diff_D, int16_t Diff_G, float* Vitesse, float* Angle)
  {
@@ -51,6 +72,20 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
      //PosX = 0;
  }
 
+ void Mise_A_Jour_Consignes(float* Consigne_Vitesse, float* Consigne_Theta, float Vitesse_Actu)
+ {
+     float Distance;
+     if (Mode_Consigne == 0)
+     {
+         Distance = Get_Distance();
+         
+     }
+     else
+     {
+         *Consigne_Theta = Consigne_Thet;
+         *Consigne_Vitesse = Consigne_Vit;
+     }
+ }
 
  /* plan plateau
   * Y

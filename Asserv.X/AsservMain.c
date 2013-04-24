@@ -1,8 +1,8 @@
 /*
-* Template dsPIC33F
+* Asserv dsPIC33F
 * Compiler : Microchip xC16
 * µC : 33FJ64MC802
-* Juillet 2012
+* Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
 *      / / | |_/ /___ | |__   ___ | |_

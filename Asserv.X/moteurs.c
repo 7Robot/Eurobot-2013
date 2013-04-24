@@ -1,3 +1,17 @@
+/*
+* Asserv dsPIC33F
+* Compiler : Microchip xC16
+* µC : 33FJ64MC802
+* Avril 2013
+*    ____________      _           _
+*   |___  /| ___ \    | |         | |
+*      / / | |_/ /___ | |__   ___ | |_
+*     / /  |    // _ \| '_ \ / _ \| __|
+*    / /   | |\ \ (_) | |_) | (_) | |_
+*   /_/    |_| \_\___/|____/ \___/'\__|
+*			      7robot.fr
+*/
+
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "AsservHeader.h"  /* Function / Parameters                           */
@@ -29,6 +43,12 @@ void Init_PWM(void)
     
     P1DC1 = 0;
     P1DC2 = 0;          // rapport cycliques nuls pour les moteurs
+
+    _TRISB0 = 0;//Pin de programmation
+    _TRISB1 = 0;//Pin de programmation
+    _TRISB2 = 0;
+    _TRISB3 = 0;
+
 }
 
 void Set_Vitesse_MoteurD(float Consigne)
@@ -36,10 +56,14 @@ void Set_Vitesse_MoteurD(float Consigne)
     if (Consigne < 0.0)
     {
         Consigne = -Consigne;
+        _LATB0 = 1;
+        _LATB1 = 0;
         //MISE DES PATES SENS INVERSE
     }
     else
     {
+        _LATB0 = 0;
+        _LATB1 = 1;
         // MISE DES PATES EN SENS NORMAL
     }
 
@@ -52,10 +76,15 @@ void Set_Vitesse_MoteurG(float Consigne)
     if (Consigne < 0.0)
     {
         Consigne = -Consigne;
+        _LATB2 = 1;
+        _LATB3 = 0;
+
         //MISE DES PATES SENS INVERSE
     }
     else
     {
+        _LATB2 = 0;
+        _LATB3 = 1;
         // MISE DES PATES EN SENS NORMAL
     }
 

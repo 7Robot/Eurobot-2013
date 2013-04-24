@@ -1,8 +1,8 @@
 /*
-* Template dsPIC33F
+* Asserv dsPIC33F
 * Compiler : Microchip xC16
 * µC : 33FJ64MC802
-* Juillet 2012
+* Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
 *      / / | |_/ /___ | |__   ___ | |_
@@ -11,6 +11,11 @@
 *   /_/    |_| \_\___/|____/ \___/'\__|
 *			      7robot.fr
 */
+
+#include <p33Fxxxx.h>      /* Includes device header file                     */
+#include <stdint.h>        /* Includes uint16_t definition                    */
+#include <stdbool.h>       /* Includes true/false definition                  */
+#include "AsservHeader.h"  /* Function / Parameters                           */
 
 /******************************************************************************/
 /* Files to Include                                                           */
@@ -170,6 +175,8 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     compteur_ticg += diffg;
 
     Incremente_Position(diffd, diffg, &Vitesse_Actu, &Theta_Actu);      // mise à jour de la position actuelle, récupération de la vitesse et de l'angle
+
+    Mise_A_Jour_Consignes(&Consigne_Vitesse, &Consigne_Theta, Vitesse_Actu);
 
     Vitesse_Actu *= 1000;       // (fournie en metres/milisecondes)
 

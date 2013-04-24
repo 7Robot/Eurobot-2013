@@ -1,4 +1,16 @@
-
+/*
+* Asserv dsPIC33F
+* Compiler : Microchip xC16
+* µC : 33FJ64MC802
+* Avril 2013
+*    ____________      _           _
+*   |___  /| ___ \    | |         | |
+*      / / | |_/ /___ | |__   ___ | |_
+*     / /  |    // _ \| '_ \ / _ \| __|
+*    / /   | |\ \ (_) | |_) | (_) | |_
+*   /_/    |_| \_\___/|____/ \___/'\__|
+*			      7robot.fr
+*/
 
 //	fichier auto-genere par code_blocks,
 //	afin de ne pas avoir Ã  utiliser sinus et cosinus dans un code PIC
