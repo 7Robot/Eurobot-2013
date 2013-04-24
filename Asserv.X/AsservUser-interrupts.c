@@ -9,7 +9,7 @@
 *     / /  |    // _ \| '_ \ / _ \| __|
 *    / /   | |\ \ (_) | |_) | (_) | |_
 *   /_/    |_| \_\___/|____/ \___/'\__|
-*			      7robot.fr
+*                 7robot.fr
 */
 
 #include <p33Fxxxx.h>      /* Includes device header file                     */
@@ -64,7 +64,7 @@ void InitApp(void)
 
     _QEA1R = 5;     //Module QEI 1 phase A sur RB5
     _QEB1R = 6;     //Module QEI 1 phase B sur RB6
-    
+
     _QEA2R = 7;     //Module QEI 2 phase A sur RB7
     _QEB2R = 8;     //Module QEI 2 phase B sur RB8
 
@@ -162,7 +162,7 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     float Vitesse_Actu, Theta_Actu;
     float Consigne_Commune, Consigne_Diff;
     char Overshoot = 0;
-    
+
     led = led^1;    // On bascule l'état de la LED
     ticd = (int16_t) POS1CNT;// ReadQEI1();
     diffd = ticd-old_ticd;
@@ -196,7 +196,7 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     {   Diff_Theta_All = 1500.0;    Overshoot = 1;  }
     if (Diff_Theta_All < -1500.0)
     {   Diff_Theta_All = -1500.0;   Overshoot = 1;  }       // 1500 ~=  PI * 1/2 seconde à 1000 coups d'interrupt/s
-    
+
 
     // calcul des consignes
     Consigne_Commune = KPv * Diff_Vitesse_Actu + KIv * Diff_Vitesse_All + KDv * (Diff_Vitesse_Old - Diff_Vitesse_Actu);
@@ -210,7 +210,7 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     Set_Vitesse_MoteurD(Consigne_Commune + Consigne_Diff);        // calcul des consignes moteurs
     Set_Vitesse_MoteurG(Consigne_Commune - Consigne_Diff);
 
-    
+
     _T2IF = 0;      // On baisse le FLAG
 }
 

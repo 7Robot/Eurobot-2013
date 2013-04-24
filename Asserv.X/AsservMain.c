@@ -9,7 +9,7 @@
 *     / /  |    // _ \| '_ \ / _ \| __|
 *    / /   | |\ \ (_) | |_) | (_) | |_
 *   /_/    |_| \_\___/|____/ \___/'\__|
-*			      7robot.fr
+*                 7robot.fr
 */
 
 #include <p33Fxxxx.h>      /* Includes device header file                     */
@@ -56,7 +56,7 @@ int16_t main(void)
     while(1)
     {
         __delay_ms(50);
-        
+
     }
 }
 

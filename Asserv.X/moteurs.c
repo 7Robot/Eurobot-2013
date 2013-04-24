@@ -9,7 +9,7 @@
 *     / /  |    // _ \| '_ \ / _ \| __|
 *    / /   | |\ \ (_) | |_) | (_) | |_
 *   /_/    |_| \_\___/|____/ \___/'\__|
-*			      7robot.fr
+*                 7robot.fr
 */
 
 #include <stdint.h>        /* Includes uint16_t definition                    */
@@ -40,7 +40,7 @@ void Init_PWM(void)
 
     // A REVOIR AUSSI : TOUCHE AUX PINS 3...
     P1OVDCON = 0x3F00;      //  Override
-    
+
     P1DC1 = 0;
     P1DC2 = 0;          // rapport cycliques nuls pour les moteurs
 

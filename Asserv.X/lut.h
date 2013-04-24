@@ -9,15 +9,15 @@
 *     / /  |    // _ \| '_ \ / _ \| __|
 *    / /   | |\ \ (_) | |_) | (_) | |_
 *   /_/    |_| \_\___/|____/ \___/'\__|
-*			      7robot.fr
+*                 7robot.fr
 */
 
-//	fichier auto-genere par code_blocks,
-//	afin de ne pas avoir à utiliser sinus et cosinus dans un code PIC
+// fichier auto-genere par code_blocks,
+// afin de ne pas avoir à utiliser sinus et cosinus dans un code PIC
 
 
-//	by pepino
-//	pour 7Robot
+// by pepino
+// pour 7Robot
 
 
 #define TAILLE_LUT 256
