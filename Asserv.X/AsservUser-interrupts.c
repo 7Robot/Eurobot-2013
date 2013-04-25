@@ -203,14 +203,11 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     Diff_Vitesse_Old = Diff_Vitesse_Actu;
 
 
-<<<<<<< HEAD
     Set_Vitesse_MoteurD(Consigne_Commune);        // calcul des consignes moteurs
     Set_Vitesse_MoteurG(Consigne_Commune);
-=======
+
     Set_Vitesse_MoteurD(Consigne_Commune + Consigne_Diff);        // calcul des consignes moteurs
     Set_Vitesse_MoteurG(Consigne_Commune - Consigne_Diff);             // NIM: C'est pas Consigne_Diff/2 ?
-
->>>>>>> 4c36705de3e78c2f953597e8c36c464c75f9fd3b
 
     _T2IF = 0;      // On baisse le FLAG
 }

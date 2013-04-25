@@ -81,17 +81,15 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
 
      }
      else
-<<<<<<< HEAD
      {*/
          *Consigne_Theta = 0;
          *Consigne_Vitesse = 1;
      //}
-=======
+
      {
          *Consigne_Theta = Consigne_Thet;
          *Consigne_Vitesse = Consigne_Vit; // NIM: cette variable n'existe nulle part ailleurs :)
      }
->>>>>>> 4c36705de3e78c2f953597e8c36c464c75f9fd3b
  }
 
  void Set_Consigne_Vitesse(float Consigne)

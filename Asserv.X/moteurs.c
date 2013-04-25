@@ -53,11 +53,7 @@ void Init_PWM(void)
 
     // A REVOIR AUSSI : TOUCHE AUX PINS 3...
     P1OVDCON = 0x3F00;      //  Override
-<<<<<<< HEAD
     */
-=======
-
->>>>>>> 4c36705de3e78c2f953597e8c36c464c75f9fd3b
     P1DC1 = 0;
     P1DC2 = 0;          // rapport cycliques nuls pour les moteurs
 

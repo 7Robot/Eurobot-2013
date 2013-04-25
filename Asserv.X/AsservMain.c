@@ -58,7 +58,6 @@ int16_t main(void)
 
     while(1)
     {
-<<<<<<< HEAD
         Set_Consigne_Vitesse(0.1);
         __delay_ms(10000);
         Set_Consigne_Vitesse(0.2);
@@ -71,11 +70,8 @@ int16_t main(void)
         Set_Vitesse_MoteurG(250);
         __delay_ms(1500);*/
 
-        
-=======
         __delay_ms(50);
 
->>>>>>> 4c36705de3e78c2f953597e8c36c464c75f9fd3b
     }
 }
 
