@@ -9,7 +9,7 @@
 *     / /  |    // _ \| '_ \ / _ \| __|
 *    / /   | |\ \ (_) | |_) | (_) | |_
 *   /_/    |_| \_\___/|____/ \___/'\__|
-*			      7robot.fr
+*                 7robot.fr
 */
 
 
@@ -58,8 +58,8 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
  void Incremente_Position(int16_t Diff_D, int16_t Diff_G, float* Vitesse, float* Angle)
  {
      float Avancement, Rotation;
-    
-     
+
+
      Avancement = (float)((Diff_D * METER_BY_TICD) + (Diff_G * METER_BY_TICG)) * 0.5;       // distance en metres parcourue par le milieu du robot
      *Vitesse = Avancement; // correpond aussi à une vitesse : intervale de temps fixe
      Rotation = (float)((Diff_D * METER_BY_TICD) - (Diff_G * METER_BY_TICG))/ LARGEUR_ROBOT;    // delta theta du robot
@@ -78,13 +78,20 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
      if (Mode_Consigne == 0)
      {
          Distance = Get_Distance();
-         
+
      }
      else
+<<<<<<< HEAD
      {*/
          *Consigne_Theta = 0;
          *Consigne_Vitesse = 1;
      //}
+=======
+     {
+         *Consigne_Theta = Consigne_Thet;
+         *Consigne_Vitesse = Consigne_Vit; // NIM: cette variable n'existe nulle part ailleurs :)
+     }
+>>>>>>> 4c36705de3e78c2f953597e8c36c464c75f9fd3b
  }
 
  void Set_Consigne_Vitesse(float Consigne)
