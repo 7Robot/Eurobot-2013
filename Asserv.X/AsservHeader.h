@@ -58,11 +58,12 @@ void Set_Postion_Angle(float, float, float);  // remet totalement à jour la posi
 void Get_Position (float*, float*, float*);       // renvoie la position actuelle du robot
 void Incremente_Position(int16_t, int16_t, float*, float*);     // recoie les tics, incremente la position, renvoie la vitesse et l'angle (pour l'asserv)
 
+ void Set_Consigne_Vitesse(float);
+ void Mise_A_Jour_Consignes(volatile float*, volatile float*, float);
 
 
-
-float sin_lut (float);   // prends un nombre en radians, en renvoie son sinus
-float cos_lut (float);   // prends un nombre en radians, en renvoie son cosinus
+//float sin_lut (float);   // prends un nombre en radians, en renvoie son sinus
+//float cos_lut (float);   // prends un nombre en radians, en renvoie son cosinus
 
 
 void Init_PWM(void);

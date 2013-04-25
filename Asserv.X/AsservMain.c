@@ -51,11 +51,25 @@ int16_t main(void)
     ConfigureOscillator();
     InitApp();
 
+
+    Set_Asserv_V(500,100,0.1);
+    Set_Asserv_T(0.1,0.1,0.1);
     //float angle = 0;
 
     while(1)
     {
-        __delay_ms(50);
+        Set_Consigne_Vitesse(0.1);
+        __delay_ms(10000);
+        Set_Consigne_Vitesse(0.2);
+        __delay_ms(10000);
+       
+       /* Set_Vitesse_MoteurD(800);
+        Set_Vitesse_MoteurG(800);
+        __delay_ms(1500);
+        Set_Vitesse_MoteurD(250);
+        Set_Vitesse_MoteurG(250);
+        __delay_ms(1500);*/
+
         
     }
 }

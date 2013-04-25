@@ -24,7 +24,7 @@
     volatile float PosX = 0.0, PosY = 0.0, Theta = 0.0;
     volatile float avancement = 0.0, delta_theta = 0.0;
     volatile float Consigne_PosX = 0, Consigne_PosY = 0, Consigne_Thet = 0;
-    volatile float Consigne Vit = 0;
+    volatile float Consigne_Vit = 0;
     volatile float Vitesse_Max = 1; // M/s, à revoir dans le futur pour l'étalonage
     volatile char Mode_Consigne = 0;
 
@@ -52,7 +52,7 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
  }
  float Get_Distance (void)
  {
-     return sqrt((PosX - Consigne_PosX)^2 + (PosY - Consigne_PosY)^2);
+     return sqrt((PosX - Consigne_PosX)*(PosX - Consigne_PosX) + (PosY - Consigne_PosY)*(PosY - Consigne_PosY));
  }
 
  void Incremente_Position(int16_t Diff_D, int16_t Diff_G, float* Vitesse, float* Angle)
@@ -64,29 +64,34 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
      *Vitesse = Avancement; // correpond aussi à une vitesse : intervale de temps fixe
      Rotation = (float)((Diff_D * METER_BY_TICD) - (Diff_G * METER_BY_TICG))/ LARGEUR_ROBOT;    // delta theta du robot
 
-     PosX += Avancement * cos_lut(Theta);
-     PosY += Avancement * sin_lut(Theta);
+     PosX += Avancement * cos(Theta);
+     PosY += Avancement * sin(Theta);
      Theta += Rotation;
 
      *Angle = Theta;
      //PosX = 0;
  }
 
- void Mise_A_Jour_Consignes(float* Consigne_Vitesse, float* Consigne_Theta, float Vitesse_Actu)
+ void Mise_A_Jour_Consignes(volatile float *Consigne_Vitesse, volatile float *Consigne_Theta, float Vitesse_Actu)
  {
-     float Distance;
+   /*  float Distance;
      if (Mode_Consigne == 0)
      {
          Distance = Get_Distance();
          
      }
      else
-     {
-         *Consigne_Theta = Consigne_Thet;
-         *Consigne_Vitesse = Consigne_Vit;
-     }
+     {*/
+         *Consigne_Theta = 0;
+         *Consigne_Vitesse = 1;
+     //}
  }
 
+ void Set_Consigne_Vitesse(float Consigne)
+ {
+     Consigne_Vit = Consigne;
+     Mode_Consigne = 1;
+ }
  /* plan plateau
   * Y
   * ^
