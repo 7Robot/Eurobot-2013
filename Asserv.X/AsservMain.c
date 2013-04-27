@@ -58,10 +58,10 @@ int16_t main(void)
 
     while(1)
     {
-        Set_Consigne_Vitesse(1);
+        Set_Consigne_Vitesse(0.6);
         __delay_ms(10000);
-        Set_Consigne_Vitesse(0);
-        __delay_ms(10000);
+//        Set_Consigne_Vitesse(0.1);
+//        __delay_ms(10000);
        
        /* Set_Vitesse_MoteurD(800);
         Set_Vitesse_MoteurG(800);

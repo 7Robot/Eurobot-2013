@@ -55,7 +55,7 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
      return sqrt((PosX - Consigne_PosX)*(PosX - Consigne_PosX) + (PosY - Consigne_PosY)*(PosY - Consigne_PosY));
  }
 
- void Incremente_Position(int16_t Diff_D, int16_t Diff_G, float* Vitesse, float* Angle)
+ void Incremente_Position(int16_t Diff_D, int16_t Diff_G, float *Vitesse, float *Angle)
  {
      float Avancement, Rotation;
 
@@ -81,15 +81,15 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
 
      }
      else
-     {*/
+     {
          *Consigne_Theta = 0;
          *Consigne_Vitesse = 1;
-     //}
+     }*/
 
-     {
+     
          *Consigne_Theta = Consigne_Thet;
          *Consigne_Vitesse = Consigne_Vit; // NIM: cette variable n'existe nulle part ailleurs :)
-     }
+     
  }
 
  void Set_Consigne_Vitesse(float Consigne)

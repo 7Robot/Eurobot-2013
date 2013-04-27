@@ -15,7 +15,6 @@
 #include <p33Fxxxx.h>      /* Includes device header file                     */
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
-#include "AsservHeader.h"  /* Function / Parameters                           */
 
 /******************************************************************************/
 /* Files to Include                                                           */
@@ -23,6 +22,7 @@
                        
 #include "timer.h"         /* Include timer fonctions                         */
 #include "qei.h"           /* Includes qei functions                          */
+#include "AsservHeader.h"  /* Function / Parameters                           */
 
 /******************************************************************************/
 /* User Functions                                                             */
@@ -209,8 +209,8 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     Diff_Vitesse_Old = Diff_Vitesse_Actu;
 
 
-    Set_Vitesse_MoteurD(Consigne_Commune);        // calcul des consignes moteurs
-    Set_Vitesse_MoteurG(Consigne_Commune);
+//    Set_Vitesse_MoteurD(Consigne_Commune);        // calcul des consignes moteurs
+//    Set_Vitesse_MoteurG(Consigne_Commune);
 
     Set_Vitesse_MoteurD(Consigne_Commune + Consigne_Diff);        // calcul des consignes moteurs
     Set_Vitesse_MoteurG(Consigne_Commune - Consigne_Diff);             // NIM: C'est pas Consigne_Diff/2 ?
