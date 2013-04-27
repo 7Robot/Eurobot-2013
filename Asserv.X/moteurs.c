@@ -57,10 +57,10 @@ void Init_PWM(void)
     P1DC1 = 0;
     P1DC2 = 0;          // rapport cycliques nuls pour les moteurs
 
-    _TRISB2 = 0;
-    _TRISB3 = 0;
-    _TRISB4 = 0;
-    _TRISA4 = 0;
+    _TRISC3 = 0;    //DIRA1 sur RC3 en sortie
+    _TRISC4 = 0;    //DIRB1 sur RC4 en sortie
+    _TRISA3 = 0;    //DIRA2 sur RA3 en sortie
+    _TRISA4 = 0;    //DIRB2 sur RA4 en sortie
 
 }
 
@@ -69,13 +69,13 @@ void Set_Vitesse_MoteurD(float Consigne)
     if (Consigne < 0.0)
     {//MISE DES PATES SENS INVERSE
         Consigne = -Consigne;
-        _LATB2 = 1;
-        _LATB3 = 0;
+        DIRA1 = 1;
+        DIRB1 = 0;
     }
     else
     { // MISE DES PATES EN SENS NORMAL
-        _LATB2 = 0;
-        _LATB3 = 1;
+        DIRA1 = 0;
+        DIRB1 = 1;
     }
 
     if (Consigne > 1000.0)        Consigne = 1000.0;
@@ -87,13 +87,13 @@ void Set_Vitesse_MoteurG(float Consigne)
     if (Consigne < 0.0)
     {//MISE DES PATES SENS INVERSE
         Consigne = -Consigne;
-        _LATB4 = 1;
-        _LATA4 = 0;
+        DIRA2 = 1;
+        DIRB2 = 0;
     }
     else
     { // MISE DES PATES EN SENS NORMAL
-        _LATB4 = 0;
-        _LATA4 = 1;
+        DIRA2 = 0;
+        DIRB2 = 1;
     }
 
     if (Consigne > 1000.0)        Consigne = 1000.0;

@@ -39,8 +39,11 @@ void ConfigureOscillator(void)
 
 void InitApp(void)
 {
-    _TRISA0 = 0;
-    led = 0;
+    //LEDs en sorties
+    _TRISB4 = 0;
+    _TRISA9 = 0;
+    led1 = 0;
+    led2 = 0;
 
     // activation de la priorité des interruptions
     _NSTDIS = 0;
@@ -51,18 +54,18 @@ void InitApp(void)
 
     OpenQEI1(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1 & QEI_NORMAL_IO & QEI_MODE_x4_MATCH & QEI_UP_COUNT,0);
     OpenQEI2(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1 & QEI_NORMAL_IO & QEI_MODE_x4_MATCH & QEI_UP_COUNT,0);
-    ConfigIntQEI1(QEI_INT_DISABLE);
-    ConfigIntQEI2(QEI_INT_DISABLE);
+//    ConfigIntQEI1(QEI_INT_DISABLE);
+//    ConfigIntQEI2(QEI_INT_DISABLE);
     //WriteQEI1(65535);        //Valeur pour déclancher l'interruption du module QEI
     //WriteQEI2(65535);        //Valeur pour déclancher l'interruption du module QEI
 
     Init_PWM();
 
-    _QEA1R = 5;     //Module QEI 1 phase A sur RB5
-    _QEB1R = 6;     //Module QEI 1 phase B sur RB6
+    _QEA1R = 9;     //Module QEI 1 phase A sur RP9, RB9
+    _QEB1R = 22;     //Module QEI 1 phase B sur RP22, RC6
 
-    _QEA2R = 7;     //Module QEI 2 phase A sur RB7
-    _QEB2R = 8;     //Module QEI 2 phase B sur RB8
+    _QEA2R = 23;     //Module QEI 2 phase A sur RP23, RC7
+    _QEB2R = 24;     //Module QEI 2 phase B sur RP24, RC8
 
 
 
@@ -159,16 +162,19 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     float Consigne_Commune, Consigne_Diff;
     char Overshoot = 0;
 
-    led = led^1;    // On bascule l'état de la LED
-    ticd = (int16_t) POS1CNT;// ReadQEI1();
-    diffd = ticd-old_ticd;
-    old_ticd = ticd;
-    compteur_ticd += diffd;
+    led1 = led1^1;    // On bascule l'état de la LED
 
-    ticg = (int16_t) POS2CNT;// ReadQEI2();
-    diffg = ticg-old_ticg;
-    old_ticg = ticg;
-    compteur_ticg += diffg;
+    compteur_ticd = (int16_t) POS2CNT;// ReadQEI2();
+//    ticd = (int16_t) POS1CNT;// ReadQEI1();
+//    diffd = ticd-old_ticd;
+//    old_ticd = ticd;
+//    compteur_ticd += diffd;
+
+    compteur_ticg = (int16_t) POS1CNT;// ReadQEI1();
+//    ticg = (int16_t) POS2CNT;// ReadQEI2();
+//    diffg = ticg-old_ticg;
+//    old_ticg = ticg;
+//    compteur_ticg += diffg;
 
     Incremente_Position(diffd, diffg, &Vitesse_Actu, &Theta_Actu);      // mise à jour de la position actuelle, récupération de la vitesse et de l'angle
 

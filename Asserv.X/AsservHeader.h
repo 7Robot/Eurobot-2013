@@ -28,7 +28,13 @@
 
 /* TODO Application specific user parameters used in user.c may go here */
 
-#define led _LATA0
+#define led1 _LATB4
+#define led2 _LATA8
+
+#define DIRA1 _LATC3    //DIRA1 sur RC3
+#define DIRB1 _LATC4    //DIRB1 sur RC4
+#define DIRA2 _LATA3    //DIRA2 sur RA3
+#define DIRB2 _LATA4    //DIRB2 sur RA4
 
 //arbitrairement
 #define TICS_BY_METERD 25000
