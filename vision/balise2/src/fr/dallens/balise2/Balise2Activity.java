@@ -1,10 +1,11 @@
 package fr.dallens.balise2;
 
-
 import java.io.IOException;
 
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
@@ -17,20 +18,23 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.Utils;
 
+
 import fr.dallens.balise2.R;
 
 
 import android.os.Bundle;
 import android.app.Activity;
-import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.view.Menu;
 
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 
 import android.util.Log;
 
-public class Balise2Activity extends Activity implements CvCameraViewListener2 {
+
+public class Balise2Activity extends Activity implements CvCameraViewListener2	 {
 
 	public native void initJNI(long addrImRef);
 	public native int findColorsJNI(long addrImTar, long addrImOut);
@@ -39,8 +43,37 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2 {
 	private boolean processingFrame = false;
 	
     private static final String  TAG = "Balise2::Activity";
+    
+    private ColorBall[] colorballs = new ColorBall[4]; // array that holds the balls
+    private int balID = 0; // variable to know what ball is being dragged
 
     private CameraBridgeViewBase mOpenCvCameraView;
+    
+    public void initBalls() {
+        // setting the start point for the balls
+        Point point1 = new Point();
+        point1.x = 50;
+        point1.y = 20;
+        Point point2 = new Point();
+        point2.x = 100;
+        point2.y = 20;
+        Point point3 = new Point();
+        point3.x = 150;
+        point3.y = 20;
+        Point point4 = new Point();
+        point3.x = 150;
+        point3.y = 80;
+        
+        
+                       
+        // declare each ball with the ColorBall class
+        colorballs[0] = new ColorBall(point1);
+        colorballs[1] = new ColorBall(point2);
+        colorballs[2] = new ColorBall(point3);
+        colorballs[3] = new ColorBall(point4);
+        
+        
+    }
     
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -85,6 +118,8 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2 {
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.balise2_activity_surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+        
+        initBalls();
     }
 
     @Override
@@ -124,6 +159,12 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2 {
     }
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+    	Mat output = inputFrame.rgba();
+    	for (ColorBall ball : colorballs) {
+    		Core.circle(output, new org.opencv.core.Point(ball.getX(), ball.getY()), 8, new Scalar(0, 0, 255), -2);
+    	}
+    	
+    	candlesInit = false;
     	if (candlesInit && !processingFrame) {
     		Log.v("Msg", "processing");
     		processingFrame = true;
@@ -157,9 +198,68 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2 {
 			
     	} else {
     		Log.v("Msg", "Displaying");
-    		return inputFrame.rgba();
+    		return output;
     	}
     }
+    
+    
+    // events when touching the screen
+    public boolean onTouchEvent(MotionEvent event) {
+        int eventaction = event.getAction(); 
+        
+        int X = (int)event.getX(); 
+        int Y = (int)event.getY(); 
+        
+        Log.v("Touch", String.format("Touched %d %d", X, Y));
+//        System.out.println(String.format("Actiong %d", eventaction));
+
+        switch (eventaction ) { 
+
+        case MotionEvent.ACTION_DOWN: // touch down so check if the finger is on a ball
+        	balID = 0;
+        	for (ColorBall ball : colorballs) {
+        		// check if inside the bounds of the ball (circle)
+        		// get the center for the ball
+        		int centerX = ball.getX();
+        		int centerY = ball.getY();
+        		
+        		// calculate the radius from the touch to the center of the ball
+        		double radCircle  = Math.sqrt( (double) (((centerX-X)*(centerX-X)) + (centerY-Y)*(centerY-Y)));
+        		
+        		// if the radius is smaller then 23 (radius of a ball is 22), then it must be on the ball
+        		if (radCircle < 30){
+        			balID = ball.getID();
+        			System.out.println(String.format("Selected %d", balID));
+                    break;
+        		}
+
+        
+              }
+             
+             break; 
+
+
+        case MotionEvent.ACTION_MOVE:   // touch drag with the ball
+        	// move the balls the same as the finger
+            if (balID > 0) {
+            	System.out.println(String.format("Moving %d", balID));
+            	colorballs[balID-1].setX(X);
+            	colorballs[balID-1].setY(Y);
+            }
+        	
+            break; 
+
+        case MotionEvent.ACTION_UP: 
+       		// touch drop - just do things here after dropping
+
+             break; 
+        } 
+        // redraw the canvas
+        //invalidate(); 
+        return true; 
+	
+    }
+    
 
  
 }

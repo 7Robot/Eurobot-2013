@@ -3,7 +3,8 @@ int attr show_fps 0x7f010000
 int drawable balise3mini 0x7f020000
 int drawable balise4mini 0x7f020001
 int drawable balise5mini 0x7f020002
-int drawable ic_launcher 0x7f020003
+int drawable bol_blauw 0x7f020003
+int drawable ic_launcher 0x7f020004
 int id any 0x7f040000
 int id back 0x7f040001
 int id balise2_activity_surface_view 0x7f040003
