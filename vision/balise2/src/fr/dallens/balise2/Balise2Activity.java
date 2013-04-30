@@ -38,6 +38,7 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
 
 	public native void initJNI(long addrImRef);
 	public native int findColorsJNI(long addrImTar, long addrImOut);
+	public native int findColorsJNI2(float p1x, float p1y, float p2x, float p2y, float p3x, float p3y, float p4x, float p4y, long addrImOut);
 	
 	private boolean candlesInit = false;
 	private boolean processingFrame = false;
@@ -159,41 +160,47 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
     }
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-    	Mat output = inputFrame.rgba();
-    	for (ColorBall ball : colorballs) {
-    		Core.circle(output, new org.opencv.core.Point(ball.getX(), ball.getY()), 8, new Scalar(0, 0, 255), -2);
-    	}
+    	Mat output = inputFrame.rgba().clone();
+
     	
-    	candlesInit = false;
+//    	candlesInit = false;
     	if (candlesInit && !processingFrame) {
     		Log.v("Msg", "processing");
     		processingFrame = true;
 	    	Mat tarImMat = new Mat();
-//			Imgproc.cvtColor(inputFrame.rgba(), tarImMat, Imgproc.COLOR_BGR2GRAY);
-	    	try {
-	    		tarImMat = Utils.loadResource(Balise2Activity.this, R.drawable.balise4mini, Highgui.CV_LOAD_IMAGE_GRAYSCALE);
-	    	} catch (IOException e) {
+			Imgproc.cvtColor(inputFrame.rgba(), tarImMat, Imgproc.COLOR_BGR2GRAY);
+//	    	try {
+//	    		tarImMat = Utils.loadResource(Balise2Activity.this, R.drawable.balise4mini, Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+//	    	} catch (IOException e) {
 	    		
-	    	}
+//	    	}
 			// FIXME 640, 480
 			Mat imOut = new Mat(tarImMat.cols()+640, Math.max(tarImMat.rows(), 480), CvType.CV_8UC4);
-			Log.v("Msg", String.format("Finding the colors (JNI) %d %d", tarImMat.type(), imOut.type()));
-			int res = findColorsJNI(tarImMat.getNativeObjAddr(), imOut.getNativeObjAddr());
+//			Log.v("Msg", String.format("Finding the colors (JNI) %d %d", tarImMat.type(), imOut.type()));
+//			int res = findColorsJNI(tarImMat.getNativeObjAddr(), imOut.getNativeObjAddr());
+			int res = findColorsJNI2(colorballs[0].getX(), colorballs[0].getY(), colorballs[1].getX(), colorballs[1].getY(), colorballs[2].getX(), colorballs[2].getY(), colorballs[3].getX(), colorballs[3].getY(), output.getNativeObjAddr());
 			processingFrame = false;
 			Log.v("Msg", "processing done");
 			if ( res==0 ) {
 				Log.v("Msg", "SUCCESS");
-				Log.v("Msg", String.format("********* %d %d %d %d %d %d", imOut.type(), imOut.height(), imOut.width(), imOut.rows(), imOut.cols(), imOut.channels()));
-//				Bitmap bmp = Bitmap.createBitmap(imOut.cols(), imOut.rows(), Bitmap.Config.ARGB_8888); 
-//				Utils.matToBitmap(imOut, bmp);
+//				Log.v("Msg", String.format("********* %d %d %d %d %d %d", imOut.type(), imOut.height(), imOut.width(), imOut.rows(), imOut.cols(), imOut.channels()));
+
 				Mat imOut2 = new Mat();
 //				Imgproc.cvtColor(tarImMat, imOut2, Imgproc.COLOR_BGR2RGBA);
-				Imgproc.resize(imOut, imOut2, new Size(inputFrame.rgba().cols(), inputFrame.rgba().rows()));
+				Imgproc.resize(output, imOut2, new Size(inputFrame.rgba().cols(), inputFrame.rgba().rows()));
+				
+				int i = 0;
+		    	for (ColorBall ball : colorballs) {
+		    		
+		    		Core.circle(imOut2, new org.opencv.core.Point(ball.getX(), ball.getY()), 8, new Scalar(i, 0, 255-i), -2);
+		    		i+=50;
+		    	}
+				
 				Log.v("Msg", "converted");
 				return imOut2;
 			} else {
 				Log.v("Msg", "FAILURE");
-				return inputFrame.rgba();
+				return output;
 			}
 			
     	} else {

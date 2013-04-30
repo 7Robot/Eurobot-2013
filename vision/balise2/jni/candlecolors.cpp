@@ -53,9 +53,9 @@ int CandleColors::findColor(Mat img, Mat &imOut)
     computeHomography.computeHomography(keypointsRef, computeFP->keypoints, good_matches);
     std::vector<Point2f> scene_corners = computeHomography.applyHomography(imRef);
 
-    if (!computeHomography.validateTransformation()) {
-        return 2;
-    }
+//    if (!computeHomography.validateTransformation()) {
+//        return 2;
+//    }
 
     std::vector<Point2f> candles = computeHomography.applyHomography(bougies);
     //-- Show detected matches
@@ -78,8 +78,42 @@ int CandleColors::findColor(Mat img, Mat &imOut)
     {
         candles[i].x += imRef.cols;
         printf("%d %f %f\n", imRef.cols, candles[i].x, candles[i].y);
-        circle( imOut, candles[i], 5, Scalar(0,0,255), -1, 8);
+        circle( imOut, candles[i], 8, Scalar(0,255,0), -1, 8);
     }
 
     return 0;
+}
+
+int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
+{
+	std::vector<Point2f> refPoints;
+	refPoints.push_back(Point2f(448,66));
+	refPoints.push_back(Point2f(249,153));
+	refPoints.push_back(Point2f(252, 233));
+	refPoints.push_back(Point2f(373, 386));
+	ComputeHomography computeHomography = ComputeHomography();
+	computeHomography.computeHomography(refPoints, calibPoints);
+//	std::vector<Point2f> scene_corners = computeHomography.applyHomography(imRef);
+
+//	if (!computeHomography.validateTransformation()) {
+//		return 2;
+//	}
+
+	std::vector<Point2f> candles = computeHomography.applyHomography(bougies);
+	//-- Show detected matches
+
+
+	for (int i=0; i<calibPoints.size(); i++)
+	{
+		printf("Target (%d) %f %f\n", i, calibPoints[i].x, calibPoints[i].y);
+	}
+
+	for (int i=0; i<candles.size(); i++)
+	{
+		printf("Candle (%d) %f %f\n", i, candles[i].x, candles[i].y);
+		//circle( imOut, bougies[i], 8, Scalar(255,0,0), -1, -2);
+		circle( imOut, candles[i], 5, Scalar(0,255,0), -1, -2);
+	}
+
+	return 0;
 }

@@ -17,6 +17,7 @@ public:
     void init(Mat imRef);
 
     int findColor(Mat img, Mat& imOut);
+    int findColor2(std::vector<Point2f> calibPoints, Mat& imOut);
 
 private:
     KEYPOINT keypoint;
