@@ -6,8 +6,13 @@
 #include "computefeaturepoints.h"
 #include "matchdescriptors.h"
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 using namespace cv;
 using namespace std;
+
+typedef enum{RED, BLUE, WHITE, UNKNOWN} color;
 
 class CandleColors
 {
@@ -20,6 +25,9 @@ public:
     int findColor2(std::vector<Point2f> calibPoints, Mat& imOut);
 
 private:
+
+    color getColor(Mat img, int x, int y);
+
     KEYPOINT keypoint;
     DESCRIPTOR descriptor;
     MATCHER matcher ;

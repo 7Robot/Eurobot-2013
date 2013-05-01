@@ -165,20 +165,20 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
     	
 //    	candlesInit = false;
     	if (candlesInit && !processingFrame) {
-    		Log.v("Msg", "processing");
     		processingFrame = true;
 	    	Mat tarImMat = new Mat();
 			Imgproc.cvtColor(inputFrame.rgba(), tarImMat, Imgproc.COLOR_BGR2GRAY);
+			Log.v("Msg", String.format("processing %dx%d", tarImMat.cols(), tarImMat.rows()));
 //	    	try {
 //	    		tarImMat = Utils.loadResource(Balise2Activity.this, R.drawable.balise4mini, Highgui.CV_LOAD_IMAGE_GRAYSCALE);
 //	    	} catch (IOException e) {
 	    		
 //	    	}
 			// FIXME 640, 480
-			Mat imOut = new Mat(tarImMat.cols()+640, Math.max(tarImMat.rows(), 480), CvType.CV_8UC4);
+//			Mat imOut = new Mat(tarImMat.cols()+640, Math.max(tarImMat.rows(), 480), CvType.CV_8UC4);
 //			Log.v("Msg", String.format("Finding the colors (JNI) %d %d", tarImMat.type(), imOut.type()));
-//			int res = findColorsJNI(tarImMat.getNativeObjAddr(), imOut.getNativeObjAddr());
-			int res = findColorsJNI2(colorballs[0].getX(), colorballs[0].getY(), colorballs[1].getX(), colorballs[1].getY(), colorballs[2].getX(), colorballs[2].getY(), colorballs[3].getX(), colorballs[3].getY(), output.getNativeObjAddr());
+			int res = findColorsJNI(tarImMat.getNativeObjAddr(), output.getNativeObjAddr());
+//			int res = findColorsJNI2(colorballs[0].getX(), colorballs[0].getY(), colorballs[1].getX(), colorballs[1].getY(), colorballs[2].getX(), colorballs[2].getY(), colorballs[3].getX(), colorballs[3].getY(), output.getNativeObjAddr());
 			processingFrame = false;
 			Log.v("Msg", "processing done");
 			if ( res==0 ) {
@@ -189,12 +189,12 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
 //				Imgproc.cvtColor(tarImMat, imOut2, Imgproc.COLOR_BGR2RGBA);
 				Imgproc.resize(output, imOut2, new Size(inputFrame.rgba().cols(), inputFrame.rgba().rows()));
 				
-				int i = 0;
-		    	for (ColorBall ball : colorballs) {
-		    		
-		    		Core.circle(imOut2, new org.opencv.core.Point(ball.getX(), ball.getY()), 8, new Scalar(i, 0, 255-i), -2);
-		    		i+=50;
-		    	}
+//				int i = 0;
+//		    	for (ColorBall ball : colorballs) {
+//		    		
+//		    		Core.circle(imOut2, new org.opencv.core.Point(ball.getX(), ball.getY()), 8, new Scalar(i, 0, 255-i), -2);
+//		    		i+=50;
+//		    	}
 				
 				Log.v("Msg", "converted");
 				return imOut2;

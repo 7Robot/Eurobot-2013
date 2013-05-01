@@ -2,6 +2,9 @@
 
 #include "computehomography.h"
 
+#include <opencv2/opencv.hpp> // sale
+#include "opencv2/highgui/highgui.hpp"
+
 #include <android/log.h>
 
 #define LOG_TAG "Msg"
@@ -59,26 +62,39 @@ int CandleColors::findColor(Mat img, Mat &imOut)
 
     std::vector<Point2f> candles = computeHomography.applyHomography(bougies);
     //-- Show detected matches
-    drawMatches( imRef, keypointsRef, img, computeFP->keypoints,
-               good_matches, imOut, Scalar::all(-1), Scalar::all(-1),
-               vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+//    drawMatches( imRef, keypointsRef, img, computeFP->keypoints,
+//               good_matches, imOut, Scalar::all(-1), Scalar::all(-1),
+//               vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
 
 
     if (good_matches.size() >= 4)
     {
         //-- Draw lines between the corners (the mapped object in the scene - image_2 )
-        line( imOut, scene_corners[0] + Point2f( imRef.cols, 0), scene_corners[1] + Point2f( imRef.cols, 0), Scalar( 0, 255, 0), 4 );
-        line( imOut, scene_corners[1] + Point2f( imRef.cols, 0), scene_corners[2] + Point2f( imRef.cols, 0), Scalar( 0, 255, 0), 4 );
-        line( imOut, scene_corners[2] + Point2f( imRef.cols, 0), scene_corners[3] + Point2f( imRef.cols, 0), Scalar( 0, 255, 0), 4 );
-        line( imOut, scene_corners[3] + Point2f( imRef.cols, 0), scene_corners[0] + Point2f( imRef.cols, 0), Scalar( 0, 255, 0), 4 );
+//        line( imOut, scene_corners[0] + Point2f( imRef.cols, 0), scene_corners[1] + Point2f( imRef.cols, 0), Scalar( 0, 255, 0), 4 );
+//        line( imOut, scene_corners[1] + Point2f( imRef.cols, 0), scene_corners[2] + Point2f( imRef.cols, 0), Scalar( 0, 255, 0), 4 );
+//        line( imOut, scene_corners[2] + Point2f( imRef.cols, 0), scene_corners[3] + Point2f( imRef.cols, 0), Scalar( 0, 255, 0), 4 );
+//        line( imOut, scene_corners[3] + Point2f( imRef.cols, 0), scene_corners[0] + Point2f( imRef.cols, 0), Scalar( 0, 255, 0), 4 );
+        line( imOut, scene_corners[0], scene_corners[1], Scalar( 0, 255, 0), 4 );
+        line( imOut, scene_corners[1], scene_corners[2], Scalar( 0, 255, 0), 4 );
+        line( imOut, scene_corners[2], scene_corners[3], Scalar( 0, 255, 0), 4 );
+        line( imOut, scene_corners[3], scene_corners[0], Scalar( 0, 255, 0), 4 );
 
     }
 
     for (int i=0; i<candles.size(); i++)
     {
-        candles[i].x += imRef.cols;
+//        candles[i].x += imRef.cols;
         printf("%d %f %f\n", imRef.cols, candles[i].x, candles[i].y);
-        circle( imOut, candles[i], 8, Scalar(0,255,0), -1, 8);
+        color col = getColor(imOut, candles[i].x, candles[i].y);
+        Scalar circleColor;
+        if (col==RED)
+        	circleColor = Scalar(255,0,0);
+        else if (col==BLUE)
+        	circleColor = Scalar(0,0,255);
+        else
+        	circleColor = Scalar(0,255,0);
+        circle( imOut, candles[i], 5, circleColor, -1, 8);
+
     }
 
     return 0;
@@ -116,4 +132,27 @@ int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
 	}
 
 	return 0;
+}
+
+color CandleColors::getColor(Mat img, int x, int y)
+{
+	const int radius = 2;
+	printf("box %d %d %d %d", x, y, MIN(MAX(0,x-radius),img.cols-2*radius), MIN(MAX(0,y-radius),img.rows-2*radius));
+	printf("img %d %d", img.cols, img.rows);
+	cv::Rect const mask(MIN(MAX(0,x-radius),img.cols-2*radius), MIN(MAX(0,y-radius),img.rows-2*radius), 2*radius, 2*radius);
+	cv::Mat roi = img(mask);
+	Mat imgHSV = roi.clone();
+	cvtColor(roi, imgHSV, CV_RGB2HSV);
+	Mat blue = Mat(roi.cols, roi.rows, CV_8UC1);
+	Mat red = Mat(roi.cols, roi.rows, CV_8UC1);
+	inRange(imgHSV, Scalar(100, 35, 109), Scalar(124,255,255), blue);
+	inRange(imgHSV, Scalar(173, 255, 255), Scalar(7,35,109), red);
+	Scalar sblue = sum(blue);
+	Scalar sred = sum(red);
+	printf("blue %f, red %f", sblue.val[0], sred.val[0]);
+	if (sblue.val[0] > sred.val[0])
+		return BLUE;
+	else
+		return RED;
+
 }
