@@ -103,7 +103,7 @@ int CandleColors::findColor(Mat img, Mat &imOut)
 int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
 {
 	std::vector<Point2f> refPoints;
-	refPoints.push_back(Point2f(448,66));
+	refPoints.push_back(Point2f(448, 66));
 	refPoints.push_back(Point2f(249,153));
 	refPoints.push_back(Point2f(252, 233));
 	refPoints.push_back(Point2f(373, 386));
@@ -124,12 +124,23 @@ int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
 		printf("Target (%d) %f %f\n", i, calibPoints[i].x, calibPoints[i].y);
 	}
 
+
+
 	for (int i=0; i<candles.size(); i++)
-	{
-		printf("Candle (%d) %f %f\n", i, candles[i].x, candles[i].y);
-		//circle( imOut, bougies[i], 8, Scalar(255,0,0), -1, -2);
-		circle( imOut, candles[i], 5, Scalar(0,255,0), -1, -2);
-	}
+	    {
+	//        candles[i].x += imRef.cols;
+	        printf("%d %f %f\n", imRef.cols, candles[i].x, candles[i].y);
+	        color col = getColor(imOut, candles[i].x, candles[i].y);
+	        Scalar circleColor;
+	        if (col==RED)
+	        	circleColor = Scalar(255,0,0);
+	        else if (col==BLUE)
+	        	circleColor = Scalar(0,0,255);
+	        else
+	        	circleColor = Scalar(0,255,0);
+	        circle( imOut, candles[i], 5, circleColor, -1, 8);
+
+	    }
 
 	return 0;
 }

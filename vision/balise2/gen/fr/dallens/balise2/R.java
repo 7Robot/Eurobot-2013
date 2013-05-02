@@ -48,9 +48,11 @@ containing a value of this type.
         public static final int back=0x7f040001;
         public static final int balise2_activity_surface_view=0x7f040003;
         public static final int front=0x7f040002;
-        public static final int menu_calibrate_colors=0x7f040005;
-        public static final int menu_fake_picture=0x7f040004;
-        public static final int menu_fix_distorsions=0x7f040006;
+        public static final int linearLayout1=0x7f040004;
+        public static final int menu_calibrate_colors=0x7f040007;
+        public static final int menu_fake_picture=0x7f040006;
+        public static final int menu_fix_distorsions=0x7f040008;
+        public static final int mode=0x7f040005;
     }
     public static final class layout {
         public static final int activity_balise2=0x7f030000;
