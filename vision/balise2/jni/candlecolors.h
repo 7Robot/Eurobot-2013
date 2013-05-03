@@ -6,8 +6,7 @@
 #include "computefeaturepoints.h"
 #include "matchdescriptors.h"
 
-#define MAX(x, y) (((x) > (y)) ? (x) : (y))
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 
 using namespace cv;
 using namespace std;
@@ -23,6 +22,7 @@ public:
 
     int findColor(Mat img, Mat& imOut);
     int findColor2(std::vector<Point2f> calibPoints, Mat& imOut);
+    void setPosition(int position);
 
 private:
 
@@ -32,6 +32,7 @@ private:
     DESCRIPTOR descriptor;
     MATCHER matcher ;
     Mat imRef;
+    int position;
 
     ComputeFeaturePoints* computeFP;
     vector<KeyPoint> keypointsRef;

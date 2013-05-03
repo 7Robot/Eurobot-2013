@@ -47,6 +47,7 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
 	public native void initJNI(long addrImRef);
 	public native int findColorsJNI(long addrImTar, long addrImOut);
 	public native int findColorsJNI2(float p1x, float p1y, float p2x, float p2y, float p3x, float p3y, float p4x, float p4y, long addrImOut);
+	public native void setPosition(int position);
 	
 	private boolean candlesInit = false;
 	private boolean processingFrame = false;
@@ -100,6 +101,7 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
                     mOpenCvCameraView.enableView();
                     System.loadLibrary("bougiesjni");
                     init();
+                    setPosition(pos);
                     break;
                 default:
                     super.onManagerConnected(status);

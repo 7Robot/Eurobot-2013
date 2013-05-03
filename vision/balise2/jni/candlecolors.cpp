@@ -5,27 +5,26 @@
 #include <opencv2/opencv.hpp> // sale
 #include "opencv2/highgui/highgui.hpp"
 
-#include <android/log.h>
+
 
 #define LOG_TAG "Msg"
-#define printf(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__))
 
+#ifdef __ANDROID__
+	#include <android/log.h>
+	#define printf(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__))
+#else
+	#include <stdio.h>
+#endif
 
-
+//#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+//#define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
 CandleColors::CandleColors(KEYPOINT keypoint, DESCRIPTOR descriptor, MATCHER matcher )
 {
     this->keypoint = keypoint;
     this->descriptor = descriptor;
     this->matcher = matcher;
-    bougies.push_back(Point2f(380 , 116));
-    bougies.push_back(Point2f(380 , 150));
-    bougies.push_back(Point2f(380 , 189));
-    bougies.push_back(Point2f(412 , 91));
-    bougies.push_back(Point2f(416 , 116));
-    bougies.push_back(Point2f(413 , 146));
-    bougies.push_back(Point2f(415 , 184));
-    bougies.push_back(Point2f(410 , 220));
+
 }
 
 void CandleColors::init(Mat imRef)
@@ -48,6 +47,7 @@ int CandleColors::findColor(Mat img, Mat &imOut)
 
     if (good_matches.size() < 4)
     {
+        printf("Not enough matches");
         return 1;
     }
 
@@ -81,10 +81,10 @@ int CandleColors::findColor(Mat img, Mat &imOut)
 
     }
 
-    for (int i=0; i<candles.size(); i++)
+    for (unsigned int i=0; i<candles.size(); i++)
     {
 //        candles[i].x += imRef.cols;
-        printf("%d %f %f\n", imRef.cols, candles[i].x, candles[i].y);
+        printf("Candle pos %d %f %f\n", imRef.cols, candles[i].x, candles[i].y);
         color col = getColor(imOut, candles[i].x, candles[i].y);
         Scalar circleColor;
         if (col==RED)
@@ -119,17 +119,17 @@ int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
 	//-- Show detected matches
 
 
-	for (int i=0; i<calibPoints.size(); i++)
+	for (unsigned int i=0; i<calibPoints.size(); i++)
 	{
 		printf("Target (%d) %f %f\n", i, calibPoints[i].x, calibPoints[i].y);
 	}
 
 
 
-	for (int i=0; i<candles.size(); i++)
+	for (unsigned int i=0; i<candles.size(); i++)
 	    {
 	//        candles[i].x += imRef.cols;
-	        printf("%d %f %f\n", imRef.cols, candles[i].x, candles[i].y);
+	        printf("Candle pos %d %f %f\n", imRef.cols, candles[i].x, candles[i].y);
 	        color col = getColor(imOut, candles[i].x, candles[i].y);
 	        Scalar circleColor;
 	        if (col==RED)
@@ -148,22 +148,68 @@ int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
 color CandleColors::getColor(Mat img, int x, int y)
 {
 	const int radius = 2;
-	printf("box %d %d %d %d", x, y, MIN(MAX(0,x-radius),img.cols-2*radius), MIN(MAX(0,y-radius),img.rows-2*radius));
-	printf("img %d %d", img.cols, img.rows);
+    printf("img %d %d %d %d %d\n", img.depth(), img.type(), img.channels(), CV_8U, CV_32F);
+	printf("box %d %d %d %d %d %d\n", x, y, MIN(MAX(0,x-radius),img.cols-2*radius), MIN(MAX(0,y-radius),img.rows-2*radius), 2*radius, 2*radius);
+	printf("img %d %d, %d %d\n", img.cols, img.rows, MIN(MAX(0,x-radius),img.cols-2*radius)+2*radius, MIN(MAX(0,y-radius),img.rows-2*radius)+2*radius);
+    
 	cv::Rect const mask(MIN(MAX(0,x-radius),img.cols-2*radius), MIN(MAX(0,y-radius),img.rows-2*radius), 2*radius, 2*radius);
 	cv::Mat roi = img(mask);
 	Mat imgHSV = roi.clone();
 	cvtColor(roi, imgHSV, CV_RGB2HSV);
 	Mat blue = Mat(roi.cols, roi.rows, CV_8UC1);
 	Mat red = Mat(roi.cols, roi.rows, CV_8UC1);
-	inRange(imgHSV, Scalar(100, 35, 109), Scalar(124,255,255), blue);
-	inRange(imgHSV, Scalar(173, 255, 255), Scalar(7,35,109), red);
+	inRange(imgHSV, Scalar(100, 109, 109), Scalar(124,255,255), blue);
+	inRange(imgHSV, Scalar(173, 255, 255), Scalar(7,109,109), red);
 	Scalar sblue = sum(blue);
 	Scalar sred = sum(red);
 	printf("blue %f, red %f", sblue.val[0], sred.val[0]);
-	if (sblue.val[0] > sred.val[0])
+	if (sblue.val[0] > 2*sred.val[0])
 		return BLUE;
-	else
+	else if (2*sblue.val[0] < sred.val[0])
 		return RED;
+	else
+		return UNKNOWN;
 
+}
+
+void CandleColors::setPosition(int position)
+{
+	this->position = position;
+	bougies = vector<Point2f>(0);
+	printf("Setting position %d\n", position);
+	if (position==4)
+	{
+		// Haut
+		bougies.push_back(Point2f(380 , 116));
+		bougies.push_back(Point2f(380 , 150));
+		bougies.push_back(Point2f(380 , 189));
+		bougies.push_back(Point2f(378 , 225));
+		bougies.push_back(Point2f(374 , 256));
+		// Bas
+		bougies.push_back(Point2f(412 , 91));
+		bougies.push_back(Point2f(416 , 116));
+		bougies.push_back(Point2f(413 , 146));
+		bougies.push_back(Point2f(415 , 184));
+		bougies.push_back(Point2f(410 , 220));
+		bougies.push_back(Point2f(411 , 251));
+		bougies.push_back(Point2f(407 , 271));
+
+	}
+	else if (position==3)
+	{
+		// Haut
+		bougies.push_back(Point2f(183 , 215));
+		bougies.push_back(Point2f(218 , 217));
+		bougies.push_back(Point2f(259 , 217));
+		bougies.push_back(Point2f(296 , 213));
+		bougies.push_back(Point2f(323 , 210));
+		// Bas
+		bougies.push_back(Point2f(157 , 249));
+		bougies.push_back(Point2f(183 , 250));
+		bougies.push_back(Point2f(216 , 254));
+		bougies.push_back(Point2f(253 , 253));
+		bougies.push_back(Point2f(286 , 247));
+		bougies.push_back(Point2f(317 , 242));
+		bougies.push_back(Point2f(344 , 239));
+	}
 }
