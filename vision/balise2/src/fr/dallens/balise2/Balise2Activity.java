@@ -24,6 +24,7 @@ import fr.dallens.balise2.R;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Point;
 import android.view.Menu;
 
@@ -41,6 +42,7 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
 	private enum Mode {AUTO, MANUEL};
 	
 	private Mode mode = Mode.AUTO;
+	private int pos; // Sur quelle balise on est
 	
 	public native void initJNI(long addrImRef);
 	public native int findColorsJNI(long addrImTar, long addrImOut);
@@ -108,7 +110,11 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
     
     private void init() {
     	try {
-			Mat refImMat = Utils.loadResource(Balise2Activity.this, R.drawable.balise3mini, Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+			Mat refImMat = new Mat();
+			if (pos == 4)
+				refImMat = Utils.loadResource(Balise2Activity.this, R.drawable.balise3mini, Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+			else if (pos == 3)
+				refImMat = Utils.loadResource(Balise2Activity.this, R.drawable.bf1, Highgui.CV_LOAD_IMAGE_GRAYSCALE);
 			Log.v("Msg", String.format("Initializing bougiesJNI %d", refImMat.type()));
 			initJNI(refImMat.getNativeObjAddr());
 			Log.v("Msg", "bougiesJNI initialized");
@@ -121,6 +127,9 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.v("Msg", "bougiesJNI loaded");
+        
+        Intent intent = getIntent();
+        pos = intent.getIntExtra("pos", 1);
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
