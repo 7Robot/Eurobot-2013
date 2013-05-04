@@ -12,9 +12,14 @@
 #ifdef __ANDROID__
 	#include <android/log.h>
 	#define printf(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__))
+    
+    
 #else
 	#include <stdio.h>
 #endif
+
+Scalar blue = Scalar(0,0,255);
+Scalar red  = Scalar(255,0,0); 
 
 //#define MAX(x, y) (((x) > (y)) ? (x) : (y))
 //#define MIN(x, y) (((x) < (y)) ? (x) : (y))
@@ -88,9 +93,9 @@ int CandleColors::findColor(Mat img, Mat &imOut)
         color col = getColor(imOut, candles[i].x, candles[i].y);
         Scalar circleColor;
         if (col==RED)
-        	circleColor = Scalar(255,0,0);
+        	circleColor = red;
         else if (col==BLUE)
-        	circleColor = Scalar(0,0,255);
+        	circleColor = blue;
         else
         	circleColor = Scalar(0,255,0);
         circle( imOut, candles[i], 5, circleColor, -1, 8);
@@ -133,9 +138,9 @@ int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
 	        color col = getColor(imOut, candles[i].x, candles[i].y);
 	        Scalar circleColor;
 	        if (col==RED)
-	        	circleColor = Scalar(255,0,0);
+	        	circleColor = red;
 	        else if (col==BLUE)
-	        	circleColor = Scalar(0,0,255);
+	        	circleColor = blue;
 	        else
 	        	circleColor = Scalar(0,255,0);
 	        circle( imOut, candles[i], 5, circleColor, -1, 8);
@@ -147,7 +152,7 @@ int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
 
 color CandleColors::getColor(Mat img, int x, int y)
 {
-	const int radius = 2;
+	const int radius = 10;
     printf("img %d %d %d %d %d\n", img.depth(), img.type(), img.channels(), CV_8U, CV_32F);
 	printf("box %d %d %d %d %d %d\n", x, y, MIN(MAX(0,x-radius),img.cols-2*radius), MIN(MAX(0,y-radius),img.rows-2*radius), 2*radius, 2*radius);
 	printf("img %d %d, %d %d\n", img.cols, img.rows, MIN(MAX(0,x-radius),img.cols-2*radius)+2*radius, MIN(MAX(0,y-radius),img.rows-2*radius)+2*radius);
@@ -156,12 +161,24 @@ color CandleColors::getColor(Mat img, int x, int y)
 	cv::Mat roi = img(mask);
 	Mat imgHSV = roi.clone();
 	cvtColor(roi, imgHSV, CV_RGB2HSV);
+    //~ imshow( "Good Matches & Object detection", roi );
+    //~ waitKey(0);
 	Mat blue = Mat(roi.cols, roi.rows, CV_8UC1);
-	Mat red = Mat(roi.cols, roi.rows, CV_8UC1);
-	inRange(imgHSV, Scalar(100, 109, 109), Scalar(124,255,255), blue);
-	inRange(imgHSV, Scalar(173, 255, 255), Scalar(7,109,109), red);
+	Mat red1 = Mat(roi.cols, roi.rows, CV_8UC1);
+    Mat red2 = Mat(roi.cols, roi.rows, CV_8UC1);
+    // Gimp    h : 0 --> 360 , s : 0 --> 100 , v : 0 --> 100
+    // OpenCV  h : 0 --> 180 , s : 0 --> 255 , v : 0 --> 255
+	inRange(imgHSV, Scalar(70, 109, 109), Scalar(130,255,255), blue);
+	inRange(imgHSV, Scalar(171, 109, 109), Scalar(180,255,255), red1);
+    inRange(imgHSV, Scalar(0, 109, 109), Scalar(5,255,255), red2);
+    
+    //~ imshow( "Good Matches & Object detection", blue );
+    //~ waitKey(0);
+    //~ imshow( "Good Matches & Object detection", red );
+    //~ waitKey(0);
+    
 	Scalar sblue = sum(blue);
-	Scalar sred = sum(red);
+	Scalar sred = sum(red1)+sum(red2);
 	printf("blue %f, red %f", sblue.val[0], sred.val[0]);
 	if (sblue.val[0] > 2*sred.val[0])
 		return BLUE;
