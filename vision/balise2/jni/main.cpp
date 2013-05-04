@@ -60,6 +60,7 @@ CandleColors* candleColors;
 	}
 #else
 
+#include <cv.h>
 #include "opencv2/highgui/highgui.hpp"
 #include <stdio.h>
 #include <iostream>
@@ -69,16 +70,25 @@ CandleColors* candleColors;
 
 	    Mat img1 = imread("../res/drawable/balise3mini.jpg", CV_LOAD_IMAGE_GRAYSCALE);
 	    Mat img2 = imread("../res/drawable/balise4mini.jpg", CV_LOAD_IMAGE_GRAYSCALE);
-        Mat imOut = imread("../res/drawable/balise4mini.jpg");
+        Mat imOutBGR = imread("../res/drawable/balise4mini.jpg", CV_LOAD_IMAGE_COLOR);
+        
+        Mat imOut = imOutBGR.clone();
+        cvtColor(imOutBGR, imOut, CV_BGR2RGB);
+        
 
 	    candleColors = new CandleColors(ORBK, ORBD, BRUTEFORCE);
 	    candleColors->init(img1);
         candleColors->setPosition(4);
 	    
 	    candleColors->findColor(img2, imOut);
+        
+        Mat imOut2 = imOut.clone();
+        cvtColor(imOut, imOut2, CV_RGB2BGR);
+        
 
-	    imshow( "Good Matches & Object detection", imOut );
-	    waitKey(0);
+	    imshow( "Good Matches & Object detection", imOut2 );
+        waitKey(0);
+        
 
 	    return 0;
 	}
