@@ -33,6 +33,7 @@ private:
     MATCHER matcher ;
     Mat imRef;
     int position;
+    std::vector<Point2f> refPoints; // mode manuel
 
     ComputeFeaturePoints* computeFP;
     vector<KeyPoint> keypointsRef;

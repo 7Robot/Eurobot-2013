@@ -107,11 +107,6 @@ int CandleColors::findColor(Mat img, Mat &imOut)
 
 int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
 {
-	std::vector<Point2f> refPoints;
-	refPoints.push_back(Point2f(448, 66));
-	refPoints.push_back(Point2f(249,153));
-	refPoints.push_back(Point2f(252, 233));
-	refPoints.push_back(Point2f(373, 386));
 	ComputeHomography computeHomography = ComputeHomography();
 	computeHomography.computeHomography(refPoints, calibPoints);
 //	std::vector<Point2f> scene_corners = computeHomography.applyHomography(imRef);
@@ -152,10 +147,10 @@ int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
 
 color CandleColors::getColor(Mat img, int x, int y)
 {
-	const int radius = 10;
-    printf("img %d %d %d %d %d\n", img.depth(), img.type(), img.channels(), CV_8U, CV_32F);
-	printf("box %d %d %d %d %d %d\n", x, y, MIN(MAX(0,x-radius),img.cols-2*radius), MIN(MAX(0,y-radius),img.rows-2*radius), 2*radius, 2*radius);
-	printf("img %d %d, %d %d\n", img.cols, img.rows, MIN(MAX(0,x-radius),img.cols-2*radius)+2*radius, MIN(MAX(0,y-radius),img.rows-2*radius)+2*radius);
+	const int radius = 4;
+//    printf("img %d %d %d %d %d\n", img.depth(), img.type(), img.channels(), CV_8U, CV_32F);
+//	printf("box %d %d %d %d %d %d\n", x, y, MIN(MAX(0,x-radius),img.cols-2*radius), MIN(MAX(0,y-radius),img.rows-2*radius), 2*radius, 2*radius);
+//	printf("img %d %d, %d %d\n", img.cols, img.rows, MIN(MAX(0,x-radius),img.cols-2*radius)+2*radius, MIN(MAX(0,y-radius),img.rows-2*radius)+2*radius);
     
 	cv::Rect const mask(MIN(MAX(0,x-radius),img.cols-2*radius), MIN(MAX(0,y-radius),img.rows-2*radius), 2*radius, 2*radius);
 	cv::Mat roi = img(mask);
@@ -168,9 +163,9 @@ color CandleColors::getColor(Mat img, int x, int y)
     Mat red2 = Mat(roi.cols, roi.rows, CV_8UC1);
     // Gimp    h : 0 --> 360 , s : 0 --> 100 , v : 0 --> 100
     // OpenCV  h : 0 --> 180 , s : 0 --> 255 , v : 0 --> 255
-	inRange(imgHSV, Scalar(70, 109, 109), Scalar(130,255,255), blue);
-	inRange(imgHSV, Scalar(171, 109, 109), Scalar(180,255,255), red1);
-    inRange(imgHSV, Scalar(0, 109, 109), Scalar(5,255,255), red2);
+	inRange(imgHSV, Scalar(70, 60, 70), Scalar(130,255,255), blue);
+	inRange(imgHSV, Scalar(140, 60, 70), Scalar(180,255,255), red1);
+    inRange(imgHSV, Scalar(0, 60, 70), Scalar(7,255,255), red2);
     
     //~ imshow( "Good Matches & Object detection", blue );
     //~ waitKey(0);
@@ -179,7 +174,7 @@ color CandleColors::getColor(Mat img, int x, int y)
     
 	Scalar sblue = sum(blue);
 	Scalar sred = sum(red1)+sum(red2);
-	printf("blue %f, red %f", sblue.val[0], sred.val[0]);
+	printf("blue %f -- red %f\n", sblue.val[0], sred.val[0]);
 	if (sblue.val[0] > 2*sred.val[0])
 		return BLUE;
 	else if (2*sblue.val[0] < sred.val[0])
@@ -193,6 +188,7 @@ void CandleColors::setPosition(int position)
 {
 	this->position = position;
 	bougies = vector<Point2f>(0);
+	refPoints = vector<Point2f>(0);
 	printf("Setting position %d\n", position);
 	if (position==4)
 	{
@@ -211,22 +207,32 @@ void CandleColors::setPosition(int position)
 		bougies.push_back(Point2f(411 , 251));
 		bougies.push_back(Point2f(407 , 271));
 
+		refPoints.push_back(Point2f(448, 66));
+		refPoints.push_back(Point2f(249,153));
+		refPoints.push_back(Point2f(252, 233));
+		refPoints.push_back(Point2f(373, 386));
+
 	}
 	else if (position==3)
 	{
 		// Haut
-		bougies.push_back(Point2f(183 , 215));
-		bougies.push_back(Point2f(218 , 217));
-		bougies.push_back(Point2f(259 , 217));
-		bougies.push_back(Point2f(296 , 213));
-		bougies.push_back(Point2f(323 , 210));
+		bougies.push_back(Point2f(218 , 454));
+		bougies.push_back(Point2f(217 , 420));
+		bougies.push_back(Point2f(217 , 381));
+		bougies.push_back(Point2f(213 , 340));
+		bougies.push_back(Point2f(210 , 313));
 		// Bas
-		bougies.push_back(Point2f(157 , 249));
-		bougies.push_back(Point2f(183 , 250));
-		bougies.push_back(Point2f(216 , 254));
-		bougies.push_back(Point2f(253 , 253));
-		bougies.push_back(Point2f(286 , 247));
-		bougies.push_back(Point2f(317 , 242));
-		bougies.push_back(Point2f(344 , 239));
+		bougies.push_back(Point2f(249 , 480));
+		bougies.push_back(Point2f(250 , 453));
+		bougies.push_back(Point2f(254 , 422));
+		bougies.push_back(Point2f(253 , 384));
+		bougies.push_back(Point2f(247 , 347));
+		bougies.push_back(Point2f(242 , 316));
+		bougies.push_back(Point2f(239 , 294));
+
+		refPoints.push_back(Point2f(277, 500));
+		refPoints.push_back(Point2f(75, 435));
+		refPoints.push_back(Point2f(79, 342));
+		refPoints.push_back(Point2f(202, 172));
 	}
 }
