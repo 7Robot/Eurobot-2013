@@ -19,10 +19,12 @@
 /******************************************************************************/
 /* Files to Include                                                           */
 /******************************************************************************/
-                       
+
 #include "timer.h"         /* Include timer fonctions                         */
 #include "qei.h"           /* Includes qei functions                          */
-#include "AsservHeader.h"  /* Function / Parameters                           */
+#include "AsservHeader.h"  /* Function / Parameters  */
+#include "atp.h"
+#include "atp-asserv.h"
 
 /******************************************************************************/
 /* User Functions                                                             */
@@ -48,7 +50,7 @@ void InitApp(void)
     // activation de la priorité des interruptions
     _NSTDIS = 0;
 
-    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_ON & T2_SOURCE_INT, 0x09FF);
+    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_ON & T2_SOURCE_INT, 0x0FF);
     ConfigIntTimer2(T2_INT_PRIOR_3 & T2_INT_ON); //Interruption ON et priorité 3
 
 
@@ -146,6 +148,7 @@ void InitApp(void)
     volatile int32_t compteur_ticg = 0;
     volatile float Consigne_Vitesse = 0.0;
     volatile float Consigne_Theta = 0.0;
+    volatile int nim = 0;
 
     volatile float KPv = 0, KDv = 0,KIv = 0;
     volatile float Diff_Vitesse_Actu = 0, Diff_Vitesse_Old = 0, Diff_Vitesse_All = 0;
@@ -162,21 +165,30 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     float Consigne_Commune, Consigne_Diff;
     char Overshoot = 0;
 
-    led1 = led1^1;    // On bascule l'état de la LED
+    //led1 = led1^1;    // On bascule l'état de la LED
 
-    compteur_ticd = (int16_t) POS2CNT;// ReadQEI2();
-//    ticd = (int16_t) POS1CNT;// ReadQEI1();
-//    diffd = ticd-old_ticd;
-//    old_ticd = ticd;
-//    compteur_ticd += diffd;
+    ticd = (int16_t) POS1CNT;// ReadQEI2();
+    diffd = ticd-old_ticd;
+    old_ticd = ticd;
+    compteur_ticd += diffd;
 
-    compteur_ticg = (int16_t) POS1CNT;// ReadQEI1();
-//    ticg = (int16_t) POS2CNT;// ReadQEI2();
-//    diffg = ticg-old_ticg;
-//    old_ticg = ticg;
-//    compteur_ticg += diffg;
+    ticg = (int16_t) POS2CNT;// ReadQEI1();
+    diffg = ticg-old_ticg;
+    old_ticg = ticg;
+    compteur_ticg += diffg;
+
+//    compteur_ticd = (int16_t) POS2CNT;
+//    compteur_ticg = (int16_t) POS1CNT;
 
     Incremente_Position(diffd, diffg, &Vitesse_Actu, &Theta_Actu);      // mise à jour de la position actuelle, récupération de la vitesse et de l'angle
+    //SendText("dd: %i, df: %i, va:%f", diffd, diffg, Vitesse_Actu); LOL
+    if (nim > 990 && nim<1000) {
+        SendPos((float)compteur_ticd, (float)compteur_ticg, Vitesse_Actu);
+        //nim++;
+    } else if (nim > 10000) nim = 0;
+    //SendError();
+
+    nim++;
 
     Mise_A_Jour_Consignes(&Consigne_Vitesse, &Consigne_Theta, Vitesse_Actu);
 
@@ -212,9 +224,10 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 //    Set_Vitesse_MoteurD(Consigne_Commune);        // calcul des consignes moteurs
 //    Set_Vitesse_MoteurG(Consigne_Commune);
 
-    Set_Vitesse_MoteurD(Consigne_Commune + Consigne_Diff);        // calcul des consignes moteurs
-    Set_Vitesse_MoteurG(Consigne_Commune - Consigne_Diff);             // NIM: C'est pas Consigne_Diff/2 ?
+    Set_Vitesse_MoteurD(Consigne_Commune - Consigne_Diff/2);        // calcul des consignes moteurs
+    Set_Vitesse_MoteurG(Consigne_Commune + Consigne_Diff/2);             // NIM: C'est pas Consigne_Diff/2 ?
 
+//*/
     _T2IF = 0;      // On baisse le FLAG
 }
 

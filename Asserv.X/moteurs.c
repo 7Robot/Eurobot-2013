@@ -69,13 +69,13 @@ void Set_Vitesse_MoteurD(float Consigne)
     if (Consigne < 0.0)
     {//MISE DES PATES SENS INVERSE
         Consigne = -Consigne;
-        DIRA1 = 1;
-        DIRB1 = 0;
+        DIRA1 = 0;
+        DIRB1 = 1;
     }
     else
     { // MISE DES PATES EN SENS NORMAL
-        DIRA1 = 0;
-        DIRB1 = 1;
+        DIRA1 = 1;
+        DIRB1 = 0;
     }
 
     if (Consigne > 1000.0)        Consigne = 1000.0;
@@ -87,13 +87,13 @@ void Set_Vitesse_MoteurG(float Consigne)
     if (Consigne < 0.0)
     {//MISE DES PATES SENS INVERSE
         Consigne = -Consigne;
-        DIRA2 = 1;
-        DIRB2 = 0;
+        DIRA2 = 0;
+        DIRB2 = 1;
     }
     else
     { // MISE DES PATES EN SENS NORMAL
-        DIRA2 = 0;
-        DIRB2 = 1;
+        DIRA2 = 1;
+        DIRB2 = 0;
     }
 
     if (Consigne > 1000.0)        Consigne = 1000.0;

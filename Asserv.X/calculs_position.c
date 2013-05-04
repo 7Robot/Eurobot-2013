@@ -86,10 +86,10 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
          *Consigne_Vitesse = 1;
      }*/
 
-     
+
          *Consigne_Theta = Consigne_Thet;
-         *Consigne_Vitesse = Consigne_Vit; // NIM: cette variable n'existe nulle part ailleurs :)
-     
+         *Consigne_Vitesse = Consigne_Vit;
+
  }
 
  void Set_Consigne_Vitesse(float Consigne)

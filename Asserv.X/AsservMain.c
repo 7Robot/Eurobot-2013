@@ -17,6 +17,9 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "AsservHeader.h"  /* Function / Parameters                           */
 #include <libpic30.h>
+#include <uart.h>
+#include "atp-asserv.h"
+#include "atp.h"
 
 
 /******************************************************************************/
@@ -51,26 +54,31 @@ int16_t main(void)
     ConfigureOscillator();
     InitApp();
 
+    AtpInit();
+    SendId(5);
 
-    Set_Asserv_V(500,100,0.1);
-    Set_Asserv_T(0.1,0.1,0.1);
+    Set_Asserv_V(500,10,0.1);
+    Set_Asserv_T(100,10,0.1);
     //float angle = 0;
 
     while(1)
     {
-        Set_Consigne_Vitesse(0.6);
-        __delay_ms(10000);
-//        Set_Consigne_Vitesse(0.1);
-//        __delay_ms(10000);
-       
-       /* Set_Vitesse_MoteurD(800);
-        Set_Vitesse_MoteurG(800);
+        //Set_Vitesse_MoteurG(800);
+
+        led1 = led1 ^ 1;
+        Set_Consigne_Vitesse(2);
+        __delay_ms(3000);
+        //Set_Consigne_Vitesse(0.2);
+        //__delay_ms(10000);
+       // */
+         /*Set_Vitesse_MoteurD(800);
+
         __delay_ms(1500);
         Set_Vitesse_MoteurD(250);
         Set_Vitesse_MoteurG(250);
-        __delay_ms(1500);*/
+        __delay_ms(1500);
 
-        __delay_ms(50);
+        __delay_ms(50);*/
 
     }
 }
