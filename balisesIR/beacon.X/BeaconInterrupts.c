@@ -143,8 +143,7 @@ void _ISR _INT1Interrupt(void)
 void _ISR _CNInterrupt(void)
 {
     _CNIF = 0;
-    led1 = 1;
-
+    
    if (_RC1)
    {
        led1 = 1;

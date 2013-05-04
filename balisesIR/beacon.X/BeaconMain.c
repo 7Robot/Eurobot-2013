@@ -69,6 +69,8 @@ int16_t main(void)
 
     TRISAbits.TRISA0 = 0; //  LED1
     TRISAbits.TRISA1 = 0; //  LED1
+    _TRISB2 = 1;
+    _TRISB3 = 1;
 
     _TRISC1 = 1; //pin de CN9 qui recoit le TX donc rx
 
