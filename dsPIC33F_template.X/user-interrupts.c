@@ -39,7 +39,7 @@ void InitApp(void)
 {
     //pin de la LED en sortie
     _TRISA0 = 0;
-
+    _TRISA1 = 0;
     //Si on a un interrupteur sur la pin RB5 (par exemple), on la met en entrée
     _TRISB5 = 1;
     //Et on active la pullup qui va bien (registres CNPU1 et CNPU2)

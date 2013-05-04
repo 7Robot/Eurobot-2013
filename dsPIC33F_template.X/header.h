@@ -29,6 +29,7 @@
 /* TODO Application specific user parameters used in user.c may go here */
 
 #define led _LATA0
+#define led1 _LATA1
 
 
 /******************************************************************************/

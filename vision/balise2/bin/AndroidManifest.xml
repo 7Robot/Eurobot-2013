@@ -3,15 +3,28 @@
     package="fr.dallens.balise2"
     android:versionCode="1"
     android:versionName="1.0" >
-    
-    <uses-permission android:name="android.permission.CAMERA"/>
 
-    <uses-sdk android:minSdkVersion="8"
-        android:targetSdkVersion="15" /><application android:allowBackup="true" android:icon="@drawable/ic_launcher" android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-        <activity android:name="fr.dallens.balise2.Balise2Activity" 
-                  android:label="@string/app_name"
-                  android:screenOrientation="landscape"
-                  android:configChanges="keyboardHidden|orientation">
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="15" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+        <activity
+            android:name="fr.dallens.balise2.Balise2Activity"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape" >
+            
+        </activity>
+        <activity
+            android:name="fr.dallens.balise2.SelectPositionActivity"
+            android:label="@string/title_activity_select_position" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -19,5 +32,4 @@
         </activity>
     </application>
 
-    
 </manifest>

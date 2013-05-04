@@ -1,7 +1,7 @@
 /*
 * Turret dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* ï¿½C : 33FJ64MC802
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -58,10 +58,30 @@ void ConfigureOscillator(void) /* Handles clock switching/osc initialization */
 
 void InitApp(void)
 {
-	TRISAbits.TRISA0 = 0; // Microstick LED
-    LATAbits.LATA0 = 1;   // affichage recepteur 1 - adversaire 1
+    //Si on a un interrupteur sur la pin RB5 (par exemple), on la met en entrÃ©e
+    _TRISC2 = 1;
+    //Et on active la pullup qui va bien (registres CNPU1 et CNPU2)
+    _CN10PUE = 1;
 
-    TRISCbits.TRISC9 = 1;  // TSOP1 RC9 non present sur 33FJ64MC802
-    TRISBbits.TRISB5 = 1;  // TSOP2
-	// ...
+    _TRISA0 = 0; //led 1
+    _TRISA1 = 0; //led 2
+    led1 = 1;   // affichage recepteur 1 - adversaire 1
+    led2 = 1;   // adversaire 2
+
+    _TRISC9 = 1;  // TSOP1
+    _TRISB5 = 1;  // TSOP2
+    _TRISB6 = 1; // ...
+    _TRISB7 = 1;
+    _TRISB8 = 1;
+    _TRISB9 = 1;
+    _TRISB10 = 1;
+    _TRISB11 = 1;
+    _TRISC7 = 1;
+    _TRISC8 = 1;
+    _TRISA7 = 1;
+    _TRISA8 = 1;
+    _TRISC3 = 1;
+    _TRISC4 = 1;
+    _TRISC5 = 1;
+    _TRISC6 = 1; // TSOP16
 }

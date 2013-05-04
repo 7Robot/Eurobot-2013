@@ -1,7 +1,7 @@
 /*
 * Turret dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* ï¿½C : 33FJ64MC802
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -25,8 +25,6 @@
 
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
-
-#include "TurretSystem.h"  /* System funct/params, like osc/peripheral config */
 #include "TurretUser.h"    /* User funct/params, such as InitApp              */
 
 /******************************************************************************/
@@ -48,8 +46,8 @@
 
 // Declarations de variable globales
 volatile unsigned int i;
-int adversaire1[taille_uart] = {1,0,0,1,0,1,1,0}; // Mettre la donnée envoyée
-int adversaire2[taille_uart] = {1,0,1,0,1,0,1,0}; // mais complémentée
+int adversaire1[taille_uart] = {1,0,0,1,0,1,1,0}; // Mettre la donnï¿½e envoyï¿½e
+int adversaire2[taille_uart] = {1,0,1,0,1,0,1,0}; // mais complï¿½mentï¿½e
 int reperage[nombre_recepteurs]; // Contient : 0 non recu, 1 adversaire1, 2 adversaire2 pour chaque TSOP
 
 // Prototypes des fonctions
@@ -68,7 +66,14 @@ int16_t main(void)
 
     int donnees[nombre_recepteurs*taille_uart];
     int recu = 0;
-    
+
+    int y;
+    for (y=0;y<10;y++)
+    {
+        led1 = !led1;
+        led2 = !led1;
+        __delay_ms(200);
+    }
     __delay_ms(2000);
 
     while(1)
@@ -86,11 +91,11 @@ int16_t main(void)
         if(recu)
         {
             for(i = 0 ; i < nombre_recepteurs ; i++)
-			{
-				reperage[i] = comparer(donnees, i);
-			}
-			lissage(); // Corrige les recepteurs defaillants
-			recu = 0;
+            {
+        	reperage[i] = comparer(donnees, i);
+            }
+            lissage(); // Corrige les recepteurs defaillants
+            recu = 0;
         }
     }
 }
@@ -122,32 +127,30 @@ void acquisition(int donnees[])
 
 int comparer(int donnees[], int recepteur)
 {
-	int adversaire = 0;
-	// Detection Adversaire 1
-	int egal = 1;
-    for(i = 0 ; i < taille_uart && egal ; i++)
+    int adversaire = 0;
+
+    // Detection Adversaire 1
+    for(i = 0 ; i < taille_uart ; i++)
     {
-        if(donnees[recepteur*taille_uart+i] != adversaire1[i])
-		{
-			egal = 0;
-		}
+        if(donnees[recepteur*taille_uart+i] != adversaire1[i]) break;
     }
-	if(i == taille_uart && egal) 
+	if(i == taille_uart && donnees[recepteur*taille_uart+i] == adversaire1[i])
 	{
 		adversaire = 1;
+                led2 = 0;
+                led1 = 1;
 	}
+
 	// Detection Adversaire 2
-	int egal = 1;
-    for(i = 0 ; i<taille_uart && egal ; i++)
+    for(i = 0 ; i<taille_uart; i++)
     {
-        if(donnees[recepteur*taille_uart+i] != adversaire2[i])
-		{
-			egal = 0;
-		}
+        if(donnees[recepteur*taille_uart+i] != adversaire2[i]) break;
     }
-	if(i == taille_uart && egal) 
+	if(i == taille_uart && donnees[recepteur*taille_uart+i] == adversaire2[i])
 	{
 		adversaire = 2;
+                led1 = 0;
+                led2 = 1;
 	}
 	
     return adversaire;

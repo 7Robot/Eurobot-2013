@@ -52,8 +52,9 @@ int16_t main(void)
 
     while (1)
     {
-        //  led = !led;
-        //  __delay_ms(100);
+          led = !led;
+          led1 = !led;
+          __delay_ms(100);
     }
 }
 

@@ -1,8 +1,8 @@
 #ifndef COMPUTEHOMOGRAPHY_H
 #define COMPUTEHOMOGRAPHY_H
 
-#import <opencv2/features2d/features2d.hpp>
-#import <vector>
+#include <opencv2/features2d/features2d.hpp>
+#include <vector>
 
 using namespace cv;
 

@@ -124,7 +124,7 @@ bool ComputeHomography::validateTransformation()
         {
             printf("Unvalidated homography transfo %d %f\n", i, angle[i]);
             for (int j = 0 ; j<4; j++)
-                printf("%f %f\n", queryPictureCorners[j].x, queryPictureCorners[j].y);
+                printf("unvalidated: %f %f\n", queryPictureCorners[j].x, queryPictureCorners[j].y);
             return false;
         }
     }

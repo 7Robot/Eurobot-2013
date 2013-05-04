@@ -1,7 +1,7 @@
 /*
 * Beacon dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* ï¿½C : 33FJ64MC802
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -25,6 +25,11 @@
 #define adversaire1     0x69
 #define adversaire2     0x55
 
+#define led1            _LATA0
+#define led2            _LATA1
+
+#define UnlockRP        __builtin_write_OSCCONL(OSCCON & 0xBF)
+#define LockRP          __builtin_write_OSCCONL(OSCCON | 0x40)
 /******************************************************************************/
 /* System Function Prototypes                                                 */
 /******************************************************************************/
