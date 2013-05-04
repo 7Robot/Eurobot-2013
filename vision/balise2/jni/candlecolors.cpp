@@ -53,7 +53,7 @@ int CandleColors::findColor(Mat img, Mat &imOut)
     if (good_matches.size() < 4)
     {
         printf("Not enough matches");
-        return 1;
+        return -1;
     }
 
     // Compute Homography
@@ -86,23 +86,9 @@ int CandleColors::findColor(Mat img, Mat &imOut)
 
     }
 
-    for (unsigned int i=0; i<candles.size(); i++)
-    {
-//        candles[i].x += imRef.cols;
-        printf("Candle pos %d %f %f\n", imRef.cols, candles[i].x, candles[i].y);
-        color col = getColor(imOut, candles[i].x, candles[i].y);
-        Scalar circleColor;
-        if (col==RED)
-        	circleColor = red;
-        else if (col==BLUE)
-        	circleColor = blue;
-        else
-        	circleColor = Scalar(0,255,0);
-        circle( imOut, candles[i], 5, circleColor, -1, 8);
 
-    }
 
-    return 0;
+    return candlesColor(candles, imOut);;
 }
 
 int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
@@ -124,25 +110,31 @@ int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
 		printf("Target (%d) %f %f\n", i, calibPoints[i].x, calibPoints[i].y);
 	}
 
+	return candlesColor(candles, imOut);
+}
 
-
+int CandleColors::candlesColor(std::vector<Point2f> candles, Mat &imOut)
+{
+	// 4 bits par bougie (4 valeurs), 2bits*12 bougies --> 24 bits --> 4 octets
+	int candlesColorsResponse = 0; // Version sérialisée du résultat
 	for (unsigned int i=0; i<candles.size(); i++)
-	    {
-	//        candles[i].x += imRef.cols;
-	        printf("Candle pos %d %f %f\n", imRef.cols, candles[i].x, candles[i].y);
-	        color col = getColor(imOut, candles[i].x, candles[i].y);
-	        Scalar circleColor;
-	        if (col==RED)
-	        	circleColor = red;
-	        else if (col==BLUE)
-	        	circleColor = blue;
-	        else
-	        	circleColor = Scalar(0,255,0);
-	        circle( imOut, candles[i], 5, circleColor, -1, 8);
+	{
+//        candles[i].x += imRef.cols;
+		printf("Candle pos %d %f %f\n", imRef.cols, candles[i].x, candles[i].y);
+		color col = getColor(imOut, candles[i].x, candles[i].y);
+		candlesColorsResponse |= col << 2*i;
+		Scalar circleColor;
+		if (col==RED)
+			circleColor = red;
+		else if (col==BLUE)
+			circleColor = blue;
+		else
+			circleColor = Scalar(0,255,0);
+		circle( imOut, candles[i], 5, circleColor, -1, 8);
 
-	    }
-
-	return 0;
+	}
+	printf("Colors sent %d\n", candlesColorsResponse);
+	return candlesColorsResponse;
 }
 
 color CandleColors::getColor(Mat img, int x, int y)

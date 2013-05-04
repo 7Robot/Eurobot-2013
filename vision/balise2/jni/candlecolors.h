@@ -11,7 +11,7 @@
 using namespace cv;
 using namespace std;
 
-typedef enum{RED, BLUE, WHITE, UNKNOWN} color;
+typedef enum{RED=0, BLUE=1, WHITE=2, UNKNOWN=3} color;
 
 class CandleColors
 {
@@ -27,6 +27,7 @@ public:
 private:
 
     color getColor(Mat img, int x, int y);
+    int candlesColor(std::vector<Point2f> candles, Mat &imOut);
 
     KEYPOINT keypoint;
     DESCRIPTOR descriptor;
