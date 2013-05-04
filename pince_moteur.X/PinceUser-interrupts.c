@@ -1,30 +1,27 @@
 /*
-* Asserv dsPIC33F
+* Template dsPIC33F
 * Compiler : Microchip xC16
 * µC : 33FJ64MC802
-* Avril 2013
+* Juillet 2012
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
 *      / / | |_/ /___ | |__   ___ | |_
 *     / /  |    // _ \| '_ \ / _ \| __|
 *    / /   | |\ \ (_) | |_) | (_) | |_
 *   /_/    |_| \_\___/|____/ \___/'\__|
-*                 7robot.fr
+*			      7robot.fr
 */
-
-#include <p33Fxxxx.h>      /* Includes device header file                     */
-#include <stdint.h>        /* Includes uint16_t definition                    */
-#include <stdbool.h>       /* Includes true/false definition                  */
 
 /******************************************************************************/
 /* Files to Include                                                           */
 /******************************************************************************/
 
+#include <p33Fxxxx.h>      /* Includes device header file                     */
+#include <stdint.h>        /* Includes uint16_t definition                    */
+#include <stdbool.h>       /* Includes true/false definition                  */
+#include "PinceHeader.h"  /* Function / Parameters                           */
 #include "timer.h"         /* Include timer fonctions                         */
 #include "qei.h"           /* Includes qei functions                          */
-#include "AsservHeader.h"  /* Function / Parameters  */
-#include "atp.h"
-#include "atp-asserv.h"
 
 /******************************************************************************/
 /* User Functions                                                             */
@@ -41,40 +38,43 @@ void ConfigureOscillator(void)
 
 void InitApp(void)
 {
-    //LEDs en sorties
-    _TRISB4 = 0;
-    _TRISA9 = 0;
-    led1 = 0;
-    led2 = 0;
-
+    _TRISA0 = 0;
+    led = 0;
     // activation de la priorité des interruptions
     _NSTDIS = 0;
 
-    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_OFF & T2_SOURCE_INT, 0x600);
+    //ODCBbits.ODCB5 = 1;
+
+    //Sortie enable avec Open Drain
+    _TRISB9 = 0;
+    _TRISB11 = 0;
+
+    _ODCB9 = 1;
+    _ODCB11 = 1;
+
+    _ODCB10 = 1;
+
+//    _TRISB2 = 1;
+//    _TRISB3 = 1;
+//    _TRISB6 = 1;
+//    _TRISB7 = 1;
+
+
+    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_ON & T2_SOURCE_INT, 0x8FF);
     ConfigIntTimer2(T2_INT_PRIOR_3 & T2_INT_ON); //Interruption ON et priorité 3
 
 
     OpenQEI1(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1 & QEI_NORMAL_IO & QEI_MODE_x4_MATCH & QEI_UP_COUNT,0);
-    OpenQEI2(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1 & QEI_NORMAL_IO & QEI_MODE_x4_MATCH & QEI_UP_COUNT,0);
 //    ConfigIntQEI1(QEI_INT_DISABLE);
-//    ConfigIntQEI2(QEI_INT_DISABLE);
-    //WriteQEI1(65535);        //Valeur pour déclancher l'interruption du module QEI
-    //WriteQEI2(65535);        //Valeur pour déclancher l'interruption du module QEI
+//    WriteQEI1(65535);        //Valeur pour déclancher l'interruption du module QEI
 
-    Init_PWM();
+    _QEA1R = 5;     //Module QEI 1 phase A sur RB5
+    _QEB1R = 6;     //Module QEI 1 phase B sur RB6
 
-    _QEA1R = 9;     //Module QEI 1 phase A sur RP9, RB9
-    _QEB1R = 22;     //Module QEI 1 phase B sur RP22, RC6
-
-    _QEA2R = 23;     //Module QEI 2 phase A sur RP23, RC7
-    _QEB2R = 24;     //Module QEI 2 phase B sur RP24, RC8
-
+  
 
 
     POS1CNT = 0;
-    POS2CNT = 0;
-
-
 }
 
 /******************************************************************************/
@@ -142,105 +142,82 @@ void InitApp(void)
 /* Interrupt Routines                                                         */
 /******************************************************************************/
 
-    volatile int16_t ticd = 0, old_ticd = 0, diffd = 0;
-    volatile int16_t ticg = 0, old_ticg = 0, diffg = 0;
-    volatile int32_t compteur_ticd = 0;
-    volatile int32_t compteur_ticg = 0;
-    volatile float Consigne_Vitesse = 0.0;
-    volatile float Consigne_Theta = 0.0;
-    volatile int nim = 0;
-
-    volatile float KPv = 0, KDv = 0,KIv = 0;
-    volatile float Diff_Vitesse_Actu = 0, Diff_Vitesse_Old = 0, Diff_Vitesse_All = 0;
-    volatile float KPt = 0, KDt = 0, KIt = 0;
-    volatile float Diff_Theta_Actu = 0, Diff_Theta_Old = 0, Diff_Theta_All = 0;
+    volatile int16_t tich = 0, old_tich = 0, diffh = 0;
+    volatile int32_t compteur_tich = 0;
+    volatile float inth = 0;
+    volatile float Kph = 0, Kih=0;
+    volatile char etat = 0;
+    volatile int32_t consigne_hauteur = 0;
+    volatile int vitesse_max = 0;
     //volatile float posx = 0.0, posy = 0.0;
-   // volatile float posx = 0.0, posy = 0.0;
+    // volatile float posx = 0.0, posy = 0.0;
 
 /* TODO Add interrupt routine code here. */
 
 void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 {
-    float Vitesse_Actu, Theta_Actu;
-    float Consigne_Commune, Consigne_Diff;
-    char Overshoot = 0;
+    led = led^1;    // On bascule l'état de la LED
 
-    //led1 = led1^1;    // On bascule l'état de la LED
-
-    ticd = (int16_t) POS1CNT;// ReadQEI2();
-    diffd = ticd-old_ticd;
-    old_ticd = ticd;
-    compteur_ticd += diffd;
-
-    ticg = (int16_t) POS2CNT;// ReadQEI1();
-    diffg = ticg-old_ticg;
-    old_ticg = ticg;
-    compteur_ticg += diffg;
-
-//    compteur_ticd = (int16_t) POS2CNT;
-//    compteur_ticg = (int16_t) POS1CNT;
-
-    Incremente_Position(diffd, diffg, &Vitesse_Actu, &Theta_Actu);      // mise à jour de la position actuelle, récupération de la vitesse et de l'angle
-    //SendText("dd: %i, df: %i, va:%f", diffd, diffg, Vitesse_Actu); LOL
-    if (nim > 990 && nim<1000) {
-        SendPos((float)compteur_ticd, (float)compteur_ticg, Vitesse_Actu);
-        //nim++;
-    } else if (nim > 10000) nim = 0;
-    //SendError();
-
-    nim++;
-
-    Mise_A_Jour_Consignes(&Consigne_Vitesse, &Consigne_Theta, Vitesse_Actu);
-
-    Vitesse_Actu *= 1000;       // (fournie en metres/milisecondes)
-
-    Diff_Vitesse_Actu = Consigne_Vitesse - Vitesse_Actu;        // calcul de la difference entre réel et consigne
-    Diff_Theta_Actu = Consigne_Theta - Theta_Actu;
-
-    Diff_Theta_All += Diff_Theta_Actu;                  // mise à jour du terme intégral
-    Diff_Vitesse_All += Diff_Vitesse_Actu;
-
-    // overshoot
-
-    if (Diff_Vitesse_All > 1500.0)
-    {   Diff_Vitesse_All = 1500.0;  Overshoot = 1;  }
-    if (Diff_Vitesse_All < -1500.0)
-    {   Diff_Vitesse_All = -1500.0; Overshoot = 1;  } // 1500 = 3m/S * 1/2 seconde à 1000 coups d'interupti/s
-    if (Diff_Theta_All > 1500.0)
-    {   Diff_Theta_All = 1500.0;    Overshoot = 1;  }
-    if (Diff_Theta_All < -1500.0)
-    {   Diff_Theta_All = -1500.0;   Overshoot = 1;  }       // 1500 ~=  PI * 1/2 seconde à 1000 coups d'interrupt/s
+    //Inutile
+    tich = (int16_t) POS1CNT;// ReadQEI1();
+    diffh = tich-old_tich;
+    old_tich = tich;
+    compteur_tich =tich;
+    
+    if (etat == 0)      // etat normal de fonctionnement
+    {
+        inth = 0;// inth + (float) (consigne_hauteur - compteur_tich);
+        Set_Vitesse_MoteurH(( -Kph * (consigne_hauteur - compteur_tich) + Kih * inth ));
+    }
+    else//(etat == 1)     // etat reset vers le bas
+    {
+        if (microswitch_bas_de_pince() != 0)
+        {
+            Set_Vitesse_MoteurH(0);
+            consigne_hauteur = 0;
+            POS1CNT = 0;
+            inth = 0;
+            old_tich = 0;
+            compteur_tich = 0;
+            etat = 0;
+        }
+        else
+        {
+            Set_Vitesse_MoteurH(-vitesse_max);
+        }
+    
+    }
 
 
-    // calcul des consignes
-    Consigne_Commune = KPv * Diff_Vitesse_Actu + KIv * Diff_Vitesse_All + KDv * (Diff_Vitesse_Old - Diff_Vitesse_Actu);
-    Consigne_Diff = KPt * Diff_Theta_Actu + KIt * Diff_Theta_All + KDt * (Diff_Theta_Old - Diff_Theta_Actu);
-
-
-    Diff_Theta_Old = Diff_Theta_Actu;               // mise à jour de la precedente valeur (pour le terme differentiel)
-    Diff_Vitesse_Old = Diff_Vitesse_Actu;
-
-
-//    Set_Vitesse_MoteurD(Consigne_Commune);        // calcul des consignes moteurs
-//    Set_Vitesse_MoteurG(Consigne_Commune);
-
-    Set_Vitesse_MoteurD(Consigne_Commune - Consigne_Diff/2);        // calcul des consignes moteurs
-    Set_Vitesse_MoteurG(Consigne_Commune + Consigne_Diff/2);             // NIM: C'est pas Consigne_Diff/2 ?
-
-//*/
+    //Set_Vitesse_MoteurH(-vitesse_max);
+    
     _T2IF = 0;      // On baisse le FLAG
 }
 
-void Set_Asserv_V(float KPv_new, float KDv_new, float KIv_new)
+void reset_pince(void)
 {
-    KPv = KPv_new;
-    KDv = KDv_new;
-    KIv = KIv_new;
+    etat = 1;
 }
 
-void Set_Asserv_T(float KPt_new, float KDt_new, float KIt_new)
+void Set_Asserv_h(float Kph_new, float Kih_new)
 {
-    KPt = KPt_new;
-    KDt = KDt_new;
-    KIt = KIt_new;
+    Kph = Kph_new;
+    Kih = Kih_new;
+}
+
+void Set_Consigne_Hauteur(int Hauteur_mm)
+{
+    consigne_hauteur = 10 * Hauteur_mm;  // on cosidère 10 tics by mm
+    //if (consigne_hauteur > 10000) consigne_hauteur = 10000;
+}
+
+void Set_Vitesse(int vitesse)
+{
+    vitesse_max = vitesse;
+}
+
+char microswitch_bas_de_pince(void)
+{
+    // renvoyer l'état du microswitch bas de course pour la pince : 1 = pince en bas, 0 = pas détecté
+    return _RB3;
 }
