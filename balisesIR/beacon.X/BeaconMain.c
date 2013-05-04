@@ -97,14 +97,15 @@ int16_t main(void)
     ConfigIntTimer1(T1_INT_PRIOR_2 & T1_INT_ON);
 
     ConfigIntMCPWM1(PWM1_INT_DIS);
-    SetDCMCPWM1(1,0x0,0);
+    SetDCMCPWM1(1,0,0);
     
-    period = 0x7;
-    sptime = 0x0;
+    period = 86;
+    sptime = 0;
     config1 = (PWM1_EN & PWM1_IDLE_STOP & PWM1_OP_SCALE1 & PWM1_IPCLK_SCALE1 & PWM1_MOD_FREE);
     config2 = (PWM1_MOD1_IND & PWM1_PDIS3H & PWM1_PDIS2H & PWM1_PEN1H & PWM1_PDIS3L & PWM1_PDIS2L & PWM1_PEN1L);
     config3 = (PWM1_SEVOPS1 & PWM1_OSYNC_PWM & PWM1_UEN);
     OpenMCPWM1(period,sptime,config1,config2,config3);
+    //P1DC1 = 88;
 
     while(1)
     {

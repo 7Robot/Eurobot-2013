@@ -25,13 +25,22 @@
 
 #if 1
 
-/* Selects internal oscillator with no switching */
-_FOSCSEL(FNOSC_FRC & IESO_OFF);
+///* Selects internal oscillator with no switching */
+//_FOSCSEL(FNOSC_FRC & IESO_OFF);
+//
+///* Disables clock switching and selects pri osc of HS with OSCIO clock output */
+//_FOSC(FCKSM_CSECME & OSCIOFNC_ON & POSCMD_HS);
+//
+///* Turns off JTAG and selects debug channel */
+//_FICD(JTAGEN_OFF & ICS_PGD1);
 
-/* Disables clock switching and selects pri osc of HS with OSCIO clock output */
-_FOSC(FCKSM_CSECME & OSCIOFNC_ON & POSCMD_HS);
-
-/* Turns off JTAG and selects debug channel */
-_FICD(JTAGEN_OFF & ICS_PGD1);
+// Select Oscillator and switching.
+_FOSCSEL(FNOSC_FRCPLL & IESO_OFF);
+// Select clock.
+_FOSC(POSCMD_NONE & OSCIOFNC_ON & IOL1WAY_ON & FCKSM_CSDCMD);
+// Watchdog Timer.
+_FWDT(FWDTEN_OFF);
+// Select debug channel.
+_FICD(ICS_PGD1 & JTAGEN_OFF);
 
 #endif
