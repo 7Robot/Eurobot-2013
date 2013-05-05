@@ -23,7 +23,14 @@
 #include <qei.h>           /* Includes qei functions */
 #include <uart.h>
 #include <libpic30.h>
+#include "ax12.h"
 #include "PinceHeader.h"  /* Function / Parameters                           */
+
+/*****************************************************************************/
+/*                            Global variables                               */
+/*****************************************************************************/
+extern unsigned char num_ax;
+extern unsigned char data;
 
 /******************************************************************************/
 /* User Functions                                                             */
@@ -57,33 +64,31 @@ void InitApp(void)
      //Le microswicth sur la pin RC5 (par exemple), on la met en entrée
     _TRISC5 = 1;
     //Et on active la pullup qui va bien (registres CNPU1 et CNPU2)
-    _CN26PUE = 1; 
+    _CN26PUE = 1;
 
     _ODCC9 = 1; // Open drain sur la pin RC9 (pour les AX12)
 
-
-
     //TRUCS EN PLUS POUR FAIRE MARCHER LES TESTS //
 
-    _TRISC0 = 1;
-    _TRISC1 = 1;
-    _TRISC2 = 1;
-    _TRISA3 = 1;
-    _TRISA4 = 1;
-    _TRISA8 = 1;
-    _TRISA9 = 1;
-    _TRISB2 = 1;
-    _TRISB3 = 1;
-    _TRISB4 = 1;
-   
-    _TRISB12 = 1;//switchs avec pullups
-    _CN14PUE = 1;
-    _TRISB13 = 1;
-    _CN13PUE = 1;
-    _TRISB14 = 1;
-    _CN12PUE = 1;
-    _TRISB15 = 1;
-    _CN11PUE = 1;
+//    _TRISC0 = 1;
+//    _TRISC1 = 1;
+//    _TRISC2 = 1;
+//    _TRISA3 = 1;
+//    _TRISA4 = 1;
+//    _TRISA8 = 1;
+//    _TRISA9 = 1;
+//    _TRISB2 = 1;
+//    _TRISB3 = 1;
+//    _TRISB4 = 1;
+//
+//    _TRISB12 = 1;//switchs avec pullups
+//    _CN14PUE = 1;
+//    _TRISB13 = 1;
+//    _CN13PUE = 1;
+//    _TRISB14 = 1;
+//    _CN12PUE = 1;
+//    _TRISB15 = 1;
+//    _CN11PUE = 1;
 
     OpenUART2(UART_EN & UART_IDLE_CON & UART_IrDA_DISABLE & UART_MODE_FLOW
         & UART_UEN_00 & UART_DIS_WAKE & UART_DIS_LOOPBACK
@@ -94,13 +99,14 @@ void InitApp(void)
         & UART_ADR_DETECT_DIS & UART_RX_OVERRUN_CLEAR,
           BRGVALAX12);
 
-    ConfigIntUART2(UART_RX_INT_PR4 & UART_RX_INT_EN
-                 & UART_TX_INT_PR4 & UART_TX_INT_DIS);
+    ConfigIntUART2(UART_RX_INT_PR5 & UART_RX_INT_EN
+                 & UART_TX_INT_PR5 & UART_TX_INT_DIS);
 
-
-    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_ON & T2_SOURCE_INT, 0x8FF);
+    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_OFF & T2_SOURCE_INT, 0x8FF);
     ConfigIntTimer2(T2_INT_PRIOR_3 & T2_INT_ON); //Interruption ON et priorite 3
 
+    OpenTimer5(T5_OFF & T5_GATE_OFF & T5_PS_1_1 & T5_SOURCE_INT, 400);
+    ConfigIntTimer5(T5_INT_PRIOR_2 & T5_INT_ON);
 
     OpenQEI1(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1
             & QEI_NORMAL_IO & QEI_MODE_x4_MATCH & QEI_UP_COUNT,0);
@@ -151,16 +157,21 @@ void Set_Vitesse(int vitesse)
 /******************************************************************************/
 /*    interrupt routine code                                                  */
 /******************************************************************************/
+void __attribute__((interrupt,auto_psv)) _T5Interrupt(void)
+{
+    _T5IF = 0;
+    GetAX(num_ax, data);
+}
 
 void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 {
-    led = led^1;    // On bascule l'etat de la LED
+    led2 = led2^1;    // On bascule l'etat de la LED
 
     //Inutile
     tich = (int16_t) POS1CNT;// ReadQEI1();
-    diffh = tich-old_tich;
-    old_tich = tich;
-    compteur_tich =tich;
+//    diffh = tich-old_tich;
+//    old_tich = tich;
+//    compteur_tich =tich;
 
     if (etat == 0)      // etat normal de fonctionnement
     {
@@ -169,7 +180,7 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     }
     else//(etat == 1)     // etat reset vers le bas
     {
-        if (microswitch_bas_de_pince)
+        if (!microswitch_bas_de_pince)
         {
             Set_Vitesse_MoteurH(0);
             consigne_hauteur = 0;
@@ -194,7 +205,7 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
  *          RX Interrupt
  *************************************************/
 
-void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void){
+void __attribute__((interrupt, no_auto_psv)) _U2RXInterrupt(void){
 
     led = led ^ 1;
     InterruptAX();
@@ -206,11 +217,10 @@ void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void){
  *          TX Interrupt
  *************************************************/
 
-void __attribute__((__interrupt__, no_auto_psv)) _U1TXInterrupt(void)
+void __attribute__((__interrupt__, no_auto_psv)) _U2TXInterrupt(void)
 {
 
    _U2TXIF = 0; // clear TX interrupt flag
-
 }
 
 /******************************************************************************/

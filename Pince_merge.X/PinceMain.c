@@ -58,17 +58,21 @@ int16_t main(void)
     PutAX(AX_BROADCAST, AX_MAX_TORQUE, 1100);
     __delay_ms(10);
 
-    Set_Consigne_Hauteur(0);
+    //Set_Consigne_Hauteur(0);
     Set_Asserv_h(0.5, 0.25);
-    Set_Vitesse(100);
-    //reset_pince(); 
+    Set_Vitesse(1000);
+
+    //reset_pince();
 
     //Sortir_Pince();
+    //__delay_ms(10000);
+    //Chopper_verre();
+    Cinematique_inverse();
     while(1)
     {
-        led = !led
-//        Set_Consigne_Hauteur(2000);
-//        __delay_ms(2000);
+        led = !led;
+        //Set_Consigne_Hauteur(-1000);
+        __delay_ms(1000);
 //        Set_Consigne_Hauteur(0);
 //        __delay_ms(2000);
     }

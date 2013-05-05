@@ -32,6 +32,8 @@
 volatile int ready = 0;
 volatile int full  = 0;
 volatile int nbverres = 0;
+unsigned char num_ax;
+unsigned char data;
 
 void Sortir_Pince()
 {
@@ -141,26 +143,22 @@ int Serrer_verre()
         PutAX(AX_BD, AX_GOAL_POSITION, 170);
         __delay_ms(10);
         int valeur;
-        valeur = GetAXnoWait(AX_BD, AX_PRESENT_POSITION);
+        num_ax = AX_BD;
+        data = AX_PRESENT_POSITION;
+        valeur = GetAXnoWait();
 
     int verreok = 0;
     if (valeur < 160) verreok = 1;
     return verreok;
 }
 
-int GetAXnoWait(unsigned char num_ax, unsigned char data)
+int GetAXnoWait()
 {
-    int valeur = 0;
-    int count=0;
+    int valeur=0;
     GetAX(num_ax, data);
     while(!responseReadyAX)
         {
-            count++;
-            if (count > 4000)
-            {
-                GetAXnoWait(num_ax, data);
-                count=0;
-            }
+        T5CONbits.TON = 1;
         }
     valeur = (responseAX.params[1]*256 + responseAX.params[0]);
     
