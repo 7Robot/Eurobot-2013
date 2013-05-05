@@ -26,15 +26,14 @@
             android:name="fr.dallens.balise2.SelectPositionActivity"
             android:label="@string/title_activity_select_position"
             android:screenOrientation="portrait" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name="fr.dallens.balise2.ConnectionActivity"
             android:label="@string/title_activity_connection" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

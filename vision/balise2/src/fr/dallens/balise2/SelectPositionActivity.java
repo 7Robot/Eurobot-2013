@@ -7,11 +7,18 @@ import android.view.Menu;
 import android.view.View;
 
 public class SelectPositionActivity extends Activity {
+	
+	private CommunicationRobot commRobot = new CommunicationRobot();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_select_position);
+		Intent intent = getIntent();
+        String addressRobot = intent.getStringExtra("addressRobot");
+		commRobot.connect(addressRobot);
+//		Thread commRobotThread = new Thread(commRobot);
+//		commRobotThread.start();
 	}
 
 	@Override
@@ -25,6 +32,7 @@ public class SelectPositionActivity extends Activity {
 		// Dit sur quelle balise on est
 		Intent intent = new Intent(this, Balise2Activity.class);
     	intent.putExtra("pos", pos);
+    	intent.putExtra("robotConnexion", commRobot);
     	startActivity(intent);
 
 	}

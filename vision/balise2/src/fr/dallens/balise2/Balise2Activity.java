@@ -44,6 +44,7 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
 	private Mode mode = Mode.AUTO;
 	private int pos; // Sur quelle balise on est
 	
+	// TODO private
 	public native void initJNI(long addrImRef);
 	public native int findColorsJNI(long addrImTar, long addrImOut);
 	public native int findColorsJNI2(float p1x, float p1y, float p2x, float p2y, float p3x, float p3y, float p4x, float p4y, long addrImOut);
@@ -51,6 +52,8 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
 	
 	private boolean candlesInit = false;
 	private boolean processingFrame = false;
+	private Candles candles = new Candles();
+	private CommunicationRobot commRobot;
 	
 	
 	
@@ -132,6 +135,8 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
         
         Intent intent = getIntent();
         pos = intent.getIntExtra("pos", 1);
+        commRobot = (CommunicationRobot)intent.getSerializableExtra("robotConnexion");
+        commRobot.setCandles(candles);
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -215,6 +220,8 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
 				res = findColorsJNI(tarImMat.getNativeObjAddr(), output.getNativeObjAddr());
 			else
 				res = findColorsJNI2(colorballs[0].getX(), colorballs[0].getY(), colorballs[1].getX(), colorballs[1].getY(), colorballs[2].getX(), colorballs[2].getY(), colorballs[3].getX(), colorballs[3].getY(), output.getNativeObjAddr());
+			candles.setCandlesPos(res);
+			Log.v("Msg", candles.toString());
 			processingFrame = false;
 			Log.v("Msg", "processing done");
 			if ( res==0 ) {
