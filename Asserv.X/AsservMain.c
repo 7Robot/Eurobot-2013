@@ -58,11 +58,12 @@ int16_t main(void)
     SendId(5);
 
 
-    Set_Asserv_V(100,10,7);
-    Set_Asserv_T(500,1,8);
+//    Set_Asserv_V(100,10,7);
+//    Set_Asserv_T(500,1,8);
 
 //    Set_Asserv_V(100,10,3);
-//    Set_Asserv_T(500,1,5);
+    Set_Asserv_D(300,20,3);
+    Set_Asserv_T(500,0.1,3);
     //float angle = 0;
 
     while(1)
@@ -70,8 +71,8 @@ int16_t main(void)
         //Set_Vitesse_MoteurG(800);
 
         led1 = led1 ^ 1;
-        Set_Consigne_Vitesse(9);
-        __delay_ms(3000);
+        Set_Consigne_Distance(1);
+        __delay_ms(10000);
         //Set_Consigne_Vitesse(0.2);
         //__delay_ms(10000);
        // */

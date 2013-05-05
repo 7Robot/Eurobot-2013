@@ -147,13 +147,17 @@ void InitApp(void)
     volatile int32_t compteur_ticd = 0;
     volatile int32_t compteur_ticg = 0;
     volatile float Consigne_Vitesse = 0.0;
+    volatile float Consigne_Distance = 0.0;
     volatile float Consigne_Theta = 0.0;
     volatile int nim = 0;
 
     volatile float KPv = 0, KDv = 0,KIv = 0;
-    volatile float Diff_Vitesse_Actu = 0, Diff_Vitesse_Old = 0, Diff_Vitesse_All = 0;
+    volatile float Diff_Vitesse_Actu = 0, Diff_Vitesse_Old = 0, Diff_Vitesse_All = 0, Diff_Vitesse_point = 0;
+    volatile float KPd = 0, KDd = 0,KId = 0;
+    volatile float Distance_Actu = 0;
+    volatile float Diff_Distance_Actu = 0, Diff_Distance_Old = 0, Diff_Distance_All = 0, Diff_Distance_point = 0;
     volatile float KPt = 0, KDt = 0, KIt = 0;
-    volatile float Diff_Theta_Actu = 0, Diff_Theta_Old = 0, Diff_Theta_All = 0;
+    volatile float Diff_Theta_Actu = 0, Diff_Theta_Old = 0, Diff_Theta_All = 0, Diff_Theta_point = 0;;
     //volatile float posx = 0.0, posy = 0.0;
    // volatile float posx = 0.0, posy = 0.0;
 
@@ -180,32 +184,40 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 //    compteur_ticd = (int16_t) POS2CNT;
 //    compteur_ticg = (int16_t) POS1CNT;
 
-    Incremente_Position(diffd, diffg, &Vitesse_Actu, &Theta_Actu);      // mise à jour de la position actuelle, récupération de la vitesse et de l'angle
+    Incremente_Position(diffd, diffg, &Vitesse_Actu, &Distance_Actu, &Theta_Actu);      // mise à jour de la position actuelle, récupération de la vitesse et de l'angle
+
     //SendText("dd: %i, df: %i, va:%f", diffd, diffg, Vitesse_Actu); LOL
-    if (nim > 990 && nim<1000) {
-        SendPos((float)compteur_ticd, (float)compteur_ticg, Vitesse_Actu);
-        //nim++;
-    } else if (nim > 10000) nim = 0;
-    //SendError();
+//    if (nim > 990 && nim<1000) {
+//        SendPos((float)compteur_ticd, (float)compteur_ticg, Vitesse_Actu);
+//        //nim++;
+//    } else if (nim > 10000) nim = 0;
+//    //SendError();
+//    nim++;
 
-    nim++;
+    Mise_A_Jour_Consignes(&Consigne_Distance, &Consigne_Theta, Distance_Actu);
 
-    Mise_A_Jour_Consignes(&Consigne_Vitesse, &Consigne_Theta, Vitesse_Actu);
+    //Vitesse_Actu *= 1000;       // (fournie en metres/milisecondes)
 
-    Vitesse_Actu *= 1000;       // (fournie en metres/milisecondes)
-
-    Diff_Vitesse_Actu = Consigne_Vitesse - Vitesse_Actu;        // calcul de la difference entre réel et consigne
+    //Calcul de l'erreur
+    //Diff_Vitesse_Actu = Consigne_Vitesse - Vitesse_Actu;        // calcul de la difference entre réel et consigne
+    Diff_Distance_Actu = Consigne_Distance - Distance_Actu;
     Diff_Theta_Actu = Consigne_Theta - Theta_Actu;
 
+    //Intégrale de l'erreur
     Diff_Theta_All += Diff_Theta_Actu;                  // mise à jour du terme intégral
-    Diff_Vitesse_All += Diff_Vitesse_Actu;
+    Diff_Distance_All += Diff_Distance_Actu;
+    //Diff_Vitesse_All += Diff_Vitesse_Actu;
+
+    //Dérivé de l'erreur
+    Diff_Theta_point = Diff_Theta_Old - Diff_Theta_Actu;
+    Diff_Vitesse_point = Diff_Distance_Old - Diff_Distance_Actu;
+    //Diff_Vitesse_point = Diff_Vitesse_Old - Diff_Vitesse_Actu;
 
     // overshoot
-
-    if (Diff_Vitesse_All > 1500.0)
-    {   Diff_Vitesse_All = 1500.0;  Overshoot = 1;  }
-    if (Diff_Vitesse_All < -1500.0)
-    {   Diff_Vitesse_All = -1500.0; Overshoot = 1;  } // 1500 = 3m/S * 1/2 seconde à 1000 coups d'interupti/s
+    if (Diff_Distance_All > 1500.0)
+    {   Diff_Distance_All = 1500.0;  Overshoot = 1;  }
+    if (Diff_Distance_All < -1500.0)
+    {   Diff_Distance_All = -1500.0; Overshoot = 1;  } // 1500 = 3m/S * 1/2 seconde à 1000 coups d'interupti/s
     if (Diff_Theta_All > 1500.0)
     {   Diff_Theta_All = 1500.0;    Overshoot = 1;  }
     if (Diff_Theta_All < -1500.0)
@@ -213,19 +225,16 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 
 
     // calcul des consignes
-    Consigne_Commune = KPv * Diff_Vitesse_Actu + KIv * Diff_Vitesse_All + KDv * (Diff_Vitesse_Old - Diff_Vitesse_Actu);
-    Consigne_Diff = KPt * Diff_Theta_Actu + KIt * Diff_Theta_All + KDt * (Diff_Theta_Old - Diff_Theta_Actu);
+    Consigne_Commune = KPd * Diff_Distance_Actu + KId * Diff_Distance_All + KDd * Diff_Distance_point;
+    Consigne_Diff = KPt * Diff_Theta_Actu + KIt * Diff_Theta_All + KDt * Diff_Theta_point;
 
 
     Diff_Theta_Old = Diff_Theta_Actu;               // mise à jour de la precedente valeur (pour le terme differentiel)
-    Diff_Vitesse_Old = Diff_Vitesse_Actu;
+    Diff_Distance_Old = Diff_Distance_Actu;
 
-
-//    Set_Vitesse_MoteurD(Consigne_Commune);        // calcul des consignes moteurs
-//    Set_Vitesse_MoteurG(Consigne_Commune);
 
     Set_Vitesse_MoteurD(Consigne_Commune - Consigne_Diff/2);        // calcul des consignes moteurs
-    Set_Vitesse_MoteurG(Consigne_Commune + Consigne_Diff/2);             // NIM: C'est pas Consigne_Diff/2 ?
+    Set_Vitesse_MoteurG(Consigne_Commune + Consigne_Diff/2);
 
 //*/
     _T2IF = 0;      // On baisse le FLAG
@@ -238,9 +247,17 @@ void Set_Asserv_V(float KPv_new, float KDv_new, float KIv_new)
     KIv = KIv_new;
 }
 
+void Set_Asserv_D(float KPd_new, float KDd_new, float KId_new)
+{
+    KPd = KPd_new;
+    KDd = KDd_new;
+    KId = KId_new;
+}
+
 void Set_Asserv_T(float KPt_new, float KDt_new, float KIt_new)
 {
     KPt = KPt_new;
     KDt = KDt_new;
     KIt = KIt_new;
 }
+

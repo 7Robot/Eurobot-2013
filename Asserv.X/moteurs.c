@@ -34,7 +34,7 @@ void Init_PWM(void)
 	PTCONbits.PTEN   = 1;   // Timer Enable bit:		 	ENABLE MCPWM
 
 	/**** PTPER: PWM Time Base Period Register ****/
-	PTPERbits.PTPER = 0x01F4; // Period Value bits
+	PTPERbits.PTPER = 500; // Period Value bits
 
 
 /*
@@ -78,7 +78,8 @@ void Set_Vitesse_MoteurD(float Consigne)
         DIRB1 = 0;
     }
 
-    if (Consigne > 1000.0)        Consigne = 1000.0;
+    //if (Consigne > 10)          Consigne += 50;
+    if (Consigne > VITESSE_MAX)      Consigne = VITESSE_MAX;
     P1DC1 = (int)(Consigne);
 }
 
@@ -96,7 +97,9 @@ void Set_Vitesse_MoteurG(float Consigne)
         DIRB2 = 0;
     }
 
-    if (Consigne > 1000.0)        Consigne = 1000.0;
+
+    //if (Consigne > 10)          Consigne += 50;
+    if (Consigne > VITESSE_MAX)      Consigne = VITESSE_MAX;
     P1DC2 = (int)(Consigne);
 
 }

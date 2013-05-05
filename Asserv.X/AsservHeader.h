@@ -41,7 +41,9 @@
 #define TICS_BY_METERG 25000
 #define METER_BY_TICD 0.00004
 #define METER_BY_TICG 0.00004
-#define LARGEUR_ROBOT 0.3       // 30cm entre droite et gauche
+#define LARGEUR_ROBOT 0.291       // 29.1cm entre encodeurs droite et gauche
+
+#define VITESSE_MAX 500
 
 /******************************************************************************/
 /* Function Prototypes                                                        */
@@ -54,18 +56,21 @@ void ConfigureOscillator(void);    /* Handles clock switching/osc initialization
 void InitApp(void);             /* I/O and Peripheral Initialization          */
 
 void Set_Asserv_V(float, float, float);
+void Set_Asserv_D(float, float, float);
 void Set_Asserv_T(float, float, float);
-
-
-
 
 void Set_Position(float, float);           // permet une mise à jour de la position, du robot
 void Set_Postion_Angle(float, float, float);  // remet totalement à jour la position
 void Get_Position (float*, float*, float*);       // renvoie la position actuelle du robot
-void Incremente_Position(int16_t, int16_t, float*, float*);     // recoie les tics, incremente la position, renvoie la vitesse et l'angle (pour l'asserv)
+float Get_Distance (void);          //renvoie la distance entre la consigne et la position actuelle
+float Get_Angle (void);             //renvoie l'angle entre la consigne et la position actuelle
+void Incremente_Position(int16_t, int16_t, float*, volatile float*, float*);     // recoie les tics, incremente la position, renvoie la vitesse et l'angle (pour l'asserv)
 
- void Set_Consigne_Vitesse(float);
+ void Set_Consigne_Distance(float);
+ void Set_Consigne_Angle(float);
  void Mise_A_Jour_Consignes(volatile float*, volatile float*, float);
+
+ void Set_Consigne(float, float);
 
 
 //float sin_lut (float);   // prends un nombre en radians, en renvoie son sinus
