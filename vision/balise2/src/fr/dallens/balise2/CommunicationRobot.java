@@ -1,6 +1,7 @@
 package fr.dallens.balise2;
 
 import android.annotation.SuppressLint;
+import android.location.Address;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -32,6 +33,7 @@ public class CommunicationRobot implements Runnable, Serializable {
 	}
 	
 	public void connect(String robotAddress) {
+		Log.v(TAG, String.format("Trying connection on %s", robotAddress));
 		try {
 			socket = new Socket(robotAddress, robotPort);
 			isConnected = true;
