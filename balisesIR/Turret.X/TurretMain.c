@@ -46,9 +46,11 @@
 
 // Declarations de variable globales
 volatile unsigned int i;
+volatile unsigned int j;
 int adversaire1[taille_uart] = {1,0,0,1,0,1,1,0}; // Mettre la donn�e envoy�e
 int adversaire2[taille_uart] = {1,0,1,0,1,0,1,0}; // mais compl�ment�e
 int reperage[nombre_recepteurs]; // Contient : 0 non recu, 1 adversaire1, 2 adversaire2 pour chaque TSOP
+int donnees[nombre_recepteurs*taille_uart];
 
 // Prototypes des fonctions
 void acquisition(int donnees[]);
@@ -64,7 +66,7 @@ int16_t main(void)
     /* Initialize IO ports and peripherals */
     InitApp();
 
-    int donnees[nombre_recepteurs*taille_uart];
+    
     int recu = 0;
 
     int y;
@@ -90,9 +92,9 @@ int16_t main(void)
 
         if(recu)
         {
-            for(i = 0 ; i < nombre_recepteurs ; i++)
+            for(j = 0 ; j < nombre_recepteurs ; j++)
             {
-        	reperage[i] = comparer(donnees, i);
+        	reperage[j] = comparer(donnees, j);
             }
             lissage(); // Corrige les recepteurs defaillants
             recu = 0;
@@ -130,11 +132,11 @@ int comparer(int donnees[], int recepteur)
     int adversaire = 0;
 
     // Detection Adversaire 1
-    for(i = 0 ; i < taille_uart ; i++)
+    for(i = 0 ; i < taille_uart-1 ; i++)
     {
         if(donnees[recepteur*taille_uart+i] != adversaire1[i]) break;
     }
-	if(i == taille_uart && donnees[recepteur*taille_uart+i] == adversaire1[i])
+	if(i == taille_uart-1 && donnees[recepteur*taille_uart+i] == adversaire1[i])
 	{
 		adversaire = 1;
                 led2 = 0;
@@ -142,11 +144,11 @@ int comparer(int donnees[], int recepteur)
 	}
 
 	// Detection Adversaire 2
-    for(i = 0 ; i<taille_uart; i++)
+    for(i = 0 ; i<taille_uart-1; i++)
     {
         if(donnees[recepteur*taille_uart+i] != adversaire2[i]) break;
     }
-	if(i == taille_uart && donnees[recepteur*taille_uart+i] == adversaire2[i])
+	if(i == taille_uart-1 && donnees[recepteur*taille_uart+i] == adversaire2[i])
 	{
 		adversaire = 2;
                 led1 = 0;
