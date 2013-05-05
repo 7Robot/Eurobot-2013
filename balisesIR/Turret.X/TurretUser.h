@@ -8,7 +8,7 @@
 #define SYS_FREQ        80000000 //7370000L
 #define FCY             SYS_FREQ/2
 
-#define bit_periode_us      90
+#define bit_periode_us      100
 #define taille_uart         8
 #define nombre_recepteurs   16
 

@@ -1,7 +1,7 @@
 /*
 * Beacon dsPIC33F
 * Compiler : Microchip xC16
-* �C : 33FJ64MC802
+* �C : 33FJ64MC804
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -109,7 +109,7 @@ int16_t main(void)
 
     while(1)
     {
-        WriteUART1(adversaire2);
+        WriteUART1(adversaire1);
         while(BusyUART1());
         __delay_ms(10);
     }
