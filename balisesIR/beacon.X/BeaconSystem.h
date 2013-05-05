@@ -19,7 +19,7 @@
 /* TODO Define system operating frequency */
 
 /* Microcontroller MIPs (FCY) */
-#define SYS_FREQ        80000000 //7370000L
+#define SYS_FREQ        7370000L //80000000
 #define FCY             SYS_FREQ/2
 #define baud            (FCY/9600)/16-1
 #define adversaire1     0x69

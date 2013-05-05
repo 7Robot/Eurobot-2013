@@ -34,11 +34,7 @@ __builtin functions.*/
 /* TODO Add clock switching code if appropriate.  An example stub is below.   */
 void ConfigureOscillator(void)
 {
-    // Configure PLL prescaler, PLL postscaler, PLL divisor
-    PLLFBDbits.PLLDIV = 41; // M=43
-    CLKDIVbits.PLLPOST = 0; // N1=2
-    CLKDIVbits.PLLPRE  = 0; // N2=2
-    // Fosc = M/(N1.N2)*Fin
+    
 #if 0
         /* Disable Watch Dog Timer */
         RCONbits.SWDTEN = 0;
