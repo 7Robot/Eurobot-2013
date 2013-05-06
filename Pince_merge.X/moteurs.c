@@ -1,11 +1,23 @@
+/*
+* Template dsPIC33F
+* Compiler : Microchip xC16
+* uC : 33FJ64MC802
+* Juillet 2012
+*    ____________      _           _
+*   |___  /| ___ \    | |         | |
+*      / / | |_/ /___ | |__   ___ | |_
+*     / /  |    // _ \| '_ \ / _ \| __|
+*    / /   | |\ \ (_) | |_) | (_) | |_
+*   /_/    |_| \_\___/|____/ \___/'\__|
+*			      7robot.fr
+*/
+
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "PinceHeader.h"  /* Function / Parameters                           */
 #include <libpic30.h>
 #include <p33Fxxxx.h>      /* Includes device header file                     */
 #include <math.h>
-
-
 
 
 void Init_PWM(void)
@@ -22,12 +34,12 @@ void Init_PWM(void)
 
 	/**** PTPER: PWM Time Base Period Register ****/
 	PTPERbits.PTPER = 500; // Period Value bits
-    
-        PDC3 = 0;          // rapport cycliques nuls pour le moteur
-          
+
+        P1DC3 = 0;          // rapport cycliques nuls pour le moteur
+
 }
 
-void Set_Vitesse_MoteurH(float Consigne)
+void Set_Vitesse_MoteurH(long Consigne)
 {
     if (Consigne < 0.0)
     {
@@ -38,8 +50,9 @@ void Set_Vitesse_MoteurH(float Consigne)
     {
         pince_en_montee();
     }
+    if (Consigne < 500)     Consigne = 0;
+    else if (Consigne > 1000)     Consigne = 1000;
 
-    if (Consigne > 1000.0)        Consigne = 1000.0;
     P1DC3 = (int)(Consigne);
 }
 

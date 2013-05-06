@@ -49,7 +49,6 @@ int16_t main(void)
     ConfigureOscillator();
     InitApp();
     Init_PWM();
-    int vitesse = 0;
     responseReadyAX = 0;
 
     __delay_ms(10);
@@ -59,23 +58,37 @@ int16_t main(void)
     __delay_ms(10);
 
     //Set_Consigne_Hauteur(0);
-    Set_Asserv_h(0.5, 0.25);
-    Set_Vitesse(1000);
+    Set_Asserv_h(1.1, 0);
+    Set_Vitesse(1500);
 
-    //reset_pince();
+    //__delay_ms(2000);
+    Sortir_Pince();
+    __delay_ms(3000);
+    Chopper_verre();
 
-    //Sortir_Pince();
-    //__delay_ms(10000);
-    //Chopper_verre();
-    
+    //Set_Consigne_Hauteur(1500); //mi hauteur
+     __delay_ms(3000);
+    Chopper_verre();
+    __delay_ms(3000);
+    Chopper_verre();
+    __delay_ms(3000);
+    Chopper_verre();
+    //Set_Consigne_Hauteur(2700); //full hauteur
+    __delay_ms(3000);
+    Lacher_verres();
+
     while(1)
     {
-        Cinematique_inverse();
+    //Set_Consigne_Hauteur(1000); //mi hauteur
+
+        //Cinematique_inverse();
+        //Set_Consigne_Hauteur(2500); //mi hauteur
+        //__delay_ms(2000);
         led = !led;
-        //Set_Consigne_Hauteur(-1000);
-        __delay_ms(100);
+        //reset_pince();
+       // __delay_ms(2000);
 //        Set_Consigne_Hauteur(0);
-//        __delay_ms(2000);
+        __delay_ms(1000);
     }
 
 }

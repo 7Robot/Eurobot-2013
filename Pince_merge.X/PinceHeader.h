@@ -52,12 +52,11 @@
 void ConfigureOscillator(void);    /* Handles clock switching/osc initialization */
 void InitApp(void);             /* I/O and Peripheral Initialization          */
 
-extern void InterruptAX(void);
-
 //protos AX12 pince
 void Cinematique_inverse();
 void Ouvrir_pince_bas();
-int Serrer_verre();
+int Serrer_verre_en_bas();
+void Serrer_verre_en_haut();
 void Serrer_stockage();
 void Semi_ouvrir_stockage();
 void Ouvrir_stockage();
@@ -70,11 +69,11 @@ int GetAXnoWait();
 
 //protos de asserv pince
 void Set_Vitesse(int);
-void Set_Consigne_Hauteur(int);
+void Set_Consigne_Hauteur(long);
 void Set_Asserv_h(float, float);
 void reset_pince(void);
 void Init_PWM(void);
-void Set_Vitesse_MoteurH(float);
+void Set_Vitesse_MoteurH(long);
 void pince_en_descente(void);
 void pince_en_montee(void);
 

@@ -52,14 +52,17 @@ void Chopper_verre()
     {
         if (nbverres >= 3)
         {
-            verreok = Serrer_verre();
+            verreok = Serrer_verre_en_bas();
             Serrer_stockage();
             if (verreok)
             {
-                Set_Consigne_Hauteur(1000); //mi hauteur
-                __delay_ms(2000);
+                Set_Consigne_Hauteur(500); //mi hauteur
+                __delay_ms(400);
+                Set_Consigne_Hauteur(50);
+                __delay_ms(200);
 
                 full = 1;
+                nbverres++;
             }
             else
             {
@@ -68,17 +71,17 @@ void Chopper_verre()
         }
         else
         {
-            verreok = Serrer_verre();
+            verreok = Serrer_verre_en_bas();
             Serrer_stockage();
             if (verreok)
             {
-                Set_Consigne_Hauteur(1000); //mi hauteur
-                __delay_ms(2000);
+                Set_Consigne_Hauteur(500); //mi hauteur
+                __delay_ms(350);
                 Semi_ouvrir_stockage();
-                Set_Consigne_Hauteur(2000); //full hauteur
-                __delay_ms(2000);
+                Set_Consigne_Hauteur(3700); //full hauteur
+                __delay_ms(2200);
                 Serrer_stockage();
-
+                __delay_ms(200);
                 Ouvrir_pince_bas();
                 reset_pince();
                 __delay_ms(2000);
@@ -106,15 +109,29 @@ void Lacher_verres()
         else
         {
             Ouvrir_pince_bas();
-            Set_Consigne_Hauteur(2000);
-            __delay_ms(2000);
-            Serrer_verre();
+            Set_Consigne_Hauteur(3700); //full hauteur
+            __delay_ms(2200);
+            Serrer_verre_en_haut();
             Semi_ouvrir_stockage();
             reset_pince();
+            __delay_ms(2500);
         }
         Ouvrir_pince_bas();
+        Serrer_stockage();
+        __delay_ms(400);
         Ouvrir_stockage();
+        __delay_ms(10);
+        //Ouvrir FULL open :
+        PutAX(AX_HD1, AX_GOAL_POSITION, 360);
+        __delay_ms(10);
+        PutAX(AX_HD2, AX_GOAL_POSITION, 677);
+        __delay_ms(10);
+        PutAX(AX_HG1, AX_GOAL_POSITION, 680);
+        __delay_ms(10);
+        PutAX(AX_HG2, AX_GOAL_POSITION, 364);
+        __delay_ms(10);
     }
+    nbverres = 0;
 }
 
 
@@ -124,10 +141,18 @@ void Ouvrir_pince_bas()
         PutAX(AX_BG, AX_GOAL_POSITION, 710);
         __delay_ms(10);
         PutAX(AX_BD, AX_GOAL_POSITION, 310);
-        __delay_ms(400);
+        __delay_ms(200);
 }
 
-int Serrer_verre()
+void Serrer_verre_en_haut()
+{
+    PutAX(AX_BG, AX_GOAL_POSITION, 845);
+    __delay_ms(10);
+    PutAX(AX_BD, AX_GOAL_POSITION, 170);
+    __delay_ms(400);
+}
+
+int Serrer_verre_en_bas()
 {
 //Serrer un verre en position basse :
 	PutAX(AX_BG, AX_GOAL_POSITION, 845);
@@ -145,7 +170,8 @@ int Serrer_verre()
         int valeur;
         num_ax = AX_BD;
         data = AX_PRESENT_POSITION;
-        valeur = GetAXnoWait();
+        valeur = 159;
+        //valeur = GetAXnoWait();
 
     int verreok = 0;
     if (valeur < 160) verreok = 1;
@@ -168,13 +194,13 @@ int GetAXnoWait()
 void Serrer_stockage()
 {
 //Serrer la pince stockage
-        PutAX(AX_HD1, AX_GOAL_POSITION, 273);
+        PutAX(AX_HD1, AX_GOAL_POSITION, 263);
         __delay_ms(10);
-        PutAX(AX_HD2, AX_GOAL_POSITION, 622);
+        PutAX(AX_HD2, AX_GOAL_POSITION, 612);
         __delay_ms(10);
-        PutAX(AX_HG1, AX_GOAL_POSITION, 738);
+        PutAX(AX_HG1, AX_GOAL_POSITION, 760);
         __delay_ms(10);
-        PutAX(AX_HG2, AX_GOAL_POSITION, 371);
+        PutAX(AX_HG2, AX_GOAL_POSITION, 392);
         __delay_ms(10);
 }
 
@@ -185,7 +211,7 @@ void Semi_ouvrir_stockage()
         __delay_ms(10);
         PutAX(AX_HD2, AX_GOAL_POSITION, 657);
         __delay_ms(10);
-        PutAX(AX_HG1, AX_GOAL_POSITION, 728);
+        PutAX(AX_HG1, AX_GOAL_POSITION, 718);
         __delay_ms(10);
         PutAX(AX_HG2, AX_GOAL_POSITION, 368);
         __delay_ms(10);

@@ -100,7 +100,7 @@ void InitApp(void)
     ConfigIntUART1(UART_RX_INT_PR4 & UART_RX_INT_EN
                  & UART_TX_INT_PR4 & UART_TX_INT_DIS);
 
-    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_OFF & T2_SOURCE_INT, 0x8FF);
+    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_OFF & T2_SOURCE_INT, 1500);
     ConfigIntTimer2(T2_INT_PRIOR_3 & T2_INT_ON); //Interruption ON et priorite 3
 
     OpenTimer5(T5_OFF & T5_GATE_OFF & T5_PS_1_1 & T5_SOURCE_INT, 400);
@@ -126,7 +126,7 @@ void InitApp(void)
     volatile float inth = 0;
     volatile float Kph = 0, Kih=0;
     volatile char etat = 0;
-    volatile int32_t consigne_hauteur = 0;
+    volatile long consigne_hauteur = 0;
     volatile int vitesse_max = 0;
     //volatile float posx = 0.0, posy = 0.0;
     // volatile float posx = 0.0, posy = 0.0;
@@ -144,9 +144,9 @@ void Set_Asserv_h(float Kph_new, float Kih_new)
     Kih = Kih_new;
 }
 
-void Set_Consigne_Hauteur(int Hauteur_mm)
+void Set_Consigne_Hauteur(long Hauteur_mm)
 {
-    consigne_hauteur = 10 * Hauteur_mm;  // on cosid�re 10 tics by mm
+    consigne_hauteur = (long)(10 * Hauteur_mm);  // on cosid�re 10 tics by mm
     //if (consigne_hauteur > 10000) consigne_hauteur = 10000;
 }
 
@@ -170,16 +170,17 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 
     //Inutile
     tich = (int16_t) POS1CNT;// ReadQEI1();
+    POS1CNT = 0;
 //    diffh = tich-old_tich;
 //    old_tich = tich;
-//    compteur_tich =tich;
+//    compteur_tich += diffh;
 
-    if (etat == 0)      // etat normal de fonctionnement
+    if (!etat)      // etat normal de fonctionnement
     {
-        inth = 0;// inth + (float) (consigne_hauteur - compteur_tich);
-        Set_Vitesse_MoteurH(( -Kph * (consigne_hauteur - compteur_tich) + Kih * inth ));
+        inth = inth + (float) (consigne_hauteur - compteur_tich);
+        Set_Vitesse_MoteurH(( Kph * (consigne_hauteur - tich) + Kih * inth ));
     }
-    else//(etat == 1)     // etat reset vers le bas
+    else if (etat)     // etat reset vers le bas
     {
         if (!microswitch_bas_de_pince)
         {
@@ -197,7 +198,6 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
         }
     }
     //Set_Vitesse_MoteurH(-vitesse_max);
-
     _T2IF = 0;      // On baisse le FLAG
 }
 
