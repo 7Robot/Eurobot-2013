@@ -1,4 +1,4 @@
-// Generated from version 1305061627 of semantic
+// Generated from version 1305062032 of semantic
 
 #include "atp.h"
 
@@ -77,6 +77,102 @@ void SendAngle(float theta) {
     SendBytes(bytes, 8);
 }
 
+void SendAsservD(float KPd, float KId, float KDd) {
+    char bytes[] = {
+        129,
+        122,
+        36,
+        ((char*)&KPd)[0],
+        ((char*)&KPd)[1],
+        ((char*)&KPd)[2],
+        ((char*)&KPd)[3],
+        36,
+        ((char*)&KId)[0],
+        ((char*)&KId)[1],
+        ((char*)&KId)[2],
+        ((char*)&KId)[3],
+        36,
+        ((char*)&KDd)[0],
+        ((char*)&KDd)[1],
+        ((char*)&KDd)[2],
+        ((char*)&KDd)[3],
+        128
+    };
+    SendBytes(bytes, 18);
+}
+
+void SendAsservO(float KPo, float KIo, float KDo) {
+    char bytes[] = {
+        129,
+        112,
+        36,
+        ((char*)&KPo)[0],
+        ((char*)&KPo)[1],
+        ((char*)&KPo)[2],
+        ((char*)&KPo)[3],
+        36,
+        ((char*)&KIo)[0],
+        ((char*)&KIo)[1],
+        ((char*)&KIo)[2],
+        ((char*)&KIo)[3],
+        36,
+        ((char*)&KDo)[0],
+        ((char*)&KDo)[1],
+        ((char*)&KDo)[2],
+        ((char*)&KDo)[3],
+        128
+    };
+    SendBytes(bytes, 18);
+}
+
+void SendAsservT(float KPt, float KIt, float KDt) {
+    char bytes[] = {
+        129,
+        132,
+        36,
+        ((char*)&KPt)[0],
+        ((char*)&KPt)[1],
+        ((char*)&KPt)[2],
+        ((char*)&KPt)[3],
+        36,
+        ((char*)&KIt)[0],
+        ((char*)&KIt)[1],
+        ((char*)&KIt)[2],
+        ((char*)&KIt)[3],
+        36,
+        ((char*)&KDt)[0],
+        ((char*)&KDt)[1],
+        ((char*)&KDt)[2],
+        ((char*)&KDt)[3],
+        128
+    };
+    SendBytes(bytes, 18);
+}
+
+void SendAsservV(float KPv, float KIv, float KDv) {
+    char bytes[] = {
+        129,
+        102,
+        36,
+        ((char*)&KPv)[0],
+        ((char*)&KPv)[1],
+        ((char*)&KPv)[2],
+        ((char*)&KPv)[3],
+        36,
+        ((char*)&KIv)[0],
+        ((char*)&KIv)[1],
+        ((char*)&KIv)[2],
+        ((char*)&KIv)[3],
+        36,
+        ((char*)&KDv)[0],
+        ((char*)&KDv)[1],
+        ((char*)&KDv)[2],
+        ((char*)&KDv)[3],
+        128
+    };
+    SendBytes(bytes, 18);
+}
+
 void SendCourbe(float v, float omega) {
     char bytes[] = {
         129,
@@ -107,6 +203,18 @@ void SendDone() {
 
 // You should redefine this function
 __attribute__((weak)) void OnGetAngle() {}
+
+// You should redefine this function
+__attribute__((weak)) void OnGetAsservD() {}
+
+// You should redefine this function
+__attribute__((weak)) void OnGetAsservO() {}
+
+// You should redefine this function
+__attribute__((weak)) void OnGetAsservT() {}
+
+// You should redefine this function
+__attribute__((weak)) void OnGetAsservV() {}
 
 // You should redefine this function
 __attribute__((weak)) void OnGetCourbe() {}
@@ -171,6 +279,18 @@ void SendPos(float x, float y, float theta) {
 __attribute__((weak)) void OnSetAngle(float theta) {}
 
 // You should redefine this function
+__attribute__((weak)) void OnSetAsservD(float KPd, float KId, float KDd) {}
+
+// You should redefine this function
+__attribute__((weak)) void OnSetAsservO(float KPo, float KIo, float KDo) {}
+
+// You should redefine this function
+__attribute__((weak)) void OnSetAsservT(float KPt, float KIt, float KDt) {}
+
+// You should redefine this function
+__attribute__((weak)) void OnSetAsservV(float KPv, float KIv, float KDv) {}
+
+// You should redefine this function
 __attribute__((weak)) void OnSetCourbe(float v, float omega) {}
 
 // You should redefine this function
@@ -224,6 +344,22 @@ int AtpDecode(int id,
         OnGetAngle();
         return 1;
     }
+    if (id == 121) {
+        OnGetAsservD();
+        return 1;
+    }
+    if (id == 111) {
+        OnGetAsservO();
+        return 1;
+    }
+    if (id == 131) {
+        OnGetAsservT();
+        return 1;
+    }
+    if (id == 101) {
+        OnGetAsservV();
+        return 1;
+    }
     if (id == 71) {
         OnGetCourbe();
         return 1;
@@ -254,6 +390,22 @@ int AtpDecode(int id,
     }
     if (id == 40) {
         OnSetAngle(floatv[0]);
+        return 1;
+    }
+    if (id == 120) {
+        OnSetAsservD(floatv[0], floatv[1], floatv[2]);
+        return 1;
+    }
+    if (id == 110) {
+        OnSetAsservO(floatv[0], floatv[1], floatv[2]);
+        return 1;
+    }
+    if (id == 130) {
+        OnSetAsservT(floatv[0], floatv[1], floatv[2]);
+        return 1;
+    }
+    if (id == 100) {
+        OnSetAsservV(floatv[0], floatv[1], floatv[2]);
         return 1;
     }
     if (id == 70) {

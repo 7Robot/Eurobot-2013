@@ -330,28 +330,41 @@ void Set_Consigne_Courbe(float Consigne_V, float Consigne_O)
 
 /****************** bridge atp ********************************/
 
-// GETs
-
+// GETs position
 void OnGetPos() {
     float x, y, theta;
     Get_Position(&x, &y, &theta);
     SendPos(x, y, theta);
 }
 void OnGetAngle() { SendAngle(Theta_Actu); }
+
+// GETs vitesse
 void OnGetVit() { SendVit(Vitesse_Actu); }
 void OnGetOmega() { SendOmega(Omega_Actu); }
 void OnGetCourbe() { SendCourbe(Vitesse_Actu, Omega_Actu); }
 
-// SETs
+// GETs coefs
+void OnGetAsservD() { SendAsservD(KPd, KId, KDd); }
+void OnGetAsservO() { SendAsservO(KPo, KIo, KDo); }
+void OnGetAsservT() { SendAsservT(KPt, KIt, KDt); }
+void OnGetAsservV() { SendAsservV(KPv, KIv, KDv); }
 
+// SETs position
 void OnStop() { Set_Consigne_Distance(0); }
 void OnSetPos(float x, float y) { Set_Consigne_Position(x, y); }
 void OnSetAngle(float theta) { Set_Consigne_Angle(theta); }
 void OnSetDist(float dist) { Set_Consigne_Distance(dist); }
+
+// SETs vitesse
 void OnSetVit(float v) { Set_Consigne_Vitesse(v); }
 void OnSetOmega(float omega) { Set_Consigne_Omega(omega); }
 void OnSetCourbe(float v, float omega) { Set_Consigne_Courbe(v, omega); }
 
+// SETs coefs
+void OnSetAsservD(float KPd_new, float KId_new, float KDd_new) { Set_Asserv_V(KPv_new, KDv_new, KIv_new); }
+void OnSetAsservO(float KPo_new, float KIo_new, float KDo_new) { Set_Asserv_O(KPo_new, KDo_new, KIo_new); }
+void OnSetAsservT(float KPt_new, float KIt_new, float KDt_new) { Set_Asserv_D(KPd_new, KDd_new, KId_new); }
+void OnSetAsservV(float KPv_new, float KIv_new, float KDv_new) { Set_Asserv_T(KPt_new, KDt_new, KIt_new); }
 
 /****************** Coefs asserv ******************************/
 
