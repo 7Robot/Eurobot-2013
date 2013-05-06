@@ -1,7 +1,7 @@
 /*
 * Template dsPIC33F
 * Compiler : Microchip xC16
-* �C : 33FJ64MC802
+* �C : 33FJ64MC804
 * Juillet 2012
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -9,7 +9,7 @@
 *     / /  |    // _ \| '_ \ / _ \| __|
 *    / /   | |\ \ (_) | |_) | (_) | |_
 *   /_/    |_| \_\___/|____/ \___/'\__|
-*			      7robot.fr
+*                 7robot.fr
 */
 
 /******************************************************************************/
@@ -25,15 +25,17 @@
 #include "PinceHeader.h"  /* Function / Parameters                           */
 #include <libpic30.h>
 #include "ax12.h"
+#include "atp-mother.h"
 
 /*
- * 
+ *
  */
 volatile int ready = 0;
 volatile int full  = 0;
-volatile int nbverres = 0;
+volatile unsigned int nbverres = 0;
 unsigned char num_ax;
 unsigned char data;
+
 
 void Sortir_Pince()
 {
@@ -187,7 +189,7 @@ int GetAXnoWait()
         T5CONbits.TON = 1;
         }
     valeur = (responseAX.params[1]*256 + responseAX.params[0]);
-    
+
     return valeur;
 }
 
@@ -287,3 +289,10 @@ void Cinematique_inverse()
     valeur[5] = (responseAX.params[1]*256 + responseAX.params[0]);
     __delay_ms(10);
 }
+
+// ATP
+void OnGetNombreVerres() { SendNombreVerres(nbverres); }
+void OnSortirPince() { Sortir_Pince(); }
+void OnChopperVerre() { Chopper_verre(); }
+void OnLacherVerres() { Lacher_verres(); }
+
