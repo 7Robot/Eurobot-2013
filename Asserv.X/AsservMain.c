@@ -1,7 +1,7 @@
 /*
 * Asserv dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* µC : 33FJ64MC804
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -17,14 +17,17 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "AsservHeader.h"  /* Function / Parameters                           */
 #include <libpic30.h>
+#include <uart.h>
+#include "atp-asserv.h"
+#include "atp.h"
 
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
 /******************************************************************************/
 
-/* i.e. uint16_t <variable_name>; */
-
+volatile unsigned int delay = 100; // ms
+volatile bool broadcast = true;
 
 
 /******************************************************************************/
@@ -47,16 +50,37 @@ _FICD(ICS_PGD1 & JTAGEN_OFF);
 
 int16_t main(void)
 {
+    float x, y, theta;
     // Initialize IO ports and peripherals.
     ConfigureOscillator();
     InitApp();
 
-    //float angle = 0;
+    AtpInit();
+    SendId(5);
 
-    while(1)
-    {
-        __delay_ms(50);
+    Set_Asserv_V(1.5,5,0);
+    Set_Asserv_O(1.5,5,0);
+    Set_Asserv_D(500,2,0.03);
+    Set_Asserv_T(300,3,0.5);
 
+    Set_Consigne_Position(0.5,1);
+
+    while(1) {
+        if (broadcast) {
+            Get_Position(&x, &y, &theta);
+            SendPos(x, y, theta);
+        }
+        __delay_ms(delay);
     }
 }
 
+void OnOdoBroadcastSetDelay(unsigned int new_delay) {
+    if (new_delay > 0) {
+        delay = new_delay;
+    } else {
+        SendError();
+    }
+}
+
+void OnOdoBroadcastOn() { broadcast = true; }
+void OnOdoBroadcastOff() { broadcast = false; }

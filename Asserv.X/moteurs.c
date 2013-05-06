@@ -24,7 +24,20 @@
 
 void Init_PWM(void)
 {
+        PTCONbits.PTEN   = 0;   // Timer Enable bit:		    DISABLE MCPWM
+	PWMCON1bits.PEN1H = 1;  // PWM1H (pin 37) is enabled for PWM output
+	PWMCON1bits.PEN2H = 1;  // PWM2H (pin 35) is enabled for PWM output
+	PTCONbits.PTCKPS = 1;   // Input Clock Prescale bits:   1:4
+	PTCONbits.PTOPS  = 0;   // Output Clock Postscale bits: 1:1
+	PTCONbits.PTSIDL = 1;	// Stop in Idle Mode:           YES
+	PTCONbits.PTMOD  = 0;   // Mode Select bits:			Free Running Mode
+	PTCONbits.PTEN   = 1;   // Timer Enable bit:		 	ENABLE MCPWM
 
+	/**** PTPER: PWM Time Base Period Register ****/
+	PTPERbits.PTPER = 500; // Period Value bits
+
+
+/*
     // voir section 14 PWM DSPIC33F de microchip
     P1TCON = 0x8000;        // demarre le PWM1
     P1TPER = 0x01F4;        // defini la periode de PWM à 1000 coup d'horloge
@@ -40,55 +53,53 @@ void Init_PWM(void)
 
     // A REVOIR AUSSI : TOUCHE AUX PINS 3...
     P1OVDCON = 0x3F00;      //  Override
-
+    */
     P1DC1 = 0;
     P1DC2 = 0;          // rapport cycliques nuls pour les moteurs
 
-    _TRISB0 = 0;//Pin de programmation
-    _TRISB1 = 0;//Pin de programmation
-    _TRISB2 = 0;
-    _TRISB3 = 0;
+    _TRISC3 = 0;    //DIRA1 sur RC3 en sortie
+    _TRISC4 = 0;    //DIRB1 sur RC4 en sortie
+    _TRISA3 = 0;    //DIRA2 sur RA3 en sortie
+    _TRISA4 = 0;    //DIRB2 sur RA4 en sortie
 
 }
 
 void Set_Vitesse_MoteurD(float Consigne)
 {
     if (Consigne < 0.0)
-    {
+    {//MISE DES PATES SENS INVERSE
         Consigne = -Consigne;
-        _LATB0 = 1;
-        _LATB1 = 0;
-        //MISE DES PATES SENS INVERSE
+        DIRA1 = 0;
+        DIRB1 = 1;
     }
     else
-    {
-        _LATB0 = 0;
-        _LATB1 = 1;
-        // MISE DES PATES EN SENS NORMAL
+    { // MISE DES PATES EN SENS NORMAL
+        DIRA1 = 1;
+        DIRB1 = 0;
     }
 
-    if (Consigne > 1000.0)        Consigne = 1000.0;
+    if (Consigne < VITESSE_MIN && Consigne > CONSIGNE_MIN)          Consigne = VITESSE_MIN;
+    if (Consigne > VITESSE_MAX)      Consigne = VITESSE_MAX;
     P1DC1 = (int)(Consigne);
 }
 
 void Set_Vitesse_MoteurG(float Consigne)
 {
     if (Consigne < 0.0)
-    {
+    {//MISE DES PATES SENS INVERSE
         Consigne = -Consigne;
-        _LATB2 = 1;
-        _LATB3 = 0;
-
-        //MISE DES PATES SENS INVERSE
+        DIRA2 = 0;
+        DIRB2 = 1;
     }
     else
-    {
-        _LATB2 = 0;
-        _LATB3 = 1;
-        // MISE DES PATES EN SENS NORMAL
+    { // MISE DES PATES EN SENS NORMAL
+        DIRA2 = 1;
+        DIRB2 = 0;
     }
 
-    if (Consigne > 1000.0)        Consigne = 1000.0;
+
+    if (Consigne < VITESSE_MIN && Consigne > CONSIGNE_MIN)          Consigne = VITESSE_MIN;
+    if (Consigne > VITESSE_MAX)      Consigne = VITESSE_MAX;
     P1DC2 = (int)(Consigne);
 
 }

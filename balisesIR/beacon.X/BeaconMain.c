@@ -1,7 +1,7 @@
 /*
 * Beacon dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* ï¿½C : 33FJ64MC804
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -65,19 +65,20 @@ int16_t main(void)
     /* Initialize IO ports and peripherals */
     InitApp();
 
-    AD1PCFGL = 0xFFFF; //Putain, met ça en numérique, quoi !
+    AD1PCFGL = 0xFFFF; //Putain, met ca en numerique, quoi !
 
-    TRISAbits.TRISA0 = 0; // Microstick LED
-    LATAbits.LATA0 = 1;
+    TRISAbits.TRISA0 = 0; //  LED1
+    TRISAbits.TRISA1 = 0; //  LED1
+    _TRISB2 = 1;
+    _TRISB3 = 1;
 
-    TRISBbits.TRISB4 = 1; 
+    _TRISC1 = 1; //pin de CN9 qui recoit le TX donc rx
 
-     __builtin_write_OSCCONL(OSCCON & 0xBF); // Unlock registers.
-    RPOR3bits.RP6R = 3; // U1TX sur RP6
-    __builtin_write_OSCCONL(OSCCON | 0x40); // Relock registers.
+    UnlockRP; // Unlock registers.
+    _RP16R = 3; // U1TX sur RP16
+    LockRP; // Relock registers.
     
-    ConfigIntCN(CHANGE_INT_ON & CHANGE_INT_PRI_4 & 0xFF000002); /*Interrupt sur CN1*/
-    CNEN2 = 0;
+    ConfigIntCN(CHANGE_INT_ON & CHANGE_INT_PRI_4 & 0xFF000200); /*Interrupt sur CN9*/
     
     CloseUART1();
     ConfigIntUART1(UART_RX_INT_DIS & UART_TX_INT_DIS);
@@ -104,6 +105,7 @@ int16_t main(void)
     config2 = (PWM1_MOD1_IND & PWM1_PDIS3H & PWM1_PDIS2H & PWM1_PEN1H & PWM1_PDIS3L & PWM1_PDIS2L & PWM1_PEN1L);
     config3 = (PWM1_SEVOPS1 & PWM1_OSYNC_PWM & PWM1_UEN);
     OpenMCPWM1(period,sptime,config1,config2,config3);
+    //P1DC1 = 88;
 
     while(1)
     {

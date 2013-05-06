@@ -118,6 +118,7 @@
 /* Interrupt Routines                                                         */
 /******************************************************************************/
 #include <ports.h>
+#include "BeaconSystem.h"
 
 unsigned int duty = 1;
 unsigned int uart_on = 1;
@@ -142,8 +143,20 @@ void _ISR _INT1Interrupt(void)
 void _ISR _CNInterrupt(void)
 {
     _CNIF = 0;
-
-   if (PORTBbits.RB4 == 1){SetDCMCPWM1(1,0,0);} else {SetDCMCPWM1(1,6,0);}
+    
+   if (_RC1)
+   {
+       led1 = 1;
+       led2 = 0;
+       SetDCMCPWM1(1,0,0);
+   }
+   else
+   {
+       led1 = 0;
+       led2 = 1;
+       SetDCMCPWM1(1,6,0);
+       //SetDCMCPWM1(1,86,0);
+   }
     
 }
  

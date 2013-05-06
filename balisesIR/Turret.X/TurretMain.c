@@ -1,7 +1,7 @@
 /*
 * Turret dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* ï¿½C : 33FJ64MC802
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -25,8 +25,6 @@
 
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
-
-#include "TurretSystem.h"  /* System funct/params, like osc/peripheral config */
 #include "TurretUser.h"    /* User funct/params, such as InitApp              */
 
 /******************************************************************************/
@@ -48,9 +46,11 @@
 
 // Declarations de variable globales
 volatile unsigned int i;
-int adversaire1[taille_uart] = {1,0,0,1,0,1,1,0}; // Mettre la donnée envoyée
-int adversaire2[taille_uart] = {1,0,1,0,1,0,1,0}; // mais complémentée
+volatile unsigned int j;
+int adversaire1[taille_uart] = {0,1,0,1,1,1,1,1};
+int adversaire2[taille_uart] = {1,0,0,1,1,1,1,1};
 int reperage[nombre_recepteurs]; // Contient : 0 non recu, 1 adversaire1, 2 adversaire2 pour chaque TSOP
+int donnees[nombre_recepteurs*taille_uart];
 
 // Prototypes des fonctions
 void acquisition(int donnees[]);
@@ -66,46 +66,42 @@ int16_t main(void)
     /* Initialize IO ports and peripherals */
     InitApp();
 
-    TRISAbits.TRISA0 = 0; // Microstick LED
-    LATAbits.LATA0 = 1;   // affichage recepteur 1 - adversaire 1
-    TRISAbits.TRISA1 = 0;
-    LATAbits.LATA0 = 1;   // affichage recepteur 2 - adversaire 1
-    TRISBbits.TRISB0 = 0;
-    LATBbits.LATB1 = 1;   // affichage recepteur 1 - adversaire 2
-    TRISBbits.TRISB1 = 0;
-    LATBbits.LATB1 = 1;   // affichage recepteur 2 - adversaire 2
-    TRISCbits.TRISC9 = 1;  // TSOP1 RC9 non present sur 33FJ64MC802
-    TRISBbits.TRISB5 = 1;  // TSOP2
-	// ...
-
-    int donnees[nombre_recepteurs*taille_uart];
-    int recu = 0;
     
+    int recu = 0;
+
+    int y;
+    for (y=0;y<10;y++)
+    {
+        led1 = !led1;
+        led2 = !led1;
+        __delay_ms(200);
+    }
     __delay_ms(2000);
 
     while(1)
     {
 	// Detection du bit de Start
         if ((TSOP1 == 0) || (TSOP2 == 0) || (TSOP3 == 0) || (TSOP4 == 0) || (TSOP5 == 0) || (TSOP6 == 0) || (TSOP7 == 0) || (TSOP8 == 0) || 
-            (TSOP9 == 0) || (TSOP10 == 0) || (TSOP11 == 0) || (TSOP12 == 0) || (TSOP13 == 0) || (TSOP14 == 0) || (TSOP15 == 0) || (TSOP16 == 0) || )
+            (TSOP9 == 0) || (TSOP10 == 0) || (TSOP11 == 0) || (TSOP12 == 0) || (TSOP13 == 0) || (TSOP14 == 0) || (TSOP15 == 0) || (TSOP16 == 0))
         {
             __delay_us(bit_periode_us/2); // Se place au millieu du bit de Start
-            acquisition(int donnees[]);
+            acquisition(donnees);
             __delay_us(bit_periode_us); // Sort de la trame envoyee
             recu = 1;
         }
 
         if(recu)
         {
-            for(i = 0 ; i < nombre_recepteurs ; i++)
-			{
-				reperage[i] = comparer(donnees, i);
-			}
-			lissage(); // Corrige les recepteurs defaillants
-			recu = 0;
+            for(j = 0 ; j < nombre_recepteurs ; j++)
+            {
+        	reperage[j] += comparer(donnees, j);
+            }
+            lissage(); // Corrige les recepteurs defaillants
+            recu = 0;
         }
     }
 }
+
 
 void acquisition(int donnees[])
 {
@@ -133,31 +129,50 @@ void acquisition(int donnees[])
 
 int comparer(int donnees[], int recepteur)
 {
-	int adversaire = 0;
-	// Detection Adversaire 1
-	int egal = 1;
-    for(i = 0 ; i < taille_uart && egal ; i++)
+    int adversaire = 0;
+
+    // Detection Adversaire 1
+    for(i = 0 ; i < taille_uart-1 ; i++)
     {
-        if(donnees[recepteur*taille_uart+i] != adversaire1[i]){egal = 0;}
+        if(donnees[recepteur*taille_uart+i] != adversaire1[i]) break;
     }
-	if(i == taille_uart && egal) {adversaire = 1;}
+	if(i == taille_uart-1 && donnees[recepteur*taille_uart+i] == adversaire1[i])
+	{
+		adversaire = 1;
+                led2 = 0;
+                led1 = 1;
+	}
+
 	// Detection Adversaire 2
-	int egal = 1;
-    for(i = 0 ; i<taille_uart && egal ; i++)
+    for(i = 0 ; i<taille_uart-1; i++)
     {
-        if(donnees[recepteur*taille_uart+i] != adversaire2[i]){egal = 0;}
+        if(donnees[recepteur*taille_uart+i] != adversaire2[i]) break;
     }
-	if(i == taille_uart && egal) {adversaire = 2;}
+	if(i == taille_uart-1 && donnees[recepteur*taille_uart+i] == adversaire2[i])
+	{
+		adversaire = 2;
+                led1 = 0;
+                led2 = 1;
+	}
 	
     return adversaire;
 }
 
 void lissage(void)
 {
-	if((reperage[nombre_recepteurs-1] != 0) && (reperage[nombre_recepteurs-1] == reperage[1]) && (reperage[0] != reperage[nombre_recepteurs-1])) {reperage[0] = reperage[nombre_recepteurs-1];}
+	if((reperage[nombre_recepteurs-1] != 0) && (reperage[nombre_recepteurs-1] == reperage[1]) && (reperage[0] != reperage[nombre_recepteurs-1]))
+	{
+		reperage[0] = reperage[nombre_recepteurs-1];
+	}
 	for(i= 0 ; i < nombre_recepteurs-2 ; i++)
 	{
-		if((reperage[i] != 0) && (reperage[i] == reperage[i+2]) && (reperage[i+1] != reperage[i])) {reperage[i+1] = reperage[i];}
+		if((reperage[i] != 0) && (reperage[i] == reperage[i+2]) && (reperage[i+1] != reperage[i])) 
+		{
+			reperage[i+1] = reperage[i];
+		}
 	}
-	if((reperage[nombre_recepteurs-2] != 0) && (reperage[nombre_recepteurs-2] == reperage[0]) && (reperage[nombre_recepteurs-1] != reperage[nombre_recepteurs-2])) {reperage[nombre_recepteurs-1] = reperage[nombre_recepteurs-2];}
+	if((reperage[nombre_recepteurs-2] != 0) && (reperage[nombre_recepteurs-2] == reperage[0]) && (reperage[nombre_recepteurs-1] != reperage[nombre_recepteurs-2])) 
+	{
+		reperage[nombre_recepteurs-1] = reperage[nombre_recepteurs-2];
+	}
 }

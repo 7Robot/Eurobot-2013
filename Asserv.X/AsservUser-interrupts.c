@@ -1,7 +1,7 @@
 /*
 * Asserv dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* µC : 33FJ64MC804
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -15,18 +15,17 @@
 #include <p33Fxxxx.h>      /* Includes device header file                     */
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
-#include "AsservHeader.h"  /* Function / Parameters                           */
+#include <math.h>
 
 /******************************************************************************/
 /* Files to Include                                                           */
 /******************************************************************************/
 
-#include <p33Fxxxx.h>      /* Includes device header file                     */
-#include <stdint.h>        /* Includes uint16_t definition                    */
-#include <stdbool.h>       /* Includes true/false definition                  */
-#include "AsservHeader.h"  /* Function / Parameters                           */
 #include "timer.h"         /* Include timer fonctions                         */
 #include "qei.h"           /* Includes qei functions                          */
+#include "AsservHeader.h"  /* Function / Parameters  */
+#include "atp.h"
+#include "atp-asserv.h"
 
 /******************************************************************************/
 /* User Functions                                                             */
@@ -43,37 +42,30 @@ void ConfigureOscillator(void)
 
 void InitApp(void)
 {
-    _TRISA0 = 0;
-    led = 0;
+    //LEDs en sorties
+    _TRISB4 = 0;
+    _TRISA9 = 0;
+    led1 = 0;
+    led2 = 0;
 
     // activation de la priorité des interruptions
     _NSTDIS = 0;
 
-    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_ON & T2_SOURCE_INT, 0x09FF);
+    //On ouvre le Timer2 qui gère l'asservissement toutes les 10ms
+    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_OFF & T2_SOURCE_INT, 0x600);
     ConfigIntTimer2(T2_INT_PRIOR_3 & T2_INT_ON); //Interruption ON et priorité 3
 
-
+    //On ouvre le module QEI qui compte les tics
     OpenQEI1(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1 & QEI_NORMAL_IO & QEI_MODE_x4_MATCH & QEI_UP_COUNT,0);
     OpenQEI2(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1 & QEI_NORMAL_IO & QEI_MODE_x4_MATCH & QEI_UP_COUNT,0);
-    ConfigIntQEI1(QEI_INT_DISABLE);
-    ConfigIntQEI2(QEI_INT_DISABLE);
-    //WriteQEI1(65535);        //Valeur pour déclancher l'interruption du module QEI
-    //WriteQEI2(65535);        //Valeur pour déclancher l'interruption du module QEI
-
-    Init_PWM();
-
-    _QEA1R = 5;     //Module QEI 1 phase A sur RB5
-    _QEB1R = 6;     //Module QEI 1 phase B sur RB6
-
-    _QEA2R = 7;     //Module QEI 2 phase A sur RB7
-    _QEB2R = 8;     //Module QEI 2 phase B sur RB8
-
-
-
-    POS1CNT = 0;
+    _QEA1R = 9;     //Module QEI 1 phase A sur RP9, RB9
+    _QEB1R = 22;    //Module QEI 1 phase B sur RP22, RC6
+    _QEA2R = 23;    //Module QEI 2 phase A sur RP23, RC7
+    _QEB2R = 24;    //Module QEI 2 phase B sur RP24, RC8
+    POS1CNT = 0;    // 0 tic pour l'instant
     POS2CNT = 0;
 
-
+    Init_PWM();     //Fonction d'initialisation du PWM
 }
 
 /******************************************************************************/
@@ -145,84 +137,273 @@ void InitApp(void)
     volatile int16_t ticg = 0, old_ticg = 0, diffg = 0;
     volatile int32_t compteur_ticd = 0;
     volatile int32_t compteur_ticg = 0;
-    volatile float Consigne_Vitesse = 0.0;
-    volatile float Consigne_Theta = 0.0;
+    volatile float Consigne_Vitesse = 0.0, Consigne_Omega = 0.0, Consigne_Distance = 0.0, Consigne_Theta = 0.0;
+    volatile float Consigne_PosX = 0, Consigne_PosY = 0, Consigne_Thet = 0;
+    volatile char Mode_Consigne = 0;
 
-    volatile float KPv = 0, KDv = 0,KIv = 0;
-    volatile float Diff_Vitesse_Actu = 0, Diff_Vitesse_Old = 0, Diff_Vitesse_All = 0;
+    //Coeffs vitesse
+    volatile float KPv = 0, KDv = 0, KIv = 0;
+    volatile float Vitesse_Actu;
+    volatile float Diff_Vitesse_Actu = 0, Diff_Vitesse_Old = 0, Diff_Vitesse_All = 0, Diff_Vitesse_point = 0;
+    //Coeffs Omega
+    volatile float KPo = 0, KDo = 0, KIo = 0;
+    volatile float Omega_Actu;
+    volatile float Diff_Omega_Actu = 0, Diff_Omega_Old = 0, Diff_Omega_All = 0, Diff_Omega_point = 0;
+    //Coeffs Distance
+    volatile float KPd = 0, KDd = 0, KId = 0;
+    volatile float Distance_Actu = 0;
+    volatile float Diff_Distance_Actu = 0, Diff_Distance_Old = 0, Diff_Distance_All = 0, Diff_Distance_point = 0;
+    //Coeffs Theta
     volatile float KPt = 0, KDt = 0, KIt = 0;
-    volatile float Diff_Theta_Actu = 0, Diff_Theta_Old = 0, Diff_Theta_All = 0;
-    //volatile float posx = 0.0, posy = 0.0;
-   // volatile float posx = 0.0, posy = 0.0;
-
-/* TODO Add interrupt routine code here. */
+    volatile float Theta_Actu;
+    volatile float Diff_Theta_Actu = 0, Diff_Theta_Old = 0, Diff_Theta_All = 0, Diff_Theta_point = 0;
 
 void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 {
-    float Vitesse_Actu, Theta_Actu;
-    float Consigne_Commune, Consigne_Diff;
+    float Consigne_Commune, Consigne_Diff, Consigne_Vitesse_Commune, Consigne_Vitesse_Diff;
     char Overshoot = 0;
 
-    led = led^1;    // On bascule l'état de la LED
-    ticd = (int16_t) POS1CNT;// ReadQEI1();
+    // On lit l'encodeur droit (qui est en fait le gauche)
+    ticd = (int16_t) POS1CNT;// ReadQEI2();
     diffd = ticd-old_ticd;
     old_ticd = ticd;
     compteur_ticd += diffd;
 
-    ticg = (int16_t) POS2CNT;// ReadQEI2();
+    // On lit l'encodeur gauche (qui est en fait le droit)
+    ticg = (int16_t) POS2CNT;// ReadQEI1();
     diffg = ticg-old_ticg;
     old_ticg = ticg;
     compteur_ticg += diffg;
 
-    Incremente_Position(diffd, diffg, &Vitesse_Actu, &Theta_Actu);      // mise à jour de la position actuelle, récupération de la vitesse et de l'angle
+//    if (Mode_Consigne == 3)  Distance_Actu = 0;
 
-    Mise_A_Jour_Consignes(&Consigne_Vitesse, &Consigne_Theta, Vitesse_Actu);
+    // Mise à jour de la position actuelle, récupération des vitesses et position
+    Incremente_Position(diffd, diffg, &Vitesse_Actu, &Omega_Actu, &Distance_Actu, &Theta_Actu);
 
-    Vitesse_Actu *= 1000;       // (fournie en metres/milisecondes)
+    //On choisit le mode de déplacement et on met à jour les consignes si besoin
+    Mise_A_Jour_Consignes();
 
-    Diff_Vitesse_Actu = Consigne_Vitesse - Vitesse_Actu;        // calcul de la difference entre réel et consigne
-    Diff_Theta_Actu = Consigne_Theta - Theta_Actu;
+//    if(Mode_Consigne <= 3)
+//    {
+//        /*      PID sue la position     */
+//
+//        // Calcul de l'erreur de position
+//        Diff_Distance_Actu = Consigne_Distance - Distance_Actu;
+//        Diff_Theta_Actu = Consigne_Theta - Theta_Actu;
+//
+//        // Intégrale de l'erreur de position
+//        Diff_Theta_All += Diff_Theta_Actu;
+//        Diff_Distance_All += Diff_Distance_Actu;
+//
+//        // Dérivé de l'erreur de position
+//        Diff_Distance_point = Diff_Distance_Old - Diff_Distance_Actu;
+//        Diff_Theta_point = Diff_Theta_Old - Diff_Theta_Actu;
+//
+//        // overshoot ???
+//        if (Diff_Distance_All > 1500.0)
+//        {   Diff_Distance_All = 1500.0;  Overshoot = 1;  }
+//        if (Diff_Distance_All < -1500.0)
+//        {   Diff_Distance_All = -1500.0; Overshoot = 1;  } // 1500 = 3m/S * 1/2 seconde à 1000 coups d'interupti/s
+//        if (Diff_Theta_All > 1500.0)
+//        {   Diff_Theta_All = 1500.0;    Overshoot = 1;  }
+//        if (Diff_Theta_All < -1500.0)
+//        {   Diff_Theta_All = -1500.0;   Overshoot = 1;  }       // 1500 ~=  PI * 1/2 seconde à 1000 coups d'interrupt/s
+//
+//
+//        // Calcul des consignes de position
+//        Consigne_Commune = KPd * Diff_Distance_Actu + KId * Diff_Distance_All + KDd * Diff_Distance_point;
+//        Consigne_Diff = KPt * Diff_Theta_Actu + KIt * Diff_Theta_All + KDt * Diff_Theta_point;
+//
+//        Diff_Vitesse_Actu = Consigne_Commune - Vitesse_Actu;
+//        Diff_Omega_Actu = Consigne_Diff - Omega_Actu;
+//    }
+//    else
+//    {
+//        Diff_Vitesse_Actu = Consigne_Vitesse - Vitesse_Actu;
+//        Diff_Omega_Actu = Consigne_Omega - Omega_Actu;
+//    }
 
-    Diff_Theta_All += Diff_Theta_Actu;                  // mise à jour du terme intégral
+    /*      PID sur la vitesse     */
+
+    // Calcul de l'erreur de vitesse
+    Diff_Vitesse_Actu = Consigne_Vitesse - Vitesse_Actu;
+    Diff_Omega_Actu = Consigne_Omega - Omega_Actu;
+
+    // Intégral de l'erreur de vitesse
     Diff_Vitesse_All += Diff_Vitesse_Actu;
+    Diff_Omega_All += Diff_Omega_Actu;
 
-    // overshoot
-
-    if (Diff_Vitesse_All > 1500.0)
-    {   Diff_Vitesse_All = 1500.0;  Overshoot = 1;  }
-    if (Diff_Vitesse_All < -1500.0)
-    {   Diff_Vitesse_All = -1500.0; Overshoot = 1;  } // 1500 = 3m/S * 1/2 seconde à 1000 coups d'interupti/s
-    if (Diff_Theta_All > 1500.0)
-    {   Diff_Theta_All = 1500.0;    Overshoot = 1;  }
-    if (Diff_Theta_All < -1500.0)
-    {   Diff_Theta_All = -1500.0;   Overshoot = 1;  }       // 1500 ~=  PI * 1/2 seconde à 1000 coups d'interrupt/s
+    // Dérivé de l'erreur de position
+    Diff_Vitesse_point = Diff_Vitesse_Old - Diff_Vitesse_Actu;
+    Diff_Omega_point = Diff_Omega_Old - Diff_Omega_Actu;
 
 
-    // calcul des consignes
-    Consigne_Commune = KPv * Diff_Vitesse_Actu + KIv * Diff_Vitesse_All + KDv * (Diff_Vitesse_Old - Diff_Vitesse_Actu);
-    Consigne_Diff = KPt * Diff_Theta_Actu + KIt * Diff_Theta_All + KDt * (Diff_Theta_Old - Diff_Theta_Actu);
+    // Calcul des consignes de vitesse
+    Consigne_Vitesse_Commune = KPv * Diff_Vitesse_Actu + KIv * Diff_Vitesse_All + KDv * Diff_Vitesse_point;
+    Consigne_Vitesse_Diff = KPo * Diff_Omega_Actu + KIo * Diff_Omega_All + KDo * Diff_Omega_point;
 
+    // Calcul des consignes moteurs
+    Set_Vitesse_MoteurD(Consigne_Vitesse_Commune - 2*Consigne_Vitesse_Diff); //ou Diff/2
+    Set_Vitesse_MoteurG(Consigne_Vitesse_Commune + 2*Consigne_Vitesse_Diff);
 
-    Diff_Theta_Old = Diff_Theta_Actu;               // mise à jour de la precedente valeur (pour le terme differentiel)
+    // Mise à jour de la precedente valeur (pour le terme differentiel)
     Diff_Vitesse_Old = Diff_Vitesse_Actu;
-
-
-    Set_Vitesse_MoteurD(Consigne_Commune + Consigne_Diff);        // calcul des consignes moteurs
-    Set_Vitesse_MoteurG(Consigne_Commune - Consigne_Diff);             // NIM: C'est pas Consigne_Diff/2 ?
-
+    Diff_Omega_Old = Diff_Omega_Actu;
+    Diff_Distance_Old = Diff_Distance_Actu;
+    Diff_Theta_Old = Diff_Theta_Actu;
 
     _T2IF = 0;      // On baisse le FLAG
 }
 
+void Mise_A_Jour_Consignes(void)
+{
+    //float Distance, Angle;
+
+    switch(Mode_Consigne)
+    {
+        case 0:
+            //A implementer
+            break;
+        case 1:
+            //Distance : Rien à modifier
+            break;
+        case 2:
+            //Angle : Rien à modifier
+            break;
+        case 3:
+            Consigne_Theta = Get_Consigne_Angle(Consigne_PosX, Consigne_PosY) - Get_Angle();
+            Consigne_Distance = Get_Consigne_Distance(Consigne_PosX, Consigne_PosY);
+            if(Consigne_Distance < 0.2)
+            {
+                Consigne_Theta = Get_Angle();
+                float Ajustement = Get_Consigne_Distance(Consigne_PosX, Consigne_PosY);
+                if(fabs(Consigne_Theta) > 1.5704) Ajustement = - Ajustement;
+                Set_Consigne_Distance(Ajustement);
+            }
+            else if(fabs(Consigne_Theta) > 1.5704) Consigne_Distance = -Consigne_Distance;
+            //TODO Rajouter une condition d'arret
+            //Distance_Actu = 0;
+            break;
+        case 4:
+            //Vitesse : Rien à modifier
+            break;
+        case 5:
+            //Omega : Rien à modifier
+            break;
+        case 6:
+            //Vitesse et Omega : Rien à modifier
+            break;
+    }
+}
+
+/******************* Consignes ******************************/
+
+void Set_Consigne_Distance(float Consigne)
+{
+    Distance_Actu = 0;
+    Consigne_Distance = Consigne;
+    Mode_Consigne = 1;
+}
+
+void Set_Consigne_Angle(float Consigne)
+{
+    Consigne_Theta = Consigne;
+    Mode_Consigne = 2;
+}
+
+void Set_Consigne_Position(float New_Consigne_PosX, float New_Consigne_PosY)
+{
+    Consigne_PosX = New_Consigne_PosX;
+    Consigne_PosY = New_Consigne_PosY;
+    Mode_Consigne = 3;
+}
+
+void Set_Consigne_Vitesse(float Consigne)
+{
+    Consigne_Vitesse = Consigne;
+    Mode_Consigne = 4;
+}
+
+void Set_Consigne_Omega(float Consigne)
+{
+    Consigne_Omega = Consigne;
+    Mode_Consigne = 5;
+}
+
+void Set_Consigne_Courbe(float Consigne_V, float Consigne_O)
+{
+    Consigne_Omega = Consigne_O;
+    Consigne_Vitesse = Consigne_V;
+    Mode_Consigne = 6;
+}
+
+/****************** bridge atp ********************************/
+
+// GETs position
+void OnGetPos() {
+    float x, y, theta;
+    Get_Position(&x, &y, &theta);
+    SendPos(x, y, theta);
+}
+void OnGetAngle() { SendAngle(Theta_Actu); }
+
+// GETs vitesse
+void OnGetVit() { SendVit(Vitesse_Actu); }
+void OnGetOmega() { SendOmega(Omega_Actu); }
+void OnGetCourbe() { SendCourbe(Vitesse_Actu, Omega_Actu); }
+
+// GETs coefs
+void OnGetAsservD() { SendAsservD(KPd, KId, KDd); }
+void OnGetAsservO() { SendAsservO(KPo, KIo, KDo); }
+void OnGetAsservT() { SendAsservT(KPt, KIt, KDt); }
+void OnGetAsservV() { SendAsservV(KPv, KIv, KDv); }
+
+// SETs position
+void OnStop() { Set_Consigne_Distance(0); }
+void OnSetPos(float x, float y) { Set_Consigne_Position(x, y); }
+void OnSetAngle(float theta) { Set_Consigne_Angle(theta); }
+void OnSetDist(float dist) { Set_Consigne_Distance(dist); }
+
+// SETs vitesse
+void OnSetVit(float v) { Set_Consigne_Vitesse(v); }
+void OnSetOmega(float omega) { Set_Consigne_Omega(omega); }
+void OnSetCourbe(float v, float omega) { Set_Consigne_Courbe(v, omega); }
+
+// SETs coefs
+void OnSetAsservD(float KPd_new, float KId_new, float KDd_new) { Set_Asserv_V(KPv_new, KDv_new, KIv_new); }
+void OnSetAsservO(float KPo_new, float KIo_new, float KDo_new) { Set_Asserv_O(KPo_new, KDo_new, KIo_new); }
+void OnSetAsservT(float KPt_new, float KIt_new, float KDt_new) { Set_Asserv_D(KPd_new, KDd_new, KId_new); }
+void OnSetAsservV(float KPv_new, float KIv_new, float KDv_new) { Set_Asserv_T(KPt_new, KDt_new, KIt_new); }
+
+/****************** Coefs asserv ******************************/
+
 void Set_Asserv_V(float KPv_new, float KDv_new, float KIv_new)
 {
+    //Coeffs de l'asserv sur la vitesse linéaire
     KPv = KPv_new;
     KDv = KDv_new;
     KIv = KIv_new;
 }
 
+void Set_Asserv_O(float KPo_new, float KDo_new, float KIo_new)
+{
+    //Coeffs de l'asserv sur la vitesse angulaire
+    KPo = KPo_new;
+    KDo = KDo_new;
+    KIo = KIo_new;
+}
+
+void Set_Asserv_D(float KPd_new, float KDd_new, float KId_new)
+{
+    //Coeffs de l'asserv sur la distance
+    KPd = KPd_new;
+    KDd = KDd_new;
+    KId = KId_new;
+}
+
 void Set_Asserv_T(float KPt_new, float KDt_new, float KIt_new)
 {
+    //Coeffs de l'asserv sur theta
     KPt = KPt_new;
     KDt = KDt_new;
     KIt = KIt_new;

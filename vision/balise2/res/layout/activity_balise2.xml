@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
@@ -7,5 +7,21 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/balise2_activity_surface_view" />
+	<LinearLayout android:id="@+id/linearLayout1" android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <Button android:text="Manuel" 
+                android:id="@+id/mode" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:onClick="changeMode"/>
+                
+        <TextView
+	    	android:id="@+id/isConnectedRobot"
+	   		android:layout_width="wrap_content"
+	   		android:layout_height="wrap_content"
+	    	android:text="Robot: "
+	    	android:textAppearance="?android:attr/textAppearanceMedium" />
+    </LinearLayout>
 
-</LinearLayout>
+	
+
+</FrameLayout>

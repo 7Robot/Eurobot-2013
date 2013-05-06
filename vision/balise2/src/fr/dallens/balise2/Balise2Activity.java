@@ -5,53 +5,93 @@ import java.io.IOException;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
+
 import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.Utils;
-import org.opencv.imgproc.Imgproc;
+
+
+import fr.dallens.balise2.R;
+
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Point;
 import android.view.Menu;
-import android.view.MenuItem;
+
 import android.view.MotionEvent;
-import android.view.WindowManager;
-import android.view.View.OnTouchListener;
+import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.TextView;
+
 import android.util.Log;
 
-public class Balise2Activity extends Activity implements CvCameraViewListener, OnTouchListener {
 
-	public enum ClickAction {
-		None,
-		CalibrateBlue,
-		CalibrateRed,
-		Distort
-	}
+public class Balise2Activity extends Activity implements CvCameraViewListener2	 {
+
+	private enum Mode {AUTO, MANUEL};
+	
+	private Mode mode = Mode.AUTO;
+	private int pos; // Sur quelle balise on est
+	
+	// TODO private
+	public native void initJNI(long addrImRef);
+	public native int findColorsJNI(long addrImTar, long addrImOut);
+	public native int findColorsJNI2(float p1x, float p1y, float p2x, float p2y, float p3x, float p3y, float p4x, float p4y, long addrImOut);
+	public native void setPosition(int position);
+	
+	private boolean candlesInit = false;
+	private boolean processingFrame = false;
+	private Candles candles = new Candles();
+	private CommunicationRobot commRobot;
+	
+	
 	
     private static final String  TAG = "Balise2::Activity";
+    
+    private ColorBall[] colorballs = new ColorBall[4]; // array that holds the balls
+    private int balID = 0; // variable to know what ball is being dragged
 
     private CameraBridgeViewBase mOpenCvCameraView;
-    private Mat mRgba;
-    private Mat mHsv;
-    private Mat mMaskBlue;
-    private Mat mMaskRed;
     
-    private Mat mFakePic;
-    private boolean mFaking = true; // Wether to replace the camera picture.
+    public void initBalls() {
+        // setting the start point for the balls
+    	float ratio = (float) ((float)240/480.0);
+    	System.out.println("Ration "+ratio);
+        Point point1 = new Point();
+        point1.x = Math.round(448*ratio);
+        point1.y = Math.round(66*ratio);
+        Point point2 = new Point();
+        point2.x = Math.round(249*ratio);
+        point2.y = Math.round(153*ratio);
+        Point point3 = new Point();
+        point3.x = Math.round(252*ratio);
+        point3.y = Math.round(233*ratio);
+        Point point4 = new Point();
+        point4.x = Math.round(373*ratio);
+        point4.y = Math.round(386*ratio);
+        
+                      
+        // declare each ball with the ColorBall class
+        colorballs[0] = new ColorBall(point1);
+        colorballs[1] = new ColorBall(point2);
+        colorballs[2] = new ColorBall(point3);
+        colorballs[3] = new ColorBall(point4);
+        
+        
+    }
     
-    private ClickAction mClickAction = ClickAction.None;
-    
-    private Scalar mColorBlue = new Scalar(0, 100, 100, 255); // TODO
-    private Scalar mColorRed  = new Scalar(150, 100, 100, 255);
-
-    private Scalar mColorRadius = new Scalar(25, 50, 50, 0);
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -59,10 +99,12 @@ public class Balise2Activity extends Activity implements CvCameraViewListener, O
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS:
                     Log.i(TAG, "OpenCV loaded successfully");
-            		
+                    candlesInit = true;
                     // Now enable camera view to start receiving frames.
-                    mOpenCvCameraView.setOnTouchListener(Balise2Activity.this);
                     mOpenCvCameraView.enableView();
+                    System.loadLibrary("bougiesjni");
+                    init();
+                    setPosition(pos);
                     break;
                 default:
                     super.onManagerConnected(status);
@@ -70,17 +112,55 @@ public class Balise2Activity extends Activity implements CvCameraViewListener, O
             }
         }
     };
+    
+    private void init() {
+    	try {
+			Mat refImMat = new Mat();
+			if (pos == 4)
+				refImMat = Utils.loadResource(Balise2Activity.this, R.drawable.balise3mini, Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+			else if (pos == 3)
+				refImMat = Utils.loadResource(Balise2Activity.this, R.drawable.bf1, Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+			Log.v("Msg", String.format("Initializing bougiesJNI %d", refImMat.type()));
+			initJNI(refImMat.getNativeObjAddr());
+			Log.v("Msg", "bougiesJNI initialized");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v("Msg", "bougiesJNI loaded");
+        initBalls();
+        
+        Intent intent = getIntent();
+        pos = intent.getIntExtra("pos", 1);
+        String addressRobot = intent.getStringExtra("addressRobot");
+        commRobot = new CommunicationRobot();
+        commRobot.setCandles(candles);
+		commRobot.connect(addressRobot);
+        Thread commRobotThread = new Thread(commRobot);
+		commRobotThread.start();
+        
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.activity_balise2);
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.balise2_activity_surface_view);
+        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+        
+        
+        TextView robotConnectedLabel = (TextView)findViewById(R.id.isConnectedRobot);
+        if (commRobot.isConnected) {
+        	robotConnectedLabel.setText("Robot: connected.");
+        	
+        }
+        else {
+        	robotConnectedLabel.setText("Robot: NOT connected.");
+        }
     }
 
     @Override
@@ -110,119 +190,142 @@ public class Balise2Activity extends Activity implements CvCameraViewListener, O
         getMenuInflater().inflate(R.menu.activity_balise2, menu);
         return true;
     }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Log.i(TAG, "Menu Item selected " + item);
-
-		switch (item.getItemId()) {
-		case R.id.menu_fake_picture:
-			mFaking = !mFaking;
-			item.setChecked(mFaking);
-			break;
-		case R.id.menu_calibrate_colors:
-			mClickAction = ClickAction.CalibrateBlue;
-			break;
-		case R.id.menu_fix_distorsions:
-			mClickAction = ClickAction.Distort;
-			break;
-		}
-		
-		return super.onOptionsItemSelected(item);
+    
+    
+    public void changeMode(View view) {
+    	Button button = (Button)findViewById(R.id.mode);
+    	if (mode == Mode.AUTO) {
+    		mode = Mode.MANUEL;
+    		button.setText("Auto");
+    	}
+    	else {
+    		mode = mode.AUTO;
+    		button.setText("Manuel");
+    	}
     }
 
-    @Override
-	public void onCameraViewStarted(int width, int height) {
-        mRgba = new Mat(height, width, CvType.CV_8UC4);
-        mHsv  = new Mat(height, width, CvType.CV_8UC4);
-        mMaskRed = new Mat(height, width, CvType.CV_8UC3);
-        mMaskBlue = new Mat(height, width, CvType.CV_8UC3);
+
+    public void onCameraViewStarted(int width, int height) {
     }
 
-    @Override
-	public void onCameraViewStopped() {
-        mRgba.release();
+    public void onCameraViewStopped() {
     }
 
-    @Override
-	public Mat onCameraFrame(Mat inputFrame) {
-        if(mFaking) {
-        	if(mFakePic == null) {
-        		try {
-        			Mat mTmp = Utils.loadResource(Balise2Activity.this, R.drawable.balise1);
-        			mFakePic = new Mat();
-                	Imgproc.resize(mTmp, mFakePic, inputFrame.size());
-                	Imgproc.cvtColor(mFakePic, mFakePic, Imgproc.COLOR_BGR2RGB); // OpenCV format is BGR.
-        		} catch (IOException e) {
-        			Log.e(TAG, "Cannot load resource.", e);
-        		}
-        	}
-        	inputFrame = mFakePic;
-        }
-        inputFrame.copyTo(mRgba);
-        
-        Imgproc.blur(mRgba, mRgba, new Size(4, 4));
-        
-        Imgproc.cvtColor(mRgba, mHsv, Imgproc.COLOR_RGB2HSV_FULL);
-        Core.inRange(mHsv, GetLowerBound(mColorBlue), GetUpperBound(mColorBlue), mMaskBlue);
-        Core.inRange(mHsv, GetLowerBound(mColorRed), GetUpperBound(mColorRed), mMaskRed);
-        Core.bitwise_or(mMaskBlue, mMaskRed, mMaskBlue);
-        
-        if(mClickAction == ClickAction.None)
-        	return mMaskBlue;
-        else
-        	return mRgba;
-    }
+    public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+    	Mat output = inputFrame.rgba().clone();
 
-    @Override
-	public boolean onTouch(View view, MotionEvent event) {
-        int cols = mRgba.cols();
-        int rows = mRgba.rows();
+    	
+//    	candlesInit = false;
+    	if (candlesInit && !processingFrame) {
+    		processingFrame = true;
+	    	Mat tarImMat = new Mat();
+			Imgproc.cvtColor(inputFrame.rgba(), tarImMat, Imgproc.COLOR_BGR2GRAY);
+			Log.v("Msg", String.format("processing %dx%d", tarImMat.cols(), tarImMat.rows()));
+//	    	try {
+//	    		tarImMat = Utils.loadResource(Balise2Activity.this, R.drawable.balise4mini, Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+//	    	} catch (IOException e) {
+	    		
+//	    	}
+			// FIXME 640, 480
+//			Mat imOut = new Mat(tarImMat.cols()+640, Math.max(tarImMat.rows(), 480), CvType.CV_8UC4);
+//			Log.v("Msg", String.format("Finding the colors (JNI) %d %d", tarImMat.type(), imOut.type()));
+			int res;
+			if (mode == Mode.AUTO)
+				res = findColorsJNI(tarImMat.getNativeObjAddr(), output.getNativeObjAddr());
+			else
+				res = findColorsJNI2(colorballs[0].getX(), colorballs[0].getY(), colorballs[1].getX(), colorballs[1].getY(), colorballs[2].getX(), colorballs[2].getY(), colorballs[3].getX(), colorballs[3].getY(), output.getNativeObjAddr());
+			candles.setCandlesPos(res);
+			Log.v("Msg", candles.toString());
+			processingFrame = false;
+			Log.v("Msg", "processing done");
+			if ( res>=0 ) {
+				Log.v("Msg", "SUCCESS");
+//				Log.v("Msg", String.format("********* %d %d %d %d %d %d", imOut.type(), imOut.height(), imOut.width(), imOut.rows(), imOut.cols(), imOut.channels()));
 
-        int xOffset = (mOpenCvCameraView.getWidth()  - cols) / 2;
-        int yOffset = (mOpenCvCameraView.getHeight() - rows) / 2;
-
-        int x = (int)event.getX() - xOffset;
-        int y = (int)event.getY() - yOffset;
-
-        Log.i(TAG, "Touch image coordinates: (" + x + ", " + y + ")");
-        if ((x < 0) || (y < 0) || (x > cols) || (y > rows))
-        	return false;
-        
-        switch(mClickAction) {
-        case CalibrateBlue:
-        	mColorBlue = new Scalar(mHsv.get(y, x));
-        	mClickAction = ClickAction.CalibrateRed;
-        	break;
-        case CalibrateRed:
-        	mColorRed = new Scalar(mHsv.get(y, x));
-        	mClickAction = ClickAction.None;
-        	break;
-    	default:
-        }
-        
-        return false;
-    }
-
-    public Scalar GetLowerBound(Scalar hsvColor) {
-        Scalar lowerBound = new Scalar(0);
-
-        lowerBound.val[0] = hsvColor.val[0] - mColorRadius.val[0];
-        lowerBound.val[1] = hsvColor.val[1] - mColorRadius.val[1];
-        lowerBound.val[2] = hsvColor.val[2] - mColorRadius.val[2];
-        lowerBound.val[3] = 0;
-        
-        return lowerBound;
+				Mat imOut2 = new Mat();
+//				Imgproc.cvtColor(tarImMat, imOut2, Imgproc.COLOR_BGR2RGBA);
+				Imgproc.resize(output, imOut2, new Size(inputFrame.rgba().cols(), inputFrame.rgba().rows()));
+				
+				if (mode == Mode.MANUEL)
+				{
+					int i = 0;
+			    	for (ColorBall ball : colorballs) {
+			    		Core.circle(imOut2, new org.opencv.core.Point(ball.getX(), ball.getY()), 8, new Scalar(i, 0, 255-i), -2);
+			    		i+=50;
+			    	}
+				}
+				
+				Log.v("Msg", "converted");
+				return imOut2;
+			} else {
+				Log.v("Msg", "FAILURE");
+				return output;
+			}
+			
+    	} else {
+    		Log.v("Msg", "Displaying");
+    		return output;
+    	}
     }
     
-    public Scalar GetUpperBound(Scalar hsvColor) {
-        Scalar upperBound = new Scalar(0);
-
-        upperBound.val[0] = hsvColor.val[0] + mColorRadius.val[0];
-        upperBound.val[1] = hsvColor.val[1] + mColorRadius.val[1];
-        upperBound.val[2] = hsvColor.val[2] + mColorRadius.val[2];
-        upperBound.val[3] = 255;
+    
+    // events when touching the screen
+    public boolean onTouchEvent(MotionEvent event) {
+        int eventaction = event.getAction(); 
         
-        return upperBound;
+        int X = (int)event.getX(); 
+        int Y = (int)event.getY(); 
+        
+        Log.v("Touch", String.format("Touched %d %d", X, Y));
+//        System.out.println(String.format("Actiong %d", eventaction));
+
+        switch (eventaction ) { 
+
+        case MotionEvent.ACTION_DOWN: // touch down so check if the finger is on a ball
+        	balID = 0;
+        	for (ColorBall ball : colorballs) {
+        		// check if inside the bounds of the ball (circle)
+        		// get the center for the ball
+        		int centerX = ball.getX();
+        		int centerY = ball.getY();
+        		
+        		// calculate the radius from the touch to the center of the ball
+        		double radCircle  = Math.sqrt( (double) (((centerX-X)*(centerX-X)) + (centerY-Y)*(centerY-Y)));
+        		
+        		// if the radius is smaller then 23 (radius of a ball is 22), then it must be on the ball
+        		if (radCircle < 30){
+        			balID = ball.getID();
+        			System.out.println(String.format("Selected %d", balID));
+                    break;
+        		}
+
+        
+              }
+             
+             break; 
+
+
+        case MotionEvent.ACTION_MOVE:   // touch drag with the ball
+        	// move the balls the same as the finger
+            if (balID > 0) {
+            	System.out.println(String.format("Moving %d", balID));
+            	colorballs[balID-1].setX(X);
+            	colorballs[balID-1].setY(Y);
+            }
+        	
+            break; 
+
+        case MotionEvent.ACTION_UP: 
+       		// touch drop - just do things here after dropping
+
+             break; 
+        } 
+        // redraw the canvas
+        //invalidate(); 
+        return true; 
+	
     }
+    
+
+ 
 }

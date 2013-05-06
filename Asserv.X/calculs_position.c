@@ -22,12 +22,6 @@
 
 
     volatile float PosX = 0.0, PosY = 0.0, Theta = 0.0;
-    volatile float avancement = 0.0, delta_theta = 0.0;
-    volatile float Consigne_PosX = 0, Consigne_PosY = 0, Consigne_Thet = 0;
-    volatile float Consigne Vit = 0;
-    volatile float Vitesse_Max = 1; // M/s, à revoir dans le futur pour l'étalonage
-    volatile char Mode_Consigne = 0;
-
 
 
 void Set_Position(float NewX, float NewY)           // permet une mise à jour de la position, du robot
@@ -43,49 +37,50 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
      PosY = NewY;
  }
 
-
  void Get_Position (float* X, float* Y, float* angle)       // renvoie la position actuelle du robot
  {
      *X = PosX;
      *Y = PosY;
      *angle = Theta;
  }
- float Get_Distance (void)
+
+ float Get_Angle(void)
  {
-     return sqrt((PosX - Consigne_PosX)^2 + (PosY - Consigne_PosY)^2);
+     return Theta;
  }
 
- void Incremente_Position(int16_t Diff_D, int16_t Diff_G, float* Vitesse, float* Angle)
+ float Get_Consigne_Distance (float Consigne_PosX, float Consigne_PosY)            //renvoie la distance entre la consigne et la position actuelle
+ {
+     return sqrt(pow(PosX - Consigne_PosX, 2) + pow(PosY - Consigne_PosY, 2));
+ }
+
+ float Get_Consigne_Angle (float Consigne_PosX, float Consigne_PosY)             //renvoie l'angle entre la consigne et la position actuelle
+ {
+     //return atan((Consigne_PosX - PosX)/(Consigne_PosY - PosY));
+     return atan2(Consigne_PosX - PosX, Consigne_PosY - PosY);
+ }
+
+ void Incremente_Position(int16_t Diff_D, int16_t Diff_G, volatile float *Vitesse, volatile float *Omega, volatile float *Distance, volatile float *Angle)
  {
      float Avancement, Rotation;
 
-
      Avancement = (float)((Diff_D * METER_BY_TICD) + (Diff_G * METER_BY_TICG)) * 0.5;       // distance en metres parcourue par le milieu du robot
-     *Vitesse = Avancement; // correpond aussi à une vitesse : intervale de temps fixe
-     Rotation = (float)((Diff_D * METER_BY_TICD) - (Diff_G * METER_BY_TICG))/ LARGEUR_ROBOT;    // delta theta du robot
+     *Vitesse = Avancement*100; // correpond à une vitesse en m/s: intervale de temps fixe (10ms)
+     Rotation = (float)(Diff_D * METER_BY_TICD - Diff_G * METER_BY_TICG)/ LARGEUR_ROBOT;    // delta theta du robot
+     *Omega = Rotation;         //correspond à une vitesse angulaire en ??
 
-     PosX += Avancement * cos_lut(Theta);
-     PosY += Avancement * sin_lut(Theta);
+     *Distance += Avancement;
+     PosX += Avancement * sin(Theta);
+     PosY += Avancement * cos(Theta);
      Theta += Rotation;
 
      *Angle = Theta;
      //PosX = 0;
  }
 
- void Mise_A_Jour_Consignes(float* Consigne_Vitesse, float* Consigne_Theta, float Vitesse_Actu)
- {
-     float Distance;
-     if (Mode_Consigne == 0)
-     {
-         Distance = Get_Distance();
 
-     }
-     else
-     {
-         *Consigne_Theta = Consigne_Thet;
-         *Consigne_Vitesse = Consigne_Vit; // NIM: cette variable n'existe nulle part ailleurs :)
-     }
- }
+ 
+
 
  /* plan plateau
   * Y
