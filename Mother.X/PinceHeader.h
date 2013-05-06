@@ -1,7 +1,7 @@
 /*
 * Template dsPIC33F
 * Compiler : Microchip xC16
-* �C : 33FJ64MC802
+* �C : 33FJ64MC804
 * Juillet 2012
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -9,7 +9,7 @@
 *     / /  |    // _ \| '_ \ / _ \| __|
 *    / /   | |\ \ (_) | |_) | (_) | |_
 *   /_/    |_| \_\___/|____/ \___/'\__|
-*			      7robot.fr
+*                 7robot.fr
 */
 
 /******************************************************************************/
@@ -49,7 +49,7 @@
 
 /* TODO User level functions prototypes (i.e. InitApp) go here */
 
-void ConfigureOscillator(void);    /* Handles clock switching/osc initialization */
+void ConfigureOscillator(void); /* Handles clock switching/osc initialization */
 void InitApp(void);             /* I/O and Peripheral Initialization          */
 
 //protos AX12 pince
