@@ -50,31 +50,21 @@ void InitApp(void)
     // activation de la priorité des interruptions
     _NSTDIS = 0;
 
+    //On ouvre le Timer2 qui gère l'asservissement toutes les 10ms
     OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_OFF & T2_SOURCE_INT, 0x600);
     ConfigIntTimer2(T2_INT_PRIOR_3 & T2_INT_ON); //Interruption ON et priorité 3
 
-
+    //On ouvre le module QEI qui compte les tics
     OpenQEI1(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1 & QEI_NORMAL_IO & QEI_MODE_x4_MATCH & QEI_UP_COUNT,0);
     OpenQEI2(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1 & QEI_NORMAL_IO & QEI_MODE_x4_MATCH & QEI_UP_COUNT,0);
-//    ConfigIntQEI1(QEI_INT_DISABLE);
-//    ConfigIntQEI2(QEI_INT_DISABLE);
-    //WriteQEI1(65535);        //Valeur pour déclancher l'interruption du module QEI
-    //WriteQEI2(65535);        //Valeur pour déclancher l'interruption du module QEI
-
-    Init_PWM();
-
     _QEA1R = 9;     //Module QEI 1 phase A sur RP9, RB9
-    _QEB1R = 22;     //Module QEI 1 phase B sur RP22, RC6
-
-    _QEA2R = 23;     //Module QEI 2 phase A sur RP23, RC7
-    _QEB2R = 24;     //Module QEI 2 phase B sur RP24, RC8
-
-
-
-    POS1CNT = 0;
+    _QEB1R = 22;    //Module QEI 1 phase B sur RP22, RC6
+    _QEA2R = 23;    //Module QEI 2 phase A sur RP23, RC7
+    _QEB2R = 24;    //Module QEI 2 phase B sur RP24, RC8
+    POS1CNT = 0;    // 0 tic pour l'instant
     POS2CNT = 0;
 
-
+    Init_PWM();     //Fonction d'initialisation du PWM
 }
 
 /******************************************************************************/
@@ -144,12 +134,10 @@ void InitApp(void)
 
     volatile int16_t ticd = 0, old_ticd = 0, diffd = 0;
     volatile int16_t ticg = 0, old_ticg = 0, diffg = 0;
-//    volatile int32_t compteur_ticd = 0;
-//    volatile int32_t compteur_ticg = 0;
-    volatile float Consigne_Vitesse = 0.0;
-    volatile float Consigne_Omega = 0.0;
-    volatile float Consigne_Distance = 0.0;
-    volatile float Consigne_Theta = 0.0;
+    volatile int32_t compteur_ticd = 0;
+    volatile int32_t compteur_ticg = 0;
+    volatile float Consigne_Vitesse = 0.0, Consigne_Omega = 0.0, Consigne_Distance = 0.0, Consigne_Theta = 0.0;
+    volatile float Consigne_PosX = 0, Consigne_PosY = 0, Consigne_Thet = 0;
     volatile char Mode_Consigne = 0;
     volatile int nim = 0;
 
@@ -179,14 +167,16 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     // On lit l'encodeur droit (qui est en fait le gauche)
     ticd = (int16_t) POS1CNT;// ReadQEI2();
     diffd = ticd-old_ticd;
-//    old_ticd = ticd;
-//    compteur_ticd += diffd;
+    old_ticd = ticd;
+    compteur_ticd += diffd;
 
     // On lit l'encodeur gauche (qui est en fait le droit)
     ticg = (int16_t) POS2CNT;// ReadQEI1();
     diffg = ticg-old_ticg;
-//    old_ticg = ticg;
-//    compteur_ticg += diffg;
+    old_ticg = ticg;
+    compteur_ticg += diffg;
+
+    if(Mode_Consigne == 3)  Distance_Actu =0;
 
     // Mise à jour de la position actuelle, récupération des vitesses et position
     Incremente_Position(diffd, diffg, &Vitesse_Actu, &Omega_Actu, &Distance_Actu, &Theta_Actu);
@@ -200,7 +190,7 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 //    nim++;
 
     //On choisit le mode de déplacement et on met à jour les consignes si besoin
-    Mise_A_Jour_Consignes(Mode_Consigne, &Consigne_Distance, &Consigne_Theta, &Consigne_Vitesse, &Consigne_Omega);
+    Mise_A_Jour_Consignes();
 
     if(Mode_Consigne <= 3)
     {
@@ -262,8 +252,8 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     Consigne_Vitesse_Diff = KPo * Diff_Omega_Actu + KIo * Diff_Omega_All + KDo * Diff_Omega_point;
 
     // Calcul des consignes moteurs
-    Set_Vitesse_MoteurD(Consigne_Vitesse_Commune - Consigne_Vitesse_Diff/2);
-    Set_Vitesse_MoteurG(Consigne_Vitesse_Commune + Consigne_Vitesse_Diff/2);
+    Set_Vitesse_MoteurD(Consigne_Vitesse_Commune - Consigne_Vitesse_Diff); //ou Diff/2
+    Set_Vitesse_MoteurG(Consigne_Vitesse_Commune + Consigne_Vitesse_Diff);
     
     // Mise à jour de la precedente valeur (pour le terme differentiel)
     Diff_Vitesse_Old = Diff_Vitesse_Actu;
@@ -274,7 +264,80 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     _T2IF = 0;      // On baisse le FLAG
 }
 
-void Set_Asserv_V(float KPv_new, float KDv_new, float KIv_new)
+void Mise_A_Jour_Consignes(void)
+ {
+     //float Distance, Angle;
+
+    switch(Mode_Consigne)
+    {
+        case 0:
+            //A implementer
+            break;
+        case 1:
+            //Distance : Rien à modifier
+            break;
+        case 2:
+            //Angle : Rien à modifier
+            break;
+        case 3:
+            Consigne_Theta = Get_Angle(Consigne_PosX, Consigne_PosY);
+            Consigne_Distance = Get_Distance(Consigne_PosX, Consigne_PosY);
+            //TODO Rajouter une condition d'arret
+            //Distance_Actu = 0;
+            break;
+        case 4:
+            //Vitesse : Rien à modifier
+            break;
+        case 5:
+            //Omega : Rien à modifier
+            break;
+        case 6:
+            //Vitesse et Omega : Rien à modifier
+            break;
+    }
+ }
+
+ void Set_Consigne_Distance(float Consigne)
+ {
+     Distance_Actu = 0;
+     Consigne_Distance = Consigne;
+     Consigne_Theta = Consigne_Theta;
+     Mode_Consigne = 1;
+ }
+
+ void Set_Consigne_Angle(float Consigne)
+ {
+     Consigne_Theta = Consigne;
+     Mode_Consigne = 2;
+ }
+
+ void Set_Consigne(float New_Consigne_PosX, float New_Consigne_PosY)
+{
+    Consigne_PosX = New_Consigne_PosX;
+    Consigne_PosY = New_Consigne_PosY;
+    Mode_Consigne = 3;
+}
+
+ void Set_Consigne_Vitesse(float Consigne)
+ {
+     Consigne_Vitesse = Consigne;
+     Mode_Consigne = 4;
+ }
+
+ void Set_Consigne_Omega(float Consigne)
+ {
+     Consigne_Omega = Consigne;
+     Mode_Consigne = 5;
+ }
+
+ void Set_Consigne_Courbe(float Consigne_V, float Consigne_O)
+ {
+     Consigne_Omega = Consigne_O;
+     Consigne_Vitesse = Consigne_V;
+     Mode_Consigne = 6;
+ }
+
+ void Set_Asserv_V(float KPv_new, float KDv_new, float KIv_new)
 {
     //Coeffs de l'asserv sur la vitesse linéaire
     KPv = KPv_new;
@@ -305,4 +368,3 @@ void Set_Asserv_T(float KPt_new, float KDt_new, float KIt_new)
     KDt = KDt_new;
     KIt = KIt_new;
 }
-
