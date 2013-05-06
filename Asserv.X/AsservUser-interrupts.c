@@ -142,12 +142,14 @@ void InitApp(void)
 
     //Coeffs vitesse
     volatile float KPv = 0, KDv = 0, KIv = 0;
+    volatile float Vitesse_Actu;
     volatile float Diff_Vitesse_Actu = 0, Diff_Vitesse_Old = 0, Diff_Vitesse_All = 0, Diff_Vitesse_point = 0;
     //Coeffs Omega
-    volatile float KPo = 0, KDo = 0,KIo = 0;
+    volatile float KPo = 0, KDo = 0, KIo = 0;
+    volatile float Omega_Actu;
     volatile float Diff_Omega_Actu = 0, Diff_Omega_Old = 0, Diff_Omega_All = 0, Diff_Omega_point = 0;
     //Coeffs Distance
-    volatile float KPd = 0, KDd = 0,KId = 0;
+    volatile float KPd = 0, KDd = 0, KId = 0;
     volatile float Distance_Actu = 0;
     volatile float Diff_Distance_Actu = 0, Diff_Distance_Old = 0, Diff_Distance_All = 0, Diff_Distance_point = 0;
     //Coeffs Theta
@@ -157,7 +159,6 @@ void InitApp(void)
 
 void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 {
-    float Vitesse_Actu, Omega_Actu;
     float Consigne_Commune, Consigne_Diff, Consigne_Vitesse_Commune, Consigne_Vitesse_Diff;
     char Overshoot = 0;
 
@@ -254,8 +255,8 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 }
 
 void Mise_A_Jour_Consignes(void)
- {
-     //float Distance, Angle;
+{
+    //float Distance, Angle;
 
     switch(Mode_Consigne)
     {
@@ -284,22 +285,24 @@ void Mise_A_Jour_Consignes(void)
             //Vitesse et Omega : Rien à modifier
             break;
     }
- }
+}
 
- void Set_Consigne_Distance(float Consigne)
- {
-     Distance_Actu = 0;
-     Consigne_Distance = Consigne;
-     Mode_Consigne = 1;
- }
+/******************* Consignes ******************************/
 
- void Set_Consigne_Angle(float Consigne)
- {
-     Consigne_Theta = Consigne;
-     Mode_Consigne = 2;
- }
+void Set_Consigne_Distance(float Consigne)
+{
+    Distance_Actu = 0;
+    Consigne_Distance = Consigne;
+    Mode_Consigne = 1;
+}
 
- void Set_Consigne_Position(float New_Consigne_PosX, float New_Consigne_PosY)
+void Set_Consigne_Angle(float Consigne)
+{
+    Consigne_Theta = Consigne;
+    Mode_Consigne = 2;
+}
+
+void Set_Consigne_Position(float New_Consigne_PosX, float New_Consigne_PosY)
 {
     Consigne_PosX = New_Consigne_PosX;
     Consigne_PosY = New_Consigne_PosY;
@@ -324,6 +327,33 @@ void Set_Consigne_Courbe(float Consigne_V, float Consigne_O)
     Consigne_Vitesse = Consigne_V;
     Mode_Consigne = 6;
 }
+
+/****************** bridge atp ********************************/
+
+// GETs
+
+void OnGetPos() {
+    float x, y, theta;
+    Get_Position(&x, &y, &theta);
+    SendPos(x, y);
+}
+void OnGetAngle() { SendAngle(Theta_Actu); }
+void OnGetVit() { SendVit(Vitesse_Actu); }
+void OnGetOmega() { SendOmega(Omega_Actu); }
+void OnGetCourbe() { SendCourbe(Vitesse_Actu, Omega_Actu); }
+
+// SETs
+
+void OnStop() { Set_Consigne_Distance(0); }
+void OnSetPos(float x, float y) { Set_Consigne_Position(x, y); }
+void OnSetAngle(float theta) { Set_Consigne_Angle(theta); }
+void OnSetDist(float dist) { Set_Consigne_Distance(dist); }
+void OnSetVit(float v) { Set_Consigne_Vitesse(v); }
+void OnSetOmega(float omega) { Set_Consigne_Omega(omega); }
+void OnSetCourbe(float v, float omega) { Set_Consigne_Courbe(v, omega); }
+
+
+/****************** Coefs asserv ******************************/
 
 void Set_Asserv_V(float KPv_new, float KDv_new, float KIv_new)
 {

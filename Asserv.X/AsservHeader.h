@@ -67,7 +67,7 @@ void Set_Postion_Angle(float, float, float);  // remet totalement à jour la posi
 void Get_Position(float*, float*, float*);       // renvoie la position actuelle du robot
 float Get_Distance(float, float);          //renvoie la distance entre la consigne et la position actuelle
 float Get_Angle(float, float);             //renvoie l'angle entre la consigne et la position actuelle
-void Incremente_Position(int16_t, int16_t, float*, float*, volatile float*, volatile float*);     // recoie les tics, incremente la position, renvoie la vitesse et l'angle (pour l'asserv)
+void Incremente_Position(int16_t, int16_t, volatile float*, volatile float*, volatile float*, volatile float*);     // recoie les tics, incremente la position, renvoie la vitesse et l'angle (pour l'asserv)
 
  void Set_Consigne_Distance(float);
  void Set_Consigne_Angle(float);

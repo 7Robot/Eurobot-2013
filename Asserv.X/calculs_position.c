@@ -55,7 +55,7 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
      return atan2(Consigne_PosY - PosY, Consigne_PosX - PosX);
  }
 
- void Incremente_Position(int16_t Diff_D, int16_t Diff_G, float *Vitesse, float *Omega, volatile float *Distance, volatile float *Angle)
+ void Incremente_Position(int16_t Diff_D, int16_t Diff_G, volatile float *Vitesse, volatile float *Omega, volatile float *Distance, volatile float *Angle)
  {
      float Avancement, Rotation;
 

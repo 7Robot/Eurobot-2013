@@ -1,4 +1,4 @@
-// Generated from version 1303020239 of semantic
+// Generated from version 1305061627 of semantic
 
 #ifndef _ASSERV_H_
 #define _ASSERV_H_
@@ -17,13 +17,21 @@ void OnTest(unsigned char B, unsigned int H, unsigned long int I, char b, int h,
 
 void SendTest(unsigned char B, unsigned int H, unsigned long int I, char b, int h, long int i, float f);
 
-void OnDist(unsigned long int dist);
+void SendAngle(float theta);
+
+void SendCourbe(float v, float omega);
 
 void SendDone();
 
+void OnGetAngle();
+
+void OnGetCourbe();
+
+void OnGetOmega();
+
 void OnGetPos();
 
-void OnGoTo(float x, float y, float theta);
+void OnGetVit();
 
 void OnOdoBroadcastOff();
 
@@ -31,13 +39,25 @@ void OnOdoBroadcastOn();
 
 void OnOdoBroadcastSetDelay(unsigned int delay);
 
-void SendPos(float x, float y, float theta);
+void SendOmega(float omega);
 
-void OnSetPos(float x, float y, float theta);
+void SendPos(float x, float y);
 
-void OnSetSpeed(char v, char omega);
+void OnSetAngle(float theta);
+
+void OnSetCourbe(float v, float omega);
+
+void OnSetDist(float dist);
+
+void OnSetOmega(float omega);
+
+void OnSetPos(float x, float y);
+
+void OnSetVit(float v);
 
 void OnStop();
+
+void SendVit(float v);
 
 
 int AtpDecode(int id,
