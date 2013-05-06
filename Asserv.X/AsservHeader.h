@@ -37,10 +37,10 @@
 #define DIRB2 _LATA4    //DIRB2 sur RA4
 
 //arbitrairement
-#define TICS_BY_METERD 24331
-#define TICS_BY_METERG 24331
-#define METER_BY_TICD 0.0000411
-#define METER_BY_TICG 0.0000411
+#define TICS_BY_METERD 24500
+#define TICS_BY_METERG 24500
+#define METER_BY_TICD 0.00004
+#define METER_BY_TICG 0.00004
 #define LARGEUR_ROBOT 0.291       // 29.1cm entre encodeurs droite et gauche
 
 #define VITESSE_MAX 500
@@ -65,8 +65,9 @@ void Set_Asserv_T(float, float, float);
 void Set_Position(float, float);           // permet une mise à jour de la position, du robot
 void Set_Postion_Angle(float, float, float);  // remet totalement à jour la position
 void Get_Position(float*, float*, float*);       // renvoie la position actuelle du robot
-float Get_Distance(float, float);          //renvoie la distance entre la consigne et la position actuelle
-float Get_Angle(float, float);             //renvoie l'angle entre la consigne et la position actuelle
+float Get_Angle(void);
+float Get_Consigne_Distance(float, float);          //renvoie la distance entre la consigne et la position actuelle
+float Get_Consigne_Angle(float, float);             //renvoie l'angle entre la consigne et la position actuelle
 void Incremente_Position(int16_t, int16_t, volatile float*, volatile float*, volatile float*, volatile float*);     // recoie les tics, incremente la position, renvoie la vitesse et l'angle (pour l'asserv)
 
  void Set_Consigne_Distance(float);

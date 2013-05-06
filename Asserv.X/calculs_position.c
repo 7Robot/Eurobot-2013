@@ -44,15 +44,20 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
      *angle = Theta;
  }
 
- float Get_Distance (float Consigne_PosX, float Consigne_PosY)            //renvoie la distance entre la consigne et la position actuelle
+ float Get_Angle(void)
+ {
+     return Theta;
+ }
+
+ float Get_Consigne_Distance (float Consigne_PosX, float Consigne_PosY)            //renvoie la distance entre la consigne et la position actuelle
  {
      return sqrt(pow(PosX - Consigne_PosX, 2) + pow(PosY - Consigne_PosY, 2));
  }
 
- float Get_Angle (float Consigne_PosX, float Consigne_PosY)             //renvoie l'angle entre la consigne et la position actuelle
+ float Get_Consigne_Angle (float Consigne_PosX, float Consigne_PosY)             //renvoie l'angle entre la consigne et la position actuelle
  {
      //return atan((Consigne_PosX - PosX)/(Consigne_PosY - PosY));
-     return atan2(Consigne_PosY - PosY, Consigne_PosX - PosX);
+     return atan2(Consigne_PosX - PosX, Consigne_PosY - PosY);
  }
 
  void Incremente_Position(int16_t Diff_D, int16_t Diff_G, volatile float *Vitesse, volatile float *Omega, volatile float *Distance, volatile float *Angle)
@@ -65,8 +70,8 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
      *Omega = Rotation;         //correspond à une vitesse angulaire en ??
 
      *Distance += Avancement;
-     PosX += Avancement * cos(Theta);
-     PosY += Avancement * sin(Theta);
+     PosX += Avancement * sin(Theta);
+     PosY += Avancement * cos(Theta);
      Theta += Rotation;
 
      *Angle = Theta;

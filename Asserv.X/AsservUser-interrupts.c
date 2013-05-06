@@ -15,6 +15,7 @@
 #include <p33Fxxxx.h>      /* Includes device header file                     */
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
+#include <math.h>
 
 /******************************************************************************/
 /* Files to Include                                                           */
@@ -242,8 +243,8 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     Consigne_Vitesse_Diff = KPo * Diff_Omega_Actu + KIo * Diff_Omega_All + KDo * Diff_Omega_point;
 
     // Calcul des consignes moteurs
-    Set_Vitesse_MoteurD(Consigne_Vitesse_Commune - Consigne_Vitesse_Diff); //ou Diff/2
-    Set_Vitesse_MoteurG(Consigne_Vitesse_Commune + Consigne_Vitesse_Diff);
+    Set_Vitesse_MoteurD(Consigne_Vitesse_Commune - 2*Consigne_Vitesse_Diff); //ou Diff/2
+    Set_Vitesse_MoteurG(Consigne_Vitesse_Commune + 2*Consigne_Vitesse_Diff);
 
     // Mise à jour de la precedente valeur (pour le terme differentiel)
     Diff_Vitesse_Old = Diff_Vitesse_Actu;
@@ -270,8 +271,16 @@ void Mise_A_Jour_Consignes(void)
             //Angle : Rien à modifier
             break;
         case 3:
-            Consigne_Theta = Get_Angle(Consigne_PosX, Consigne_PosY);
-            Consigne_Distance = Get_Distance(Consigne_PosX, Consigne_PosY);
+            Consigne_Theta = Get_Consigne_Angle(Consigne_PosX, Consigne_PosY) - Get_Angle();
+            Consigne_Distance = Get_Consigne_Distance(Consigne_PosX, Consigne_PosY);
+            if(Consigne_Distance < 0.2)
+            {
+                Consigne_Theta = Get_Angle();
+                float Ajustement = Get_Consigne_Distance(Consigne_PosX, Consigne_PosY);
+                if(fabs(Consigne_Theta) > 1.5704) Ajustement = - Ajustement;
+                Set_Consigne_Distance(Ajustement);
+            }
+            else if(fabs(Consigne_Theta) > 1.5704) Consigne_Distance = -Consigne_Distance;
             //TODO Rajouter une condition d'arret
             //Distance_Actu = 0;
             break;
