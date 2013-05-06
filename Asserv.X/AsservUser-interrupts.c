@@ -335,7 +335,7 @@ void Set_Consigne_Courbe(float Consigne_V, float Consigne_O)
 void OnGetPos() {
     float x, y, theta;
     Get_Position(&x, &y, &theta);
-    SendPos(x, y);
+    SendPos(x, y, theta);
 }
 void OnGetAngle() { SendAngle(Theta_Actu); }
 void OnGetVit() { SendVit(Vitesse_Actu); }

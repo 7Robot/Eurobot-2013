@@ -69,6 +69,7 @@ int16_t main(void)
 
     //float angle = 0;
 
+    Set_Consigne_Vitesse(0.5);
     while(1)
     {
         //Set_Vitesse_MoteurG(800);
@@ -76,7 +77,7 @@ int16_t main(void)
         led1 = led1 ^ 1;
         //Set_Consigne_Distance(0.5);
         //Set_Consigne_Angle(-2*1.5707);
-        Set_Consigne_Position(0.5,0.5);
+        //Set_Consigne_Position(0.5,0.5);
         __delay_ms(10000);
 
 

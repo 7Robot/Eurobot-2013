@@ -41,7 +41,7 @@ void OnOdoBroadcastSetDelay(unsigned int delay);
 
 void SendOmega(float omega);
 
-void SendPos(float x, float y);
+void SendPos(float x, float y, float theta);
 
 void OnSetAngle(float theta);
 
