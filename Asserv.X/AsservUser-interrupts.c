@@ -1,7 +1,7 @@
 /*
 * Asserv dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* µC : 33FJ64MC804
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -139,10 +139,9 @@ void InitApp(void)
     volatile float Consigne_Vitesse = 0.0, Consigne_Omega = 0.0, Consigne_Distance = 0.0, Consigne_Theta = 0.0;
     volatile float Consigne_PosX = 0, Consigne_PosY = 0, Consigne_Thet = 0;
     volatile char Mode_Consigne = 0;
-    volatile int nim = 0;
 
-    //Coeffa vitesse
-    volatile float KPv = 0, KDv = 0,KIv = 0;
+    //Coeffs vitesse
+    volatile float KPv = 0, KDv = 0, KIv = 0;
     volatile float Diff_Vitesse_Actu = 0, Diff_Vitesse_Old = 0, Diff_Vitesse_All = 0, Diff_Vitesse_point = 0;
     //Coeffs Omega
     volatile float KPo = 0, KDo = 0,KIo = 0;
@@ -155,8 +154,6 @@ void InitApp(void)
     volatile float KPt = 0, KDt = 0, KIt = 0;
     volatile float Theta_Actu;
     volatile float Diff_Theta_Actu = 0, Diff_Theta_Old = 0, Diff_Theta_All = 0, Diff_Theta_point = 0;
-
-/* TODO Add interrupt routine code here. */
 
 void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 {
@@ -176,18 +173,10 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     old_ticg = ticg;
     compteur_ticg += diffg;
 
-    if(Mode_Consigne == 3)  Distance_Actu =0;
+    if (Mode_Consigne == 3)  Distance_Actu = 0;
 
     // Mise à jour de la position actuelle, récupération des vitesses et position
     Incremente_Position(diffd, diffg, &Vitesse_Actu, &Omega_Actu, &Distance_Actu, &Theta_Actu);
-
-    //SendText("dd: %i, df: %i, va:%f", diffd, diffg, Vitesse_Actu); LOL
-//    if (nim > 990 && nim<1000) {
-//        SendPos((float)compteur_ticd, (float)compteur_ticg, Vitesse_Actu);
-//        //nim++;
-//    } else if (nim > 10000) nim = 0;
-//    //SendError();
-//    nim++;
 
     //On choisit le mode de déplacement et on met à jour les consignes si besoin
     Mise_A_Jour_Consignes();
@@ -232,7 +221,7 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
         Diff_Omega_Actu = Consigne_Omega - Omega_Actu;
     }
 
-//    /*      PID sue la vitesse     */
+//    /*      PID sur la vitesse     */
 //
 //    // Calcul de l'erreur de vitesse
 //    Diff_Vitesse_Actu = Consigne_Commune - Vitesse_Actu;
@@ -254,7 +243,7 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     // Calcul des consignes moteurs
     Set_Vitesse_MoteurD(Consigne_Vitesse_Commune - Consigne_Vitesse_Diff); //ou Diff/2
     Set_Vitesse_MoteurG(Consigne_Vitesse_Commune + Consigne_Vitesse_Diff);
-    
+
     // Mise à jour de la precedente valeur (pour le terme differentiel)
     Diff_Vitesse_Old = Diff_Vitesse_Actu;
     Diff_Omega_Old = Diff_Omega_Actu;
@@ -301,7 +290,6 @@ void Mise_A_Jour_Consignes(void)
  {
      Distance_Actu = 0;
      Consigne_Distance = Consigne;
-     Consigne_Theta = Consigne_Theta;
      Mode_Consigne = 1;
  }
 
@@ -311,33 +299,33 @@ void Mise_A_Jour_Consignes(void)
      Mode_Consigne = 2;
  }
 
- void Set_Consigne(float New_Consigne_PosX, float New_Consigne_PosY)
+ void Set_Consigne_Position(float New_Consigne_PosX, float New_Consigne_PosY)
 {
     Consigne_PosX = New_Consigne_PosX;
     Consigne_PosY = New_Consigne_PosY;
     Mode_Consigne = 3;
 }
 
- void Set_Consigne_Vitesse(float Consigne)
- {
-     Consigne_Vitesse = Consigne;
-     Mode_Consigne = 4;
- }
+void Set_Consigne_Vitesse(float Consigne)
+{
+    Consigne_Vitesse = Consigne;
+    Mode_Consigne = 4;
+}
 
- void Set_Consigne_Omega(float Consigne)
- {
-     Consigne_Omega = Consigne;
-     Mode_Consigne = 5;
- }
+void Set_Consigne_Omega(float Consigne)
+{
+    Consigne_Omega = Consigne;
+    Mode_Consigne = 5;
+}
 
- void Set_Consigne_Courbe(float Consigne_V, float Consigne_O)
- {
-     Consigne_Omega = Consigne_O;
-     Consigne_Vitesse = Consigne_V;
-     Mode_Consigne = 6;
- }
+void Set_Consigne_Courbe(float Consigne_V, float Consigne_O)
+{
+    Consigne_Omega = Consigne_O;
+    Consigne_Vitesse = Consigne_V;
+    Mode_Consigne = 6;
+}
 
- void Set_Asserv_V(float KPv_new, float KDv_new, float KIv_new)
+void Set_Asserv_V(float KPv_new, float KDv_new, float KIv_new)
 {
     //Coeffs de l'asserv sur la vitesse linéaire
     KPv = KPv_new;

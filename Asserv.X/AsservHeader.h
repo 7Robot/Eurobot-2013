@@ -1,7 +1,7 @@
 /*
 * Asserv dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* µC : 33FJ64MC804
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -64,24 +64,22 @@ void Set_Asserv_T(float, float, float);
 
 void Set_Position(float, float);           // permet une mise à jour de la position, du robot
 void Set_Postion_Angle(float, float, float);  // remet totalement à jour la position
-void Get_Position (float*, float*, float*);       // renvoie la position actuelle du robot
-float Get_Distance (float, float);          //renvoie la distance entre la consigne et la position actuelle
-float Get_Angle (float, float);             //renvoie l'angle entre la consigne et la position actuelle
+void Get_Position(float*, float*, float*);       // renvoie la position actuelle du robot
+float Get_Distance(float, float);          //renvoie la distance entre la consigne et la position actuelle
+float Get_Angle(float, float);             //renvoie l'angle entre la consigne et la position actuelle
 void Incremente_Position(int16_t, int16_t, float*, float*, volatile float*, volatile float*);     // recoie les tics, incremente la position, renvoie la vitesse et l'angle (pour l'asserv)
 
  void Set_Consigne_Distance(float);
  void Set_Consigne_Angle(float);
- void Set_Consigne(float, float);
+ void Set_Consigne_Position(float, float);
  void Set_Consigne_Vitesse(float);
  void Set_Consigne_Omega(float);
  void Set_Consigne_Courbe(float, float);
  void Mise_A_Jour_Consignes(void);
 
- 
 
-
-//float sin_lut (float);   // prends un nombre en radians, en renvoie son sinus
-//float cos_lut (float);   // prends un nombre en radians, en renvoie son cosinus
+//float sin_lut(float);   // prends un nombre en radians, en renvoie son sinus
+//float cos_lut(float);   // prends un nombre en radians, en renvoie son cosinus
 
 
 void Init_PWM(void);

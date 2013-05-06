@@ -1,7 +1,7 @@
 /*
 * Asserv dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* µC : 33FJ64MC804
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -76,7 +76,7 @@ int16_t main(void)
         led1 = led1 ^ 1;
         //Set_Consigne_Distance(0.5);
         //Set_Consigne_Angle(-2*1.5707);
-        Set_Consigne(0.5,0.5);
+        Set_Consigne_Position(0.5,0.5);
         __delay_ms(10000);
 
 
