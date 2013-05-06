@@ -1,5 +1,5 @@
 /*
-* Template dsPIC33F
+* Code ADC Capteur Sick
 * Compiler : Microchip xC16
 * µC : 33FJ64MC802
 * Juillet 2012
@@ -22,16 +22,33 @@
 #include "header.h"        /* Function / Parameters                           */
 #include <timer.h>         /* Include timer fonctions                         */
 #include <uart.h>
+#include <adc.h>
+#include "atp.h"
+
+
+
 
 /******************************************************************************/
 /* User Functions                                                             */
 /******************************************************************************/
 
-#define BAUDRATE 57600
-#define BRGVAL ((FCY / BAUDRATE / 16) - 1)
+
+//Nombre de capteur branché sur les AN
+#define NB_SENSOR         4
+
+#define AN0  0
+#define AN1  1
+#define AN2  2
+#define AN3  3
+#define AN4  4
+#define AN5  5
+#define AN6  6
+#define AN7  7
 
 
 extern void InterruptAX(void);
+
+char channel = 0;
 
 
 void ConfigureOscillator()
@@ -47,43 +64,89 @@ void InitApp()
 {
     _TRISA0 = 0;
 
-    OpenUART1(UART_EN & UART_IDLE_CON & UART_IrDA_DISABLE & UART_MODE_FLOW
-        & UART_UEN_00 & UART_DIS_WAKE & UART_DIS_LOOPBACK
-        & UART_DIS_ABAUD & UART_UXRX_IDLE_ONE & UART_BRGH_SIXTEEN
-        & UART_NO_PAR_8BIT & UART_1STOPBIT,
-          UART_INT_TX_BUF_EMPTY & UART_IrDA_POL_INV_ZERO
-        & UART_SYNC_BREAK_DISABLED & UART_TX_ENABLE & UART_TX_BUF_NOT_FUL & UART_INT_RX_CHAR
-        & UART_ADR_DETECT_DIS & UART_RX_OVERRUN_CLEAR,
-          BRGVAL);
-
-    ConfigIntUART1(UART_RX_INT_PR4 & UART_RX_INT_EN
-                 & UART_TX_INT_PR4 & UART_TX_INT_DIS);
-
-    /* MARCHE PAS
-    _U1TXIE = 1; // Active l'interruption du TX
-    _U1TXIP = 5; // Donne la priorité de l'interruptionTX (=5)
-    _U1RXIE = 1; // Active l'interruption du RX
-    _U1RXIP = 5; // Donne la priorité de l'interruptionRX (=5)
-    */
-
     // activation de la priorité des interruptions
     _NSTDIS = 0;
 
 
+    ConfigIntTimer2(T2_INT_PRIOR_2 & T2_INT_ON);
 
+    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_ON & T2_SOURCE_INT, 0x1FFF);
 
+    EnableIntT2;
 
-
-            
-    /*
-    OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_ON & T2_SOURCE_INT, 0x9FFF);
-    ConfigIntTimer2()
-    EnableIntT2;    // Activation de l'interruption T23
-    _T2IP = 3;      // Priorité de l'interruption
-    */
 
 }
+void InitAdc()
+{
 
+   //Configuration du convertisseur Analog to Digital (ADC) du dspic33f
+   //Cf page 286 dspic33f Data Sheet
+   //Eteindre A/D converter pour la configuration
+   AD1CON1bits.ADON = 0;
+   //Configure le format de la sortie de l'ADC ( 3=signed float, 2=unsigned float, 1=signed integer, 0=unsigned integer
+   AD1CON1bits.FORM = 0;
+   //Config de l'échantillonnage : auto-convert
+   AD1CON1bits.SSRC = 7;
+   //Début d'échantillonnage (1=tout de suite  0=dès que AD1CON1bits.SAMP est activé)
+   AD1CON1bits.ASAM = 0;
+   //Choix du type de converter (10 ou 12 bits) 0 = 10 bits , 1 = 12bits
+   AD1CON1bits.AD12B = 0;
+   //Choix du type de clock interne (=1) ou externe (=0)
+   AD1CON3bits.ADRC = 1;
+   //Choix des références liées à la mesure analogique sur le channel 0
+   AD1CHS0bits.CH0SA = 0;	// Choix du (+) de la mesure pour le channel CH0 (0 = AN0) par défault
+   AD1CHS0bits.CH0NA = 0;	// Choix du (-) de la mesure pour le channel CH0 (0 = Masse interne pic)
+
+   //Met tous les ports AN en Digital Input
+   AD1PCFGL = 0xFFFF;
+
+   //Selectionne quelles pins sont analogiques
+   AD1PCFGLbits.PCFG0 = 0;
+   AD1PCFGLbits.PCFG1 = 0;
+   AD1PCFGLbits.PCFG2 = 0;
+   AD1PCFGLbits.PCFG3 = 0;
+   AD1PCFGLbits.PCFG4 = 0;
+   AD1PCFGLbits.PCFG5 = 0;
+   /* COM A ENLEVER SUR DSPIC AVEC 8 PINS ANALOGIQUES
+   AD1PCFGLbits.PCFG6 = 0;
+   AD1PCFGLbits.PCFG7 = 0;
+    */
+
+   //Mise à 0 du flag d'interrupt de ADC1
+   IFS0bits.AD1IF = 0;
+   //Enable les interruptions d'ADC1
+   IEC0bits.AD1IE = 1;
+   //Et les prioritées (ici prio = 3)
+   IPC3bits.AD1IP = 3;
+
+   AD1CON1bits.SAMP = 0;
+   AD1CON1bits.ADON = 1;		// Turn on the A/D converter
+}
+
+
+void TestZone (short adc,char channel)
+{    
+    unsigned char zone = adc>>6;
+    if (floodOn || zone != lastZone[channel]) {
+        lastZone[channel] = zone;
+        SendZone(channel, zone);
+    }      
+}
+
+void OnFloodOn()
+{
+    floodOn = 1;
+}
+
+void OnFloodOff()
+{
+    floodOn = 0;
+}
+
+void OnGetValue(unsigned char id)
+{
+   SendValue(id, Buff_adc_value[channel]);
+}
 
 /******************************************************************************/
 /* Interrupt Vector Options                                                   */
@@ -151,40 +214,65 @@ void InitApp()
 /******************************************************************************/
 
 /* TODO Add interrupt routine code here. */
-/*
-void __int i=0attribute__((interrupt,auto_psv)) _T2Interrupt(void)
-{
-    //led = led^1;    // On bascule l'état de la LED
-    //_T2IF = 0;      // On baisse le FLAG
-}
-*/
 
-
-
-
-/*************************************************
- *          RX Interrupt
- *
- *************************************************/
-
-
-void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void){
-
-    led = led ^ 1;
-    InterruptAX();
-
-    _U1RXIF = 0;      // On baisse le FLAG
-}
-
-/*************************************************
- *          TX Interrupt
- *
- *************************************************/
-
-
-void __attribute__((__interrupt__, no_auto_psv)) _U1TXInterrupt(void)
+void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 {
 
-   IFS0bits.U1TXIF = 0; // clear TX interrupt flag
 
+    // Balayage des chans AN. A chaque interruption du timer 2, le pic définit sur quel pin il sample
+    //le changement de la cariable "channel" se fait dans l'interruption de l'ADC
+
+    /* /!\ ordre des déclarations de pin à changer si tout les pins ne sont pas utilisés /!\ */
+
+    switch(channel){
+        case 0:
+            AD1CHS0bits.CH0SA = AN0;
+        break;
+        case 1:
+            AD1CHS0bits.CH0SA = AN1;
+        break;
+        case 2:
+            AD1CHS0bits.CH0SA = AN2;
+        break;
+        case 3:
+            AD1CHS0bits.CH0SA = AN3;
+        break;
+        case 4:
+            AD1CHS0bits.CH0SA = AN4;
+        break;
+        case 5:
+            AD1CHS0bits.CH0SA = AN5;
+        break;
+        case 6:
+            AD1CHS0bits.CH0SA = AN6;
+        break;
+        case 7:
+            AD1CHS0bits.CH0SA = AN7;
+        break;
+
+
+        default:
+            AD1CHS0bits.CH0SA = AN0;
+        break;
+    }   
+
+    AD1CON1bits.SAMP = 1; //Start sampling
+    _T2IF = 0;            // On baisse le FLAG
 }
+
+
+void __attribute__ ((interrupt, auto_psv)) _ADC1Interrupt(void)
+ {
+
+    Buff_adc_value[channel]  = ADC1BUF0;
+
+    TestZone(Buff_adc_value[channel],channel);
+
+    channel++;
+    channel=channel%NB_SENSOR;
+
+    AD1CON1bits.SAMP = 0;      //Stop sampling
+    IFS0bits.AD1IF = 0;        //Clear the interrupt flag
+ }
+
+

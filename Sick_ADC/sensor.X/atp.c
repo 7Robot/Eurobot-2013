@@ -1,4 +1,3 @@
-
 #include <p33Fxxxx.h>      /* Includes device header file                     */
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
@@ -142,7 +141,7 @@ void AtpInit() {
     ConfigIntUART1(config);
 
     __builtin_write_OSCCONL(OSCCON & 0xBF);
-     _RP6R = 3; // RP5 (pin 14) = U1TX (p.167)
+     _RP5R = 3; // RP5 (pin 14) = U1TX (p.167)
     _U1RXR = 6; // RP6 (pin 15) = U1RX (p.165)
     __builtin_write_OSCCONL(OSCCON | 0x40);
 }
@@ -188,7 +187,6 @@ void SendBytes(char *bytes, int count)
     buffers[prio].end = end;
     buffers[prio].flag = 1;
     IFS0bits.U1TXIF = 1;
-    // TODO : flush FTDI (par le ring indicator)
 }
 
 
@@ -201,16 +199,24 @@ void updateRunLevel() {
             return;
         }
     }
+    //led = 0;
     runLevel = -1;
 }
 
 //##############################################################################
 
 void processPacket() {
-#ifdef BLINK_ON_PACKET
     led = led ^ 1;
-#endif
-    if (AtpDecode(packetId, ucharv, ucharc,
+    if (processProto(packetId, ucharv, ucharc,
+            ushortv, ushortc,
+            uintv, uintc,
+            charv, charc,
+            shortv, shortc,
+            intv, intc,
+            floatv, floatc)) {
+        return;
+    }
+    if (BOARD_PROCESSOR(packetId, ucharv, ucharc,
             ushortv, ushortc,
             uintv, uintc,
             charv, charc,
@@ -233,8 +239,6 @@ int checkDataType(unsigned int type) {
         case 18:
         case 20:
         case 36:
-        case 132:
-        case 148:
             return 1;
         default:
             return 0;
@@ -366,6 +370,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _U1TXInterrupt(void)
         }
         if (buffers[runLevel].begin == buffers[runLevel].end) {
             buffers[runLevel].flag = 0;
+            led = 0;
             updateRunLevel();
         }
     }

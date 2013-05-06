@@ -1,0 +1,24 @@
+Utilisation du template ATP
+===========================
+
+Les fichiers atp.c, atp.h et atp-user.h constitue le cœur du module.
+
+Les autres fichiers atp-*.[ch] sont des fichiers auto-généré depuis le fichier
+de description de la sémantique du protocole, protos.py.
+
+Pour utiliser ce module, il vous faut :
+* Importer les fichiers atp.c, atp.h et atp-user.h dans votre projet.
+* Inclure le fichier atp.h.
+* Éventuellement regénérer les autres fichiers (./gen.py).
+* Importer atp-proto.c et atp-proto.h. Il s’agit de la partie commune à tous
+les protocoles, quelque soit la carte.
+* Importer atp-<board>.c et atp-<board>.h. Il s’agit de la partie spécifique à
+votre carte.
+* Éditer atp-user.h pour faire quelques modification :
+  * Inclure le bon fichier spécifique à votre carte, par exemple atp-captor.h
+  * Bien faire attention au priorité des interruption.
+Je crois que c’est tout !
+
+Le template est fournit pré-configuré pour la carte capteur. Si vous souhaitez
+le récupérer pour une autre carte, il vous suffit de modifier l’include
+dans atp-user.h et d’importer les bons fichiers.

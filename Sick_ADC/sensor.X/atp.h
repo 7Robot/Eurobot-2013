@@ -1,4 +1,4 @@
-/*
+/* 
  * File:   atp.h
  * Author: elie
  *
@@ -7,6 +7,7 @@
 #ifndef ATP_H
 #define	ATP_H
 
+#include "atp-proto.h"
 #include "atp-user.h"
 
 void AtpInit();
@@ -18,3 +19,4 @@ void SendBoardId();
 void AtpTest();
 
 #endif	/* ATP_H */
+

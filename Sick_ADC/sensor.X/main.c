@@ -18,14 +18,13 @@
 #include "header.h"        /* Function / Parameters                           */
 #include <libpic30.h>
 #include <uart.h>
+#include "atp.h"
+#include <adc.h>
 
-
-/******************************************************************************/
-/* Global Variable Declaration                                                */
-/******************************************************************************/
-
-/* i.e. uint16_t <variable_name>; */
-
+volatile short Buff_adc_value[8];
+volatile unsigned char floodOn = 0;
+volatile unsigned char lastZone[8];
+//volatile float distance;
 
 /******************************************************************************/
 /* Configuartion                                                              */
@@ -34,54 +33,28 @@
 // Select Oscillator and switching.
 _FOSCSEL(FNOSC_FRCPLL & IESO_OFF);
 // Select clock.
-_FOSC(POSCMD_NONE & OSCIOFNC_ON & IOL1WAY_ON & FCKSM_CSDCMD);
+_FOSC(POSCMD_NONE & OSCIOFNC_ON /*& IOL1WAY_OFF*/ & FCKSM_CSDCMD);
 // Watchdog Timer.
 _FWDT(FWDTEN_OFF);
 // Select debug channel.
 _FICD(ICS_PGD1 & JTAGEN_OFF);
 
 
-
 /******************************************************************************/
 /* Main Program                                                               */
 /******************************************************************************/
 
-/*
-void SetTX() {
-    __builtin_write_OSCCONL(OSCCON & 0xBF);
-    RPINR18bits.U1RXR = 0; // RP2
-    RPOR1bits.RP2R = 3;  // 3 est U1TX
-    __builtin_write_OSCCONL(OSCCON | 0x40);
-}
-
-void SetRX() {
-    __builtin_write_OSCCONL(OSCCON & 0xBF);
-    RPOR1bits.RP2R = 0;  // 3 est U1TX
-    RPINR18bits.U1RXR = 5; // RP5
-    __builtin_write_OSCCONL(OSCCON | 0x40);
-}
-
-*/
-
-
 int16_t main(void)
 {
-    // Initialize IO ports and peripherals.
     ConfigureOscillator();
+
     InitApp();
+    InitAdc();
+    AtpInit();
 
-    while(1) {
-        //__delay_ms(500);
-        //led ^= 1;
+    SendBoardId();
 
-        //char Txdata[] = {'M','i','c','r','o','c','h','i','p','\0'};
-
-        //SetTX();
-       //putsUART1 ((unsigned int *)Txdata);
-       //SetRX();
-
-
-
+    while(1) {       
+        __delay_ms(200);
     }
 }
-
