@@ -47,8 +47,8 @@
 // Declarations de variable globales
 volatile unsigned int i;
 volatile unsigned int j;
-int adversaire1[taille_uart] = {1,0,0,1,0,1,1,0}; // Mettre la donn�e envoy�e
-int adversaire2[taille_uart] = {1,0,1,0,1,0,1,0}; // mais compl�ment�e
+int adversaire1[taille_uart] = {0,1,0,1,1,1,1,1};
+int adversaire2[taille_uart] = {1,0,0,1,1,1,1,1};
 int reperage[nombre_recepteurs]; // Contient : 0 non recu, 1 adversaire1, 2 adversaire2 pour chaque TSOP
 int donnees[nombre_recepteurs*taille_uart];
 
@@ -94,7 +94,7 @@ int16_t main(void)
         {
             for(j = 0 ; j < nombre_recepteurs ; j++)
             {
-        	reperage[j] = comparer(donnees, j);
+        	reperage[j] += comparer(donnees, j);
             }
             lissage(); // Corrige les recepteurs defaillants
             recu = 0;

@@ -116,13 +116,13 @@ int CandleColors::findColor2(std::vector<Point2f> calibPoints, Mat& imOut)
 int CandleColors::candlesColor(std::vector<Point2f> candles, Mat &imOut)
 {
 	// 4 bits par bougie (4 valeurs), 2bits*12 bougies --> 24 bits --> 4 octets
-	int candlesColorsResponse = 0; // Version sérialisée du résultat
+	int candlesColorsResponse = position; // Version sérialisée du résultat
 	for (unsigned int i=0; i<candles.size(); i++)
 	{
 //        candles[i].x += imRef.cols;
 		printf("Candle pos %d %f %f\n", imRef.cols, candles[i].x, candles[i].y);
 		color col = getColor(imOut, candles[i].x, candles[i].y);
-		candlesColorsResponse |= col << 2*i;
+		candlesColorsResponse |= col << 2*i+2;
 		Scalar circleColor;
 		if (col==RED)
 			circleColor = red;

@@ -1,7 +1,7 @@
 /*
 * Beacon dsPIC33F
 * Compiler : Microchip xC16
-* �C : 33FJ64MC802
+* �C : 33FJ64MC804
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -19,11 +19,11 @@
 /* TODO Define system operating frequency */
 
 /* Microcontroller MIPs (FCY) */
-#define SYS_FREQ        80000000 //7370000L
+#define SYS_FREQ        7370000L //80000000
 #define FCY             SYS_FREQ/2
 #define baud            (FCY/9600)/16-1
-#define adversaire1     0x69
-#define adversaire2     0x55
+#define adversaire1     0xFA
+#define adversaire2     0xF9
 
 #define led1            _LATA0
 #define led2            _LATA1

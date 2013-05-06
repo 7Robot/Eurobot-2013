@@ -154,8 +154,8 @@ void _ISR _CNInterrupt(void)
    {
        led1 = 0;
        led2 = 1;
-       //SetDCMCPWM1(1,6,0);
-       SetDCMCPWM1(1,86,0);
+       SetDCMCPWM1(1,6,0);
+       //SetDCMCPWM1(1,86,0);
    }
     
 }

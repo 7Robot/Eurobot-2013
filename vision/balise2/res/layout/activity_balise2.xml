@@ -13,5 +13,15 @@
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content" 
                 android:onClick="changeMode"/>
+                
+        <TextView
+	    	android:id="@+id/isConnectedRobot"
+	   		android:layout_width="wrap_content"
+	   		android:layout_height="wrap_content"
+	    	android:text="Robot: "
+	    	android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
+
+	
+
 </FrameLayout>
