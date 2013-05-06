@@ -51,8 +51,6 @@ void InitApp(void)
     _TRISA1 = 0;
     led = 0;
     led2 = 0;
-    // activation de la priorite des interruptions
-    _NSTDIS = 0;
 
     //Sortie enable
     _TRISB9 = 0;
@@ -90,7 +88,7 @@ void InitApp(void)
 //    _TRISB15 = 1;
 //    _CN11PUE = 1;
 
-    OpenUART2(UART_EN & UART_IDLE_CON & UART_IrDA_DISABLE & UART_MODE_FLOW
+   OpenUART1(UART_EN & UART_IDLE_CON & UART_IrDA_DISABLE & UART_MODE_FLOW
         & UART_UEN_00 & UART_DIS_WAKE & UART_DIS_LOOPBACK
         & UART_DIS_ABAUD & UART_UXRX_IDLE_ONE & UART_BRGH_SIXTEEN
         & UART_NO_PAR_8BIT & UART_1STOPBIT,
@@ -99,8 +97,8 @@ void InitApp(void)
         & UART_ADR_DETECT_DIS & UART_RX_OVERRUN_CLEAR,
           BRGVALAX12);
 
-    ConfigIntUART2(UART_RX_INT_PR5 & UART_RX_INT_EN
-                 & UART_TX_INT_PR5 & UART_TX_INT_DIS);
+    ConfigIntUART1(UART_RX_INT_PR4 & UART_RX_INT_EN
+                 & UART_TX_INT_PR4 & UART_TX_INT_DIS);
 
     OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_OFF & T2_SOURCE_INT, 0x8FF);
     ConfigIntTimer2(T2_INT_PRIOR_3 & T2_INT_ON); //Interruption ON et priorite 3
@@ -116,6 +114,9 @@ void InitApp(void)
     _QEA1R = 5;     //Module QEI 1 phase A sur RB5
     _QEB1R = 6;     //Module QEI 1 phase B sur RB6
     POS1CNT = 0;
+
+    // activation de la priorite des interruptions
+    _NSTDIS = 0;
 }
 
 //variables globales d'asserv
@@ -203,25 +204,31 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 //AX12 INTS
 /*************************************************
  *          RX Interrupt
+ *
  *************************************************/
 
-void __attribute__((interrupt, no_auto_psv)) _U2RXInterrupt(void){
+
+void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void){
 
     led = led ^ 1;
     InterruptAX();
 
-    _U2RXIF = 0;      // On baisse le FLAG
+    _U1RXIF = 0;      // On baisse le FLAG
 }
 
 /*************************************************
  *          TX Interrupt
+ *
  *************************************************/
 
-void __attribute__((__interrupt__, no_auto_psv)) _U2TXInterrupt(void)
+
+void __attribute__((__interrupt__, no_auto_psv)) _U1TXInterrupt(void)
 {
 
-   _U2TXIF = 0; // clear TX interrupt flag
+   IFS0bits.U1TXIF = 0; // clear TX interrupt flag
+
 }
+
 
 /******************************************************************************/
 /* Interrupt Vector Options                                                   */

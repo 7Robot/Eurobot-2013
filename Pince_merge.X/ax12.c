@@ -1,7 +1,7 @@
 /*
 * Template dsPIC33F
 * Compiler : Microchip xC16
-* �C : 33FJ64MC802
+* µC : 33FJ64MC802
 * Juillet 2012
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -34,18 +34,18 @@ responseAXtype responseAX;
 
 void SetTX() {
     __builtin_write_OSCCONL(OSCCON & 0xBF);
-    _TRISC9 = 0;
-    _U2RXR = 0b11111; //U2RX sur Vss
-    _RP25R = 0b00101;  // RP25 = U2TX (p.167)
+    _U1RXR = 31;
+     _RP25R = 3;  // RP25 (pin 14) = U1TX (p.167)
     __builtin_write_OSCCONL(OSCCON | 0x40);
+    //CNPU2bits.CN27PUE = 0;
 }
 
 void SetRX() {
     __builtin_write_OSCCONL(OSCCON & 0xBF);
-    _TRISC9 = 1;
      _RP25R = 0;
-    _U2RXR = 25; // RP25 = U2RX (p.165)
+    _U1RXR = 25; // RP25 (pin 14) = U1RX (p.165)
     __builtin_write_OSCCONL(OSCCON | 0x40);
+    //CNPU2bits.CN27PUE = 1; // Enable pull up.
 }
 
 /******************************************************************************
@@ -53,9 +53,8 @@ void SetRX() {
  ******************************************************************************/
 
 void PushUART1(byte b) {
-    while (U2STAbits.UTXBF); // UART2 TX Buffer Full
-    WriteUART2(b);
-
+    while (U1STAbits.UTXBF); // UART1 TX Buffer Full
+    WriteUART1(b);
     checksumAX += b;
 }
 
@@ -86,7 +85,7 @@ void PushBufferAX(byte len, byte* buf) {
 /* Finish a command packet by sending the checksum. */
 void PushFooterAX() {
     PushUART1(~checksumAX);
-    while (BusyUART2()); // UART2 Transmit Shift Register Empty
+    while (BusyUART1()); // UART1 Transmit Shift Register Empty
     SetRX();
 }
 
@@ -94,8 +93,8 @@ int expected = 0;
 int received = 0;
 /**/
 void InterruptAX() {
-    while(DataRdyUART2()) {
-        byte b = ReadUART2();
+    while(DataRdyUART1()) {
+        byte b = ReadUART1();
 
         if(posAX == -5 && b == 0xFF)
             posAX = -4;
@@ -191,11 +190,13 @@ byte RegisterLenAX(byte address) {
 
 /* Write a value to a registry, guessing its width. */
 void PutAX(byte id, byte address, int value) {
+    responseReadyAX = 0;
     WriteAX(id, address, RegisterLenAX(address),
                    (byte*)&value /* C18 and AX12 are little-endian */);
 }
 
 /* Read a value from a registry, guessing its width. */
 void GetAX(byte id, byte address) {
+    responseReadyAX = 0;
     ReadAX(id, address, RegisterLenAX(address));
 }

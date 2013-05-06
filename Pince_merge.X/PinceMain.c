@@ -67,12 +67,13 @@ int16_t main(void)
     //Sortir_Pince();
     //__delay_ms(10000);
     //Chopper_verre();
-    Cinematique_inverse();
+    
     while(1)
     {
+        Cinematique_inverse();
         led = !led;
         //Set_Consigne_Hauteur(-1000);
-        __delay_ms(1000);
+        __delay_ms(100);
 //        Set_Consigne_Hauteur(0);
 //        __delay_ms(2000);
     }
