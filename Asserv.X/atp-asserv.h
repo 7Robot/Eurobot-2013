@@ -1,4 +1,4 @@
-// Generated from version 1305062032 of semantic
+// Generated from version 1305061627 of semantic
 
 #ifndef _ASSERV_H_
 #define _ASSERV_H_
@@ -19,27 +19,11 @@ void SendTest(unsigned char B, unsigned int H, unsigned long int I, char b, int 
 
 void SendAngle(float theta);
 
-void SendAsservD(float KPd, float KId, float KDd);
-
-void SendAsservO(float KPo, float KIo, float KDo);
-
-void SendAsservT(float KPt, float KIt, float KDt);
-
-void SendAsservV(float KPv, float KIv, float KDv);
-
 void SendCourbe(float v, float omega);
 
 void SendDone();
 
 void OnGetAngle();
-
-void OnGetAsservD();
-
-void OnGetAsservO();
-
-void OnGetAsservT();
-
-void OnGetAsservV();
 
 void OnGetCourbe();
 
@@ -57,17 +41,9 @@ void OnOdoBroadcastSetDelay(unsigned int delay);
 
 void SendOmega(float omega);
 
-void SendPos(float x, float y, float theta);
+void SendPos(float x, float y);
 
 void OnSetAngle(float theta);
-
-void OnSetAsservD(float KPd, float KId, float KDd);
-
-void OnSetAsservO(float KPo, float KIo, float KDo);
-
-void OnSetAsservT(float KPt, float KIt, float KDt);
-
-void OnSetAsservV(float KPv, float KIv, float KDv);
 
 void OnSetCourbe(float v, float omega);
 
