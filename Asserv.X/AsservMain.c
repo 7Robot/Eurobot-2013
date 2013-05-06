@@ -61,9 +61,15 @@ int16_t main(void)
 //    Set_Asserv_V(100,10,7);
 //    Set_Asserv_T(500,1,8);
 
-//    Set_Asserv_V(100,10,3);
-    Set_Asserv_D(300,20,3);
-    Set_Asserv_T(500,0.1,3);
+
+//    Set_Asserv_D(100,0.1,1);
+//    Set_Asserv_T(100,0.1,1);
+
+    Set_Asserv_V(20,10,0);
+    Set_Asserv_O(10,7,0);
+    Set_Asserv_D(500,2,0.05);
+    Set_Asserv_T(400,1,0.05);
+
     //float angle = 0;
 
     while(1)
@@ -71,7 +77,8 @@ int16_t main(void)
         //Set_Vitesse_MoteurG(800);
 
         led1 = led1 ^ 1;
-        Set_Consigne_Distance(1);
+        Set_Consigne_Distance(0);
+        //Set_Consigne_Angle(4*3.1416);
         __delay_ms(10000);
         //Set_Consigne_Vitesse(0.2);
         //__delay_ms(10000);

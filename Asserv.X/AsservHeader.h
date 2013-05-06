@@ -37,13 +37,15 @@
 #define DIRB2 _LATA4    //DIRB2 sur RA4
 
 //arbitrairement
-#define TICS_BY_METERD 25000
-#define TICS_BY_METERG 25000
-#define METER_BY_TICD 0.00004
-#define METER_BY_TICG 0.00004
+#define TICS_BY_METERD 24331
+#define TICS_BY_METERG 24331
+#define METER_BY_TICD 0.0000411
+#define METER_BY_TICG 0.0000411
 #define LARGEUR_ROBOT 0.291       // 29.1cm entre encodeurs droite et gauche
 
 #define VITESSE_MAX 500
+#define VITESSE_MIN 200
+#define CONSIGNE_MIN 30
 
 /******************************************************************************/
 /* Function Prototypes                                                        */
@@ -56,6 +58,7 @@ void ConfigureOscillator(void);    /* Handles clock switching/osc initialization
 void InitApp(void);             /* I/O and Peripheral Initialization          */
 
 void Set_Asserv_V(float, float, float);
+void Set_Asserv_O(float, float, float);
 void Set_Asserv_D(float, float, float);
 void Set_Asserv_T(float, float, float);
 
@@ -64,13 +67,17 @@ void Set_Postion_Angle(float, float, float);  // remet totalement à jour la posi
 void Get_Position (float*, float*, float*);       // renvoie la position actuelle du robot
 float Get_Distance (void);          //renvoie la distance entre la consigne et la position actuelle
 float Get_Angle (void);             //renvoie l'angle entre la consigne et la position actuelle
-void Incremente_Position(int16_t, int16_t, float*, volatile float*, float*);     // recoie les tics, incremente la position, renvoie la vitesse et l'angle (pour l'asserv)
+void Incremente_Position(int16_t, int16_t, float*, float*, volatile float*, volatile float*);     // recoie les tics, incremente la position, renvoie la vitesse et l'angle (pour l'asserv)
 
  void Set_Consigne_Distance(float);
  void Set_Consigne_Angle(float);
- void Mise_A_Jour_Consignes(volatile float*, volatile float*, float);
-
  void Set_Consigne(float, float);
+ void Set_Consigne_Vitesse(float);
+ void Set_Consigne_Omega(float);
+ void Set_Consigne_Courbe(float, float);
+ void Mise_A_Jour_Consignes(volatile char, volatile float*, volatile float*, volatile float*, volatile float*);
+
+ 
 
 
 //float sin_lut (float);   // prends un nombre en radians, en renvoie son sinus
