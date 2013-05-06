@@ -15,6 +15,6 @@ Il contient essentiellement
 - L’outil de gestion des puces FTDI
 
 
-Il manque, entre autres, l’IA, le protocole de communication et tout ce qui tourne autour, ce qui se trouve dans les dépots _7Robot-Soft
+Il manque, entre autres, l’IA, le protocole de communication et tout ce qui tourne autour, ce qui se trouve dans les dépots 7Robot-Soft_.
 
 .. _7Robot-Soft : https://github.com/7Robot-Soft/common
