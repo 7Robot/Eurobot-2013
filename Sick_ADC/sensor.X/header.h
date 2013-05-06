@@ -30,6 +30,11 @@
 
 #define led _LATA0
 
+extern volatile short Buff_adc_value[8];
+extern volatile unsigned char floodOn;
+extern volatile unsigned char lastZone[8];
+//extern volatile float distance;
+
 /******************************************************************************/
 /* Function Prototypes                                                        */
 /******************************************************************************/
@@ -40,3 +45,4 @@ void ConfigureOscillator(void);    /* Handles clock switching/osc initialization
 
 void InitApp(void);             /* I/O and Peripheral Initialization          */
 
+void InitAdc(void);             /*Init Analog to Digital Converter PIC*/

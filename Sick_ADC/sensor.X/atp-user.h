@@ -1,4 +1,4 @@
-/*
+/* 
  * File:   atp-user.h
  * Author: elie
  *
@@ -9,7 +9,7 @@
 #define	ATP_USER_H
 
 // Fonction de communication spécifique au rôle du pic
-#include "atp-ax.h"
+#include "atp-sensor.h"
 
 // Vitesse de transmission, défaut : 115200
 #define BAUDRATE 115200
@@ -21,7 +21,7 @@
 
 
 // Priorité de RX INTERRUPT, doit être supérieur ou égal à 1
-#define RECV_PRIO 4
+#define RECV_PRIO 5
 // Priorité de TX INTERRUPT, doit être strictement supérieur à RECV_PRIO
 // Vous pouvez envoyer des paquets seulement depuis des interruption de priorité
 // inférieur strictement à SEND_PRIO (ie si vous voulez envoyer un paquet depuis
@@ -29,15 +29,11 @@
 // priorité strictement inférieur à SEND_PRIO ; rien ne vous empèche d'utiliser
 // des interruptions de priorité supérieur à égal à SEND_PRIO tant que vous
 // n'envoyez aucun paquet).
-#define SEND_PRIO 7
+#define SEND_PRIO 6
 
 // La définition de cette variable déclenche l'envoit d'un paquet de
 // notification d'erreur (message d'id inconnu)
 #define REPORT_UNKNOW_PACKET
-
-// La définition de cette variable provoque le clignotement de la led à la
-// réception d?un packett
-//#define BLINK_ON_PACKET
 
 
 #define MAX_UCHAR 8
@@ -49,3 +45,4 @@
 #define MAX_FLOAT 8
 
 #endif	/* ATP_USER_H */
+
