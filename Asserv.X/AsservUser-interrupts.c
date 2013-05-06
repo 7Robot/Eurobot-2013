@@ -15,6 +15,7 @@
 #include <p33Fxxxx.h>      /* Includes device header file                     */
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
+#include <math.h>
 
 /******************************************************************************/
 /* Files to Include                                                           */
@@ -242,8 +243,8 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     Consigne_Vitesse_Diff = KPo * Diff_Omega_Actu + KIo * Diff_Omega_All + KDo * Diff_Omega_point;
 
     // Calcul des consignes moteurs
-    Set_Vitesse_MoteurD(Consigne_Vitesse_Commune - Consigne_Vitesse_Diff); //ou Diff/2
-    Set_Vitesse_MoteurG(Consigne_Vitesse_Commune + Consigne_Vitesse_Diff);
+    Set_Vitesse_MoteurD(Consigne_Vitesse_Commune - 2*Consigne_Vitesse_Diff); //ou Diff/2
+    Set_Vitesse_MoteurG(Consigne_Vitesse_Commune + 2*Consigne_Vitesse_Diff);
 
     // Mise à jour de la precedente valeur (pour le terme differentiel)
     Diff_Vitesse_Old = Diff_Vitesse_Actu;
@@ -270,8 +271,16 @@ void Mise_A_Jour_Consignes(void)
             //Angle : Rien à modifier
             break;
         case 3:
-            Consigne_Theta = Get_Angle(Consigne_PosX, Consigne_PosY);
-            Consigne_Distance = Get_Distance(Consigne_PosX, Consigne_PosY);
+            Consigne_Theta = Get_Consigne_Angle(Consigne_PosX, Consigne_PosY) - Get_Angle();
+            Consigne_Distance = Get_Consigne_Distance(Consigne_PosX, Consigne_PosY);
+            if(Consigne_Distance < 0.2)
+            {
+                Consigne_Theta = Get_Angle();
+                float Ajustement = Get_Consigne_Distance(Consigne_PosX, Consigne_PosY);
+                if(fabs(Consigne_Theta) > 1.5704) Ajustement = - Ajustement;
+                Set_Consigne_Distance(Ajustement);
+            }
+            else if(fabs(Consigne_Theta) > 1.5704) Consigne_Distance = -Consigne_Distance;
             //TODO Rajouter une condition d'arret
             //Distance_Actu = 0;
             break;
@@ -330,41 +339,28 @@ void Set_Consigne_Courbe(float Consigne_V, float Consigne_O)
 
 /****************** bridge atp ********************************/
 
-// GETs position
+// GETs
+
 void OnGetPos() {
     float x, y, theta;
     Get_Position(&x, &y, &theta);
-    SendPos(x, y, theta);
+    SendPos(x, y);
 }
 void OnGetAngle() { SendAngle(Theta_Actu); }
-
-// GETs vitesse
 void OnGetVit() { SendVit(Vitesse_Actu); }
 void OnGetOmega() { SendOmega(Omega_Actu); }
 void OnGetCourbe() { SendCourbe(Vitesse_Actu, Omega_Actu); }
 
-// GETs coefs
-void OnGetAsservD() { SendAsservD(KPd, KId, KDd); }
-void OnGetAsservO() { SendAsservO(KPo, KIo, KDo); }
-void OnGetAsservT() { SendAsservT(KPt, KIt, KDt); }
-void OnGetAsservV() { SendAsservV(KPv, KIv, KDv); }
+// SETs
 
-// SETs position
 void OnStop() { Set_Consigne_Distance(0); }
 void OnSetPos(float x, float y) { Set_Consigne_Position(x, y); }
 void OnSetAngle(float theta) { Set_Consigne_Angle(theta); }
 void OnSetDist(float dist) { Set_Consigne_Distance(dist); }
-
-// SETs vitesse
 void OnSetVit(float v) { Set_Consigne_Vitesse(v); }
 void OnSetOmega(float omega) { Set_Consigne_Omega(omega); }
 void OnSetCourbe(float v, float omega) { Set_Consigne_Courbe(v, omega); }
 
-// SETs coefs
-void OnSetAsservD(float KPd_new, float KId_new, float KDd_new) { Set_Asserv_V(KPv_new, KDv_new, KIv_new); }
-void OnSetAsservO(float KPo_new, float KIo_new, float KDo_new) { Set_Asserv_O(KPo_new, KDo_new, KIo_new); }
-void OnSetAsservT(float KPt_new, float KIt_new, float KDt_new) { Set_Asserv_D(KPd_new, KDd_new, KId_new); }
-void OnSetAsservV(float KPv_new, float KIv_new, float KDv_new) { Set_Asserv_T(KPt_new, KDt_new, KIt_new); }
 
 /****************** Coefs asserv ******************************/
 
