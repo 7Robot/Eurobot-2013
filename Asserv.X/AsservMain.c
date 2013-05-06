@@ -28,6 +28,9 @@
 
 /* i.e. uint16_t <variable_name>; */
 
+unsigned int delay = 100; // ms
+bool broadcast = True;
+
 
 
 /******************************************************************************/
@@ -50,6 +53,7 @@ _FICD(ICS_PGD1 & JTAGEN_OFF);
 
 int16_t main(void)
 {
+    float x, y, theta;
     // Initialize IO ports and peripherals.
     ConfigureOscillator();
     InitApp();
@@ -72,29 +76,21 @@ int16_t main(void)
     Set_Consigne_Vitesse(0.5);
     while(1)
     {
-        //Set_Vitesse_MoteurG(800);
-
-        led1 = led1 ^ 1;
-        //Set_Consigne_Distance(0.5);
-        //Set_Consigne_Angle(-2*1.5707);
-        //Set_Consigne_Position(0.5,0.5);
-        __delay_ms(10000);
-
-
-//        Set_Consigne_Vitesse(1);
-//        __delay_ms(500);
-//        Set_Consigne_Vitesse(0);
-//        __delay_ms(10000);
-       // */
-         /*Set_Vitesse_MoteurD(800);
-
-        __delay_ms(1500);
-        Set_Vitesse_MoteurD(250);
-        Set_Vitesse_MoteurG(250);
-        __delay_ms(1500);
-
-        __delay_ms(50);*/
-
+        if (broadcast) {
+            Get_Position(&x, &y, &theta);
+            SendPos(x, y, theta);
+        }
+        __delay_ms(delay);
     }
 }
 
+void OnOdoBroadcastSetDelay(unsigned int new_delay) {
+    if (new_delay > 0) {
+        delay = new_delay;
+    } else {
+        SendError();
+    }
+}
+
+void OnOdoBroadcastOn() { broadcast = true; }
+void OnOdoBroadcastOff() { broadcast = false; }
