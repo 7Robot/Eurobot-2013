@@ -65,7 +65,7 @@ void Rangement_pince();
 void Sortir_Pince();
 void Chopper_verre();
 void Lacher_verres();
-int GetAXnoWait();
+void GetAXnoWait();
 
 //protos de asserv pince
 void Set_Vitesse(int);

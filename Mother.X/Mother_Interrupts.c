@@ -99,7 +99,7 @@ void InitApp()
     OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_OFF & T2_SOURCE_INT, 1500);
     ConfigIntTimer2(T2_INT_PRIOR_3 & T2_INT_ON); //Interruption ON et priorite 3
 
-    OpenTimer5(T5_OFF & T5_GATE_OFF & T5_PS_1_1 & T5_SOURCE_INT, 400);
+    OpenTimer5(T5_OFF & T5_GATE_OFF & T5_PS_1_1 & T5_SOURCE_INT, 40000);
     ConfigIntTimer5(T5_INT_PRIOR_2 & T5_INT_ON);
 
     OpenQEI1(QEI_DIR_SEL_QEB & QEI_INT_CLK & QEI_INDEX_RESET_DISABLE & QEI_CLK_PRESCALE_1

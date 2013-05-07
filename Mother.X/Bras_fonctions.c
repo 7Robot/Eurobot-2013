@@ -130,14 +130,14 @@ void OnBougiesOn(){
 
 void DoOnBougie(){
 
-        PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0141);
-        __delay_ms(300);
+        PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0207);
+        __delay_ms(500);
         PutAX(AX_BOUGIES_2, AX_GOAL_POSITION, 0x029C);
-        __delay_ms(10);
+        __delay_ms(600);
         PutAX(AX_BOUGIES_3, AX_GOAL_POSITION, 0x0180);
         __delay_ms(500);
-        PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0207);
-        __delay_ms(100);
+        //PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0207);
+        //__delay_ms(100);
         SendBougiesOnConfirm();
 }
 
