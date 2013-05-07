@@ -1,7 +1,7 @@
 /*
-* Pince merged dsPIC33F
+* Template dsPIC33F
 * Compiler : Microchip xC16
-* uC : 33FJ64MC804
+* µC : 33FJ64MC804
 * Juillet 2012
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -33,6 +33,7 @@
 // Select Oscillator and switching.
 _FOSCSEL(FNOSC_FRCPLL & IESO_OFF);
 // Select clock.
+// TODO: IOL1WAY_OFF ? (Nim)
 _FOSC(POSCMD_NONE & OSCIOFNC_ON & IOL1WAY_ON & FCKSM_CSDCMD);
 // Watchdog Timer.
 _FWDT(FWDTEN_OFF);
@@ -48,8 +49,12 @@ int16_t main(void)
     // Initialize IO ports and peripherals.
     ConfigureOscillator();
     InitApp();
+    AtpInit();
     Init_PWM();
     responseReadyAX = 0;
+
+    // TODO: Nim: C’est quoi ça ?
+    ODCBbits.ODCB7 = 1;
 
     __delay_ms(10);
     PutAX(AX_BROADCAST, AX_MOVING_SPEED, 250);
