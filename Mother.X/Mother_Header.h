@@ -42,6 +42,10 @@
 #define BOUGIE_TOP (1<<3)
 #define BOUGIE_BOT (1<<4)
 
+#define SORTIR_PINCE (1<<1)
+#define CHOPPER_VERRE (1<<2)
+#define LACHER_VERRE (1<<3)
+
 #define AX_BG 8
 #define AX_BD 11
 #define AX_HG1 16
@@ -85,3 +89,9 @@ void Init_PWM(void);
 void Set_Vitesse_MoteurH(long);
 void pince_en_descente(void);
 void pince_en_montee(void);
+
+//protos bras
+void DoOnBougie();
+void DoOffBougie();
+void DoHitBotBougie();
+void DoHitTopBougie();

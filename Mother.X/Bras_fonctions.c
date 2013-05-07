@@ -48,11 +48,6 @@ void PosInitBougies(int Bot){
 
 }
 
-//Taper sur les bougies du haut
-void OnBougiesHitTop(){
-   actionBras |= BOUGIE_TOP;
-   IFS2bits.SPI2IF = 1;
-}
 void DoHitTopBougie(){
         PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0207);
         __delay_ms(10);
@@ -64,12 +59,6 @@ void DoHitTopBougie(){
         SendBougiesHitTopConfirm();
 }
 
-//Taper sur les bougies du bas
-
-void OnBougiesHitBot(){
-    actionBras |= BOUGIE_BOT;
-    IFS2bits.SPI2IF = 1;
-}
 void DoHitBotBougie(){
     PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0207);
     __delay_ms(10);
@@ -83,11 +72,6 @@ void DoHitBotBougie(){
     SendBougiesHitBotConfirm();
 }
 
-//Position pli�e bras AX Bougies
-void OnBougiesOff(){ //DONE
-    actionBras |= BOUGIE_OFF;
-    IFS2bits.SPI2IF = 1;
-}
 void DoOffBougie(){
 
         PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0141);
@@ -99,12 +83,6 @@ void DoOffBougie(){
         PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0086);
         __delay_ms(100);
         SendBougiesOffConfirm();
-}
-
-//Position d�pli�e bras AX Bougies
-void OnBougiesOn(){
-    actionBras |= BOUGIE_ON;
-    IFS2bits.SPI2IF = 1;
 }
 
 void DoOnBougie(){
@@ -120,3 +98,24 @@ void DoOnBougie(){
         SendBougiesOnConfirm();
 }
 
+// ATP
+
+void OnBougiesOn(){
+    actionBras |= BOUGIE_ON;
+    IFS2bits.SPI2IF = 1;
+}
+
+void OnBougiesHitTop(){
+   actionBras |= BOUGIE_TOP;
+   IFS2bits.SPI2IF = 1;
+}
+
+void OnBougiesHitBot(){
+    actionBras |= BOUGIE_BOT;
+    IFS2bits.SPI2IF = 1;
+}
+
+void OnBougiesOff(){ //DONE
+    actionBras |= BOUGIE_OFF;
+    IFS2bits.SPI2IF = 1;
+}

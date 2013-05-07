@@ -33,6 +33,7 @@
 volatile int ready = 0;
 volatile int full  = 0;
 volatile unsigned int nbverres = 0;
+volatile char actionPince = 0;
 unsigned char num_ax;
 unsigned char data;
 
@@ -291,7 +292,19 @@ void Cinematique_inverse()
 
 // ATP
 void OnGetNombreVerres() { SendNombreVerres(nbverres); }
-void OnSortirPince() { Sortir_Pince(); }
-void OnChopperVerre() { Chopper_verre(); }
-void OnLacherVerres() { Lacher_verres(); }
+
+void OnSortirPince() {
+    actionPince |= SORTIR_PINCE;
+    IFS2bits.SPI2IF = 1;
+}
+
+void OnChopperVerre() {
+    actionPince |= CHOPPER_VERRRE;
+    IFS2bits.SPI2IF = 1;
+}
+
+void OnLacherVerres() {
+    actionPince |= LACHER_VERRE;
+    IFS2bits.SPI2IF = 1;
+}
 
