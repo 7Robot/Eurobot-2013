@@ -1,10 +1,10 @@
-// Generated from version 1305070300 of semantic
+// Generated from version 1303020239 of semantic
 
-#ifndef _MOTHER_H_
-#define _MOTHER_H_
+#ifndef _DEMO_H_
+#define _DEMO_H_
 
-#define BOARD_ID 6
-#define BOARD_NAME Mother
+//#define BOARD_ID 1
+//#define BOARD_NAME Demo
 
 
 void SendError();
@@ -17,31 +17,19 @@ void OnTest(unsigned char B, unsigned int H, unsigned long int I, char b, int h,
 
 void SendTest(unsigned char B, unsigned int H, unsigned long int I, char b, int h, long int i, float f);
 
-void OnBougiesHitBot();
+void OnBlinkOff();
 
-void SendBougiesHitBotConfirm();
+void OnBlinkOn();
 
-void OnBougiesHitTop();
+void SendCallback();
 
-void SendBougiesHitTopConfirm();
+void OnLedOff();
 
-void OnBougiesOff();
+void OnLedOn();
 
-void SendBougiesOffConfirm();
+void OnSetCallback(unsigned char nbloop);
 
-void OnBougiesOn();
-
-void SendBougiesOnConfirm();
-
-void OnChopperVerre();
-
-void OnGetNombreVerres();
-
-void OnLacherVerres();
-
-void SendNombreVerres(unsigned int n);
-
-void OnSortirPince();
+void OnSetDelay(unsigned int delay);
 
 
 int AtpDecode(int id,
@@ -53,4 +41,4 @@ int AtpDecode(int id,
         long int *intv, int intc,
         float *floatv, int floatc);
 
-#endif // _MOTHER_H_
+#endif // _DEMO_H_

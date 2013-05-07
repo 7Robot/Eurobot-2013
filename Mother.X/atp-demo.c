@@ -1,4 +1,4 @@
-// Generated from version 1305070300 of semantic
+// Generated from version 1303020239 of semantic
 
 #include "atp.h"
 
@@ -64,76 +64,31 @@ void SendTest(unsigned char B, unsigned int H, unsigned long int I, char b, int 
 }
 
 // You should redefine this function
-__attribute__((weak)) void OnBougiesHitBot() {}
+__attribute__((weak)) void OnBlinkOff() {}
 
-void SendBougiesHitBotConfirm() {
+// You should redefine this function
+__attribute__((weak)) void OnBlinkOn() {}
+
+void SendCallback() {
     char bytes[] = {
         129,
-        13,
+        7,
         128
     };
     SendBytes(bytes, 3);
 }
 
 // You should redefine this function
-__attribute__((weak)) void OnBougiesHitTop() {}
-
-void SendBougiesHitTopConfirm() {
-    char bytes[] = {
-        129,
-        11,
-        128
-    };
-    SendBytes(bytes, 3);
-}
+__attribute__((weak)) void OnLedOff() {}
 
 // You should redefine this function
-__attribute__((weak)) void OnBougiesOff() {}
-
-void SendBougiesOffConfirm() {
-    char bytes[] = {
-        129,
-        15,
-        128
-    };
-    SendBytes(bytes, 3);
-}
+__attribute__((weak)) void OnLedOn() {}
 
 // You should redefine this function
-__attribute__((weak)) void OnBougiesOn() {}
-
-void SendBougiesOnConfirm() {
-    char bytes[] = {
-        129,
-        17,
-        128
-    };
-    SendBytes(bytes, 3);
-}
+__attribute__((weak)) void OnSetCallback(unsigned char nbloop) {}
 
 // You should redefine this function
-__attribute__((weak)) void OnChopperVerre() {}
-
-// You should redefine this function
-__attribute__((weak)) void OnGetNombreVerres() {}
-
-// You should redefine this function
-__attribute__((weak)) void OnLacherVerres() {}
-
-void SendNombreVerres(unsigned int n) {
-    char bytes[] = {
-        129,
-        5,
-        2,
-        ((char*)&n)[0],
-        ((char*)&n)[1],
-        128
-    };
-    SendBytes(bytes, 6);
-}
-
-// You should redefine this function
-__attribute__((weak)) void OnSortirPince() {}
+__attribute__((weak)) void OnSetDelay(unsigned int delay) {}
 
 
 int AtpDecode(int id,
@@ -153,36 +108,28 @@ int AtpDecode(int id,
         OnTest(ucharv[0], ushortv[0], uintv[0], charv[0], shortv[0], intv[0], floatv[0]);
         return 1;
     }
-    if (id == 12) {
-        OnBougiesHitBot();
-        return 1;
-    }
-    if (id == 10) {
-        OnBougiesHitTop();
-        return 1;
-    }
-    if (id == 14) {
-        OnBougiesOff();
-        return 1;
-    }
-    if (id == 16) {
-        OnBougiesOn();
-        return 1;
-    }
     if (id == 2) {
-        OnChopperVerre();
-        return 1;
-    }
-    if (id == 4) {
-        OnGetNombreVerres();
-        return 1;
-    }
-    if (id == 3) {
-        OnLacherVerres();
+        OnBlinkOff();
         return 1;
     }
     if (id == 1) {
-        OnSortirPince();
+        OnBlinkOn();
+        return 1;
+    }
+    if (id == 5) {
+        OnLedOff();
+        return 1;
+    }
+    if (id == 4) {
+        OnLedOn();
+        return 1;
+    }
+    if (id == 6) {
+        OnSetCallback(ucharv[0]);
+        return 1;
+    }
+    if (id == 3) {
+        OnSetDelay(ushortv[0]);
         return 1;
     }
     return 0;
