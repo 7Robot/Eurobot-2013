@@ -8,6 +8,9 @@
 #ifndef ATP_USER_H
 #define	ATP_USER_H
 
+// Fonction de communication spécifique au rôle du pic
+#include "atp-mother.h"
+
 // Vitesse de transmission, défaut : 115200
 #define BAUDRATE 115200
 

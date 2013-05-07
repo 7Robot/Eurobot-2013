@@ -9,7 +9,7 @@
 #define	ATP_USER_H
 
 // Fonction de communication spécifique au rôle du pic
-#include "atp-demo.h"
+#include "atp-asserv.h"
 
 // Vitesse de transmission, défaut : 115200
 #define BAUDRATE 115200
