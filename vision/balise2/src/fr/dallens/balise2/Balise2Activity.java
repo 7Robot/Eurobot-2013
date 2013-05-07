@@ -33,6 +33,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 
 import android.util.Log;
 
@@ -44,6 +45,7 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
 	private Mode mode = Mode.AUTO;
 	private int pos; // Sur quelle balise on est
 	
+	// TODO private
 	public native void initJNI(long addrImRef);
 	public native int findColorsJNI(long addrImTar, long addrImOut);
 	public native int findColorsJNI2(float p1x, float p1y, float p2x, float p2y, float p3x, float p3y, float p4x, float p4y, long addrImOut);
@@ -51,6 +53,8 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
 	
 	private boolean candlesInit = false;
 	private boolean processingFrame = false;
+	private Candles candles = new Candles();
+	private CommunicationRobot commRobot;
 	
 	
 	
@@ -78,8 +82,7 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
         point4.x = Math.round(373*ratio);
         point4.y = Math.round(386*ratio);
         
-        
-                       
+                      
         // declare each ball with the ColorBall class
         colorballs[0] = new ColorBall(point1);
         colorballs[1] = new ColorBall(point2);
@@ -129,9 +132,17 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.v("Msg", "bougiesJNI loaded");
+        initBalls();
         
         Intent intent = getIntent();
         pos = intent.getIntExtra("pos", 1);
+        String addressRobot = intent.getStringExtra("addressRobot");
+        commRobot = new CommunicationRobot();
+        commRobot.setCandles(candles);
+		commRobot.connect(addressRobot);
+        Thread commRobotThread = new Thread(commRobot);
+		commRobotThread.start();
+        
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -141,7 +152,15 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
         
-        initBalls();
+        
+        TextView robotConnectedLabel = (TextView)findViewById(R.id.isConnectedRobot);
+        if (commRobot.isConnected) {
+        	robotConnectedLabel.setText("Robot: connected.");
+        	
+        }
+        else {
+        	robotConnectedLabel.setText("Robot: NOT connected.");
+        }
     }
 
     @Override
@@ -215,9 +234,11 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
 				res = findColorsJNI(tarImMat.getNativeObjAddr(), output.getNativeObjAddr());
 			else
 				res = findColorsJNI2(colorballs[0].getX(), colorballs[0].getY(), colorballs[1].getX(), colorballs[1].getY(), colorballs[2].getX(), colorballs[2].getY(), colorballs[3].getX(), colorballs[3].getY(), output.getNativeObjAddr());
+			candles.setCandlesPos(res);
+			Log.v("Msg", candles.toString());
 			processingFrame = false;
 			Log.v("Msg", "processing done");
-			if ( res==0 ) {
+			if ( res>=0 ) {
 				Log.v("Msg", "SUCCESS");
 //				Log.v("Msg", String.format("********* %d %d %d %d %d %d", imOut.type(), imOut.height(), imOut.width(), imOut.rows(), imOut.cols(), imOut.channels()));
 
@@ -229,7 +250,6 @@ public class Balise2Activity extends Activity implements CvCameraViewListener2	 
 				{
 					int i = 0;
 			    	for (ColorBall ball : colorballs) {
-			    		
 			    		Core.circle(imOut2, new org.opencv.core.Point(ball.getX(), ball.getY()), 8, new Scalar(i, 0, 255-i), -2);
 			    		i+=50;
 			    	}

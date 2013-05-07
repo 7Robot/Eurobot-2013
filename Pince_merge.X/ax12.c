@@ -1,7 +1,7 @@
 /*
 * Template dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* ÂµC : 33FJ64MC802
 * Juillet 2012
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -34,16 +34,16 @@ responseAXtype responseAX;
 
 void SetTX() {
     __builtin_write_OSCCONL(OSCCON & 0xBF);
-    _U1RXR = 25;
-     _RP5R = 3;  // RP5 (pin 14) = U1TX (p.167)
+    _U1RXR = 31;
+     _RP25R = 3;  // RP25 (pin 14) = U1TX (p.167)
     __builtin_write_OSCCONL(OSCCON | 0x40);
     //CNPU2bits.CN27PUE = 0;
 }
 
 void SetRX() {
     __builtin_write_OSCCONL(OSCCON & 0xBF);
-     _RP5R = 0;
-    _U1RXR = 5; // RP5 (pin 14) = U1RX (p.165)
+     _RP25R = 0;
+    _U1RXR = 25; // RP25 (pin 14) = U1RX (p.165)
     __builtin_write_OSCCONL(OSCCON | 0x40);
     //CNPU2bits.CN27PUE = 1; // Enable pull up.
 }
@@ -190,11 +190,13 @@ byte RegisterLenAX(byte address) {
 
 /* Write a value to a registry, guessing its width. */
 void PutAX(byte id, byte address, int value) {
+    responseReadyAX = 0;
     WriteAX(id, address, RegisterLenAX(address),
                    (byte*)&value /* C18 and AX12 are little-endian */);
 }
 
 /* Read a value from a registry, guessing its width. */
 void GetAX(byte id, byte address) {
+    responseReadyAX = 0;
     ReadAX(id, address, RegisterLenAX(address));
 }

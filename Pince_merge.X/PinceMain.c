@@ -1,7 +1,7 @@
 /*
-* Template dsPIC33F
+* Pince merged dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* uC : 33FJ64MC804
 * Juillet 2012
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -15,20 +15,16 @@
 #include <p33Fxxxx.h>      /* Includes device header file                     */
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
-#include "header.h"        /* Function / Parameters                           */
+#include "PinceHeader.h"  /* Function / Parameters                           */
 #include <libpic30.h>
 #include <uart.h>
 #include "ax12.h"
-
-
-
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
 /******************************************************************************/
 
 /* i.e. uint16_t <variable_name>; */
-
 
 /******************************************************************************/
 /* Configuartion                                                              */
@@ -37,80 +33,63 @@
 // Select Oscillator and switching.
 _FOSCSEL(FNOSC_FRCPLL & IESO_OFF);
 // Select clock.
-_FOSC(POSCMD_NONE & OSCIOFNC_ON & IOL1WAY_OFF & FCKSM_CSDCMD);
+_FOSC(POSCMD_NONE & OSCIOFNC_ON & IOL1WAY_ON & FCKSM_CSDCMD);
 // Watchdog Timer.
 _FWDT(FWDTEN_OFF);
 // Select debug channel.
 _FICD(ICS_PGD1 & JTAGEN_OFF);
 
-
-
 /******************************************************************************/
 /* Main Program                                                               */
 /******************************************************************************/
 
-
-
-
-
-
 int16_t main(void)
 {
-
     // Initialize IO ports and peripherals.
     ConfigureOscillator();
     InitApp();
+    Init_PWM();
     responseReadyAX = 0;
 
-    ODCBbits.ODCB5 = 1;
+    __delay_ms(10);
+    PutAX(AX_BROADCAST, AX_MOVING_SPEED, 250);
+    __delay_ms(10);
+    PutAX(AX_BROADCAST, AX_MAX_TORQUE, 1100);
+    __delay_ms(10);
 
-    __delay_ms(500);
-    //PutAX(AX_BROADCAST, AX_MOVING_SPEED, 0x0000);
-    //PutAX(AX_BROADCAST, AX_BAUD_RATE, 0x0022);
-    //Les AX12 sont à 57600 BAUD
+    //Set_Consigne_Hauteur(0);
+    Set_Asserv_h(1.1, 0);
+    Set_Vitesse(1500);
 
+    //__delay_ms(2000);
+    Sortir_Pince();
+    __delay_ms(3000);
+    Chopper_verre();
 
-    while(1) {
-        __delay_ms(300);
-        PutAX(4, AX_GOAL_POSITION, 350);
-        __delay_ms(200);
-        PutAX(13, AX_GOAL_POSITION, 200);
-        __delay_ms(10);
-        PutAX(10, AX_GOAL_POSITION, 560);
+    //Set_Consigne_Hauteur(1500); //mi hauteur
+     __delay_ms(3000);
+    Chopper_verre();
+    __delay_ms(3000);
+    Chopper_verre();
+    __delay_ms(3000);
+    Chopper_verre();
+    //Set_Consigne_Hauteur(2700); //full hauteur
+    __delay_ms(3000);
+    Lacher_verres();
 
-        __delay_ms(600);
-        PutAX(4, AX_GOAL_POSITION, 860);
-        __delay_ms(100);
-        PutAX(13, AX_GOAL_POSITION, 200);
-        __delay_ms(10);
-        PutAX(10, AX_GOAL_POSITION, 560);
+    while(1)
+    {
+    //Set_Consigne_Hauteur(1000); //mi hauteur
 
-         __delay_ms(300);
-        PutAX(4, AX_GOAL_POSITION, 860);
-        __delay_ms(10);
-        PutAX(13, AX_GOAL_POSITION, 200);
-        __delay_ms(10);
-        PutAX(10, AX_GOAL_POSITION, 200);
-
-         __delay_ms(230);
-        PutAX(4, AX_GOAL_POSITION, 710);
-        __delay_ms(10);
-        PutAX(13, AX_GOAL_POSITION, 200);
-        __delay_ms(10);
-        PutAX(10, AX_GOAL_POSITION, 200);
-
-        __delay_ms(200);
-        PutAX(4, AX_GOAL_POSITION, 860);
-        __delay_ms(10);
-        PutAX(13, AX_GOAL_POSITION, 200);
-        __delay_ms(160);
-        PutAX(10, AX_GOAL_POSITION, 560);
-
-
-      //GetAX(13,AX_PRESENT_POSITION);
-      //while(!responseReadyAX);
-
-
-
+        //Cinematique_inverse();
+        //Set_Consigne_Hauteur(2500); //mi hauteur
+        //__delay_ms(2000);
+        led = !led;
+        //reset_pince();
+       // __delay_ms(2000);
+//        Set_Consigne_Hauteur(0);
+        __delay_ms(1000);
     }
+
 }
+
