@@ -29,8 +29,10 @@
 /******************************************************************************/
 /*                            Global variables                                */
 /******************************************************************************/
+
 extern unsigned char num_ax;
 extern unsigned char data;
+extern volatile char actionBras = 0;
 
 /******************************************************************************/
 /* User Functions                                                             */
@@ -289,3 +291,23 @@ void __attribute__((__interrupt__, no_auto_psv)) _U2TXInterrupt(void)
 /* <compiler installation directory>/doc directory for the latest compiler    */
 /* release.                                                                   */
 /******************************************************************************/
+
+
+void __attribute__((interrupt, no_auto_psv)) _SPI2Interrupt(void){
+    led=1;
+    IFS2bits.SPI2IF = 0;
+    if((actionBras & BOUGIE_ON) == BOUGIE_ON){
+        DoOnBougie();
+        actionBras &= ~BOUGIE_ON;
+    }else if((actionBras & BOUGIE_OFF) == BOUGIE_OFF){
+        DoOffBougie();
+        actionBras &= ~BOUGIE_OFF;
+    }else if((actionBras & BOUGIE_BOT) == BOUGIE_BOT){
+        DoHitBotBougie();
+        actionBras &= ~BOUGIE_BOT;
+    }else if((actionBras & BOUGIE_TOP) == BOUGIE_TOP){
+        DoHitTopBougie();
+        actionBras &= ~BOUGIE_TOP;
+    }
+    led=0;
+}

@@ -33,6 +33,15 @@
 #define led _LATA0
 #define led2 _LATA1
 
+#define AX_BOUGIES_1 13
+#define AX_BOUGIES_2 10
+#define AX_BOUGIES_3 4
+
+#define BOUGIE_ON (1<<1)
+#define BOUGIE_OFF (1<<2)
+#define BOUGIE_TOP (1<<3)
+#define BOUGIE_BOT (1<<4)
+
 #define AX_BG 8
 #define AX_BD 11
 #define AX_HG1 16
@@ -76,6 +85,3 @@ void Init_PWM(void);
 void Set_Vitesse_MoteurH(long);
 void pince_en_descente(void);
 void pince_en_montee(void);
-
-// From Bras_AX12
-extern volatile char actionAx;

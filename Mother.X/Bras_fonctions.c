@@ -26,32 +26,11 @@
 #include <libpic30.h>
 #include "atp-mother.h"
 
-#define AX_BOUGIES_1 13
-#define AX_BOUGIES_2 10
-#define AX_BOUGIES_3 4
-
-#define AX_PINCE_GAUCHE 8
-#define AX_PINCE_DROITE 11
-
-#define AX_GUIDE_GAUCHE_1 16
-#define AX_GUIDE_GAUCHE_2 17
-#define AX_GUIDE_DROIT_1 6
-#define AX_GUIDE_DROIT_2 7
-
-#define BOUGIE_ON (1<<1)
-#define BOUGIE_OFF (1<<2)
-#define BOUGIE_TOP (1<<3)
-#define BOUGIE_BOT (1<<4)
-
-
-volatile char actionAx =0;
-
+volatile char actionBras = 0;
 
 /*************************************************
  *                 Bougies                       *
  *************************************************/
-
-
 
 void PosInitBougies(int Bot){
     if(Bot==1){
@@ -71,7 +50,7 @@ void PosInitBougies(int Bot){
 
 //Taper sur les bougies du haut
 void OnBougiesHitTop(){
-   actionAx |= BOUGIE_TOP;
+   actionBras |= BOUGIE_TOP;
    IFS2bits.SPI2IF = 1;
 }
 void DoHitTopBougie(){
@@ -88,7 +67,7 @@ void DoHitTopBougie(){
 //Taper sur les bougies du bas
 
 void OnBougiesHitBot(){
-    actionAx |=  BOUGIE_BOT;
+    actionBras |= BOUGIE_BOT;
     IFS2bits.SPI2IF = 1;
 }
 void DoHitBotBougie(){
@@ -106,7 +85,7 @@ void DoHitBotBougie(){
 
 //Position pli�e bras AX Bougies
 void OnBougiesOff(){ //DONE
-    actionAx |= BOUGIE_OFF;
+    actionBras |= BOUGIE_OFF;
     IFS2bits.SPI2IF = 1;
 }
 void DoOffBougie(){
@@ -124,7 +103,7 @@ void DoOffBougie(){
 
 //Position d�pli�e bras AX Bougies
 void OnBougiesOn(){
-    actionAx |= BOUGIE_ON;
+    actionBras |= BOUGIE_ON;
     IFS2bits.SPI2IF = 1;
 }
 
@@ -141,22 +120,3 @@ void DoOnBougie(){
         SendBougiesOnConfirm();
 }
 
-
-void __attribute__((interrupt, no_auto_psv)) _SPI2Interrupt(void){
-    led=1;
-    IFS2bits.SPI2IF = 0;
-    if((actionAx & BOUGIE_ON) == BOUGIE_ON){
-        DoOnBougie();
-        actionAx &= ~BOUGIE_ON;
-    }else if((actionAx & BOUGIE_OFF) == BOUGIE_OFF){
-        DoOffBougie();
-        actionAx &= ~BOUGIE_OFF;
-    }else if((actionAx & BOUGIE_BOT) == BOUGIE_BOT){
-        DoHitBotBougie();
-        actionAx &= ~BOUGIE_BOT;
-    }else if((actionAx & BOUGIE_TOP) == BOUGIE_TOP){
-        DoHitTopBougie();
-        actionAx &= ~BOUGIE_TOP;
-    }
-    led=0;
-}
