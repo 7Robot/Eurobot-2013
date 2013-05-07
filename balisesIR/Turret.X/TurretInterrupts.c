@@ -118,6 +118,7 @@
 /* Interrupt Routines                                                         */
 /******************************************************************************/
 #include <ports.h>
+#include "atp-turret.h"
 
 void OnOn () {
 }

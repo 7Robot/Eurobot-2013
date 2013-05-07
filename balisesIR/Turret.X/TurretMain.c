@@ -26,6 +26,7 @@
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "TurretUser.h"    /* User funct/params, such as InitApp              */
+#include "atp.h"
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
