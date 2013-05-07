@@ -12,6 +12,8 @@
 *                 7robot.fr
 */
 
+#include "atp.h"
+
 /******************************************************************************/
 /* System Level #define Macros                                                */
 /******************************************************************************/
@@ -47,7 +49,7 @@
 
 #define CONSIGNE_MAX 800
 #define CONSIGNE_MIN 200
-#define CONSIGNE_NULLE 20
+#define CONSIGNE_NULLE 30
 
 #define VITESSE_MAX 1
 #define OMEGA_MAX 10
@@ -75,6 +77,9 @@ void Set_Asserv_D(float, float, float);
 void Set_Asserv_T(float, float, float);
 
 void Set_Position(float, float);           // permet une mise à jour de la position, du robot
+void Set_Angle(float);
+void Set_X_Angle(float, float);
+void Set_Y_Angle(float, float);
 void Set_Postion_Angle(float, float, float);  // remet totalement à jour la position
 void Get_Position(float*, float*, float*);       // renvoie la position actuelle du robot
 float Get_Angle(void);
@@ -82,6 +87,7 @@ float Get_Distance_Obj(float, float);          //renvoie la distance entre la co
 float Get_Angle_Obj(float, float);             //renvoie l'angle entre la consigne et la position actuelle
 void Incremente_Position(int16_t, int16_t, volatile float*, volatile float*, volatile float*, volatile float*);     // recoie les tics, incremente la position, renvoie la vitesse et l'angle (pour l'asserv)
 
+ void Stop(void);
  void Set_Rampe_Position(float, float);
  void Set_Rampe_Distance(float);
  void Set_Rampe_Angle(float);
@@ -89,6 +95,8 @@ void Incremente_Position(int16_t, int16_t, volatile float*, volatile float*, vol
  void Set_Consigne_Angle(float);
  void Set_Consigne_Position(float, float);
  void Set_Consigne_Vitesse(float);
+ void Set_Consigne_Omega(float);
+ void Set_Consigne_Courbe(float, float);
  void Mise_A_Jour_Consignes(void);
 
 

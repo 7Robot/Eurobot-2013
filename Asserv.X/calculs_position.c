@@ -30,6 +30,23 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
     PosY = NewY;
 }
 
+void Set_Angle(float NewTheta)
+{
+    Theta = NewTheta;
+}
+
+void Set_X_Angle(float NewX, float NewTheta)
+{
+    PosX = NewX;
+    Theta = NewTheta;
+}
+
+void Set_Y_Angle(float NewY, float NewTheta)
+{
+    PosY = NewY;
+    Theta = NewTheta;
+}
+
 void Set_Postion_Angle(float NewX, float NewY, float NewTheta)  // remet totalement à jour la position
 {
     Theta = NewTheta;

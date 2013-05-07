@@ -18,8 +18,6 @@
 #include "AsservHeader.h"  /* Function / Parameters                           */
 #include <libpic30.h>
 #include <uart.h>
-#include "atp-asserv.h"
-#include "atp.h"
 
 
 /******************************************************************************/
@@ -58,18 +56,18 @@ int16_t main(void)
     AtpInit();
     SendId(5);
 
-    Set_Asserv_D(600,10,0.1);
-    Set_Asserv_T(300,10,0.1);
+    Set_Asserv_D(600,10,1);
+    Set_Asserv_T(300,10,0);
     Set_Asserv_V(100,10,1);
     Set_Asserv_O(100,10,1);
 
-    //Set_Consigne_Position(0.5,1);
+    Stop();
 
     while(1) {
 
 //        Set_Consigne_Distance(-1);
 //        Set_Consigne_Angle(PI/2);
-        Set_Consigne_Position(-0.4,0.5);
+//        Set_Consigne_Position(-0.4,0.5);
         while(1);
 
         if (broadcast) {
