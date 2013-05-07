@@ -78,8 +78,9 @@ void Set_Vitesse_MoteurD(float Consigne)
         DIRB1 = 0;
     }
 
-    if (Consigne < VITESSE_MIN && Consigne > CONSIGNE_MIN)          Consigne = VITESSE_MIN;
-    if (Consigne > VITESSE_MAX)      Consigne = VITESSE_MAX;
+    if (Consigne < CONSIGNE_NULLE) Consigne = 0;
+    if (Consigne < CONSIGNE_MIN && Consigne > CONSIGNE_NULLE)          Consigne = CONSIGNE_MIN;
+    if (Consigne > CONSIGNE_MAX)      Consigne = CONSIGNE_MAX;
     P1DC1 = (int)(Consigne);
 }
 
@@ -97,9 +98,9 @@ void Set_Vitesse_MoteurG(float Consigne)
         DIRB2 = 0;
     }
 
-
-    if (Consigne < VITESSE_MIN && Consigne > CONSIGNE_MIN)          Consigne = VITESSE_MIN;
-    if (Consigne > VITESSE_MAX)      Consigne = VITESSE_MAX;
+    if (Consigne < CONSIGNE_NULLE) Consigne = 0;
+    if (Consigne < CONSIGNE_MIN && Consigne > CONSIGNE_NULLE)          Consigne = CONSIGNE_MIN;
+    if (Consigne > CONSIGNE_MAX)      Consigne = CONSIGNE_MAX;
     P1DC2 = (int)(Consigne);
 
 }
