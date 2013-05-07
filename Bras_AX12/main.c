@@ -1,7 +1,7 @@
 /*
 * Template dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* µC : 33FJ64MC804
 * Juillet 2012
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -9,7 +9,7 @@
 *     / /  |    // _ \| '_ \ / _ \| __|
 *    / /   | |\ \ (_) | |_) | (_) | |_
 *   /_/    |_| \_\___/|____/ \___/'\__|
-*			      7robot.fr
+*                 7robot.fr
 */
 
 #include <p33Fxxxx.h>      /* Includes device header file                     */
@@ -19,9 +19,6 @@
 #include <libpic30.h>
 #include <uart.h>
 #include "ax12.h"
-
-
-
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
@@ -44,14 +41,9 @@ _FWDT(FWDTEN_OFF);
 _FICD(ICS_PGD1 & JTAGEN_OFF);
 
 
-
 /******************************************************************************/
 /* Main Program                                                               */
 /******************************************************************************/
-
-
-
-
 
 
 int16_t main(void)
@@ -72,7 +64,7 @@ int16_t main(void)
     //Les AX12 sont à 57600 BAUD
     //OnOnBougies();
     //__delay_ms(500);
-  
+
     while(1) {
 /*
         PutAX(4, AX_GOAL_POSITION, 710);

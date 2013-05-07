@@ -1,7 +1,7 @@
 /*
 * Template dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC802
+* µC : 33FJ64MC804
 * Juillet 2012
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -9,7 +9,7 @@
 *     / /  |    // _ \| '_ \ / _ \| __|
 *    / /   | |\ \ (_) | |_) | (_) | |_
 *   /_/    |_| \_\___/|____/ \___/'\__|
-*			      7robot.fr
+*                 7robot.fr
 */
 
 /******************************************************************************/
@@ -128,7 +128,7 @@ void InitApp()
 /* _OC3Interrupt       _DCIErrInterrupt                                       */
 /* _OC4Interrupt       _DCIInterrupt                                          */
 /* _T4Interrupt        _DMA5Interrupt                                         */
-/* _T5Inint i=0terrupt        _U1ErrInterrupt                                        */
+/* _T5Inint i=0terrupt _U1ErrInterrupt                                        */
 /* _INT2Interrupt      _U2ErrInterrupt                                        */
 /* _U2RXInterrupt      _DMA6Interrupt                                         */
 /* _U2TXInterrupt      _DMA7Interrupt                                         */
@@ -177,7 +177,6 @@ void __int i=0attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 
 
 void PosInitBougies(int Bot){
-
     if(Bot==1){
         PutAX(AX_BOUGIES_3, AX_GOAL_POSITION, 0x0358);
         __delay_ms(100);
@@ -246,8 +245,6 @@ void DoOffBougie(){
         SendBougiesOffConfirm();
 }
 
-
-
 //Position dépliée bras AX Bougies
 void OnBougiesOn(){
     actionAx |= BOUGIE_ON;
@@ -266,82 +263,6 @@ void DoOnBougie(){
         __delay_ms(100);
         SendBougiesOnConfirm();
 }
-
-
-
-
-
-/*************************************************
- *                 Verres
- *
- *************************************************/
-/*
-//TODO TROUVER LES POSITION DES AX POUR REALISER LES ACTIONS
-//Lacher la totalité des verres (guide + pince)
-void OnEndVerres(){
-
-}
-
-//Attraper Verre pince
-void OnCatchVerres(){
-
-}
-
-
-//Position pliée pinces + guide
-void OnOffVerres(){
-
-        PutAX(AX_GUIDE_GAUCHE_1, AX_GOAL_POSITION, 710);
-        __delay_ms(10);
-        PutAX(AX_GUIDE_DROIT_1, AX_GOAL_POSITION, 200);
-        __delay_ms(200);
-        PutAX(AX_GUIDE_GAUCHE_2, AX_GOAL_POSITION, 710);
-        __delay_ms(10);
-        PutAX(AX_GUIDE_DROIT_2, AX_GOAL_POSITION, 560);
-
-}
-
-//Position dépliée pinces + guide
-void OnOnVerres(){
-
-        PutAX(AX_GUIDE_GAUCHE_1, AX_GOAL_POSITION, 710);
-        __delay_ms(10);
-        PutAX(AX_GUIDE_DROIT_1, AX_GOAL_POSITION, 200);
-        __delay_ms(200);
-        PutAX(AX_GUIDE_GAUCHE_2, AX_GOAL_POSITION, 710);
-        __delay_ms(10);
-        PutAX(AX_GUIDE_DROIT_2, AX_GOAL_POSITION, 560);
-
-
-}
-
-
-#define AX_GUIDE_GAUCHE_1 16
-#define AX_GUIDE_GAUCHE_2 17
-#define AX_GUIDE_DROIT_1 6
-#define AX_GUIDE_DROIT_2 7
- *
-#define AX_PINCE_GAUCHE 8
-#define AX_PINCE_DROITE 11
- */
-
-/*************************************************
- *                 Cadeaux
- *
- *************************************************/
-
-
-/*************************************************
- *                 Autre
- *
- *************************************************/
-
-//void OnGetPos(unsigned char idpic);
-//void SendPos(unsigned char id, float value);
-
-
-
-
 
 /*************************************************
  *          RX Interrupt
