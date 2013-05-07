@@ -32,8 +32,8 @@
 
 extern unsigned char num_ax;
 extern unsigned char data;
-extern volatile char actionBras = 0;
-extern volatile char actionPince = 0;
+extern volatile char actionBras;
+extern volatile char actionPince;
 
 /******************************************************************************/
 /* User Functions                                                             */
@@ -316,7 +316,7 @@ void __attribute__((interrupt, no_auto_psv)) _SPI2Interrupt(void){
         Chopper_verre();
         actionPince &= ~CHOPPER_VERRE;
     } else if ((actionPince & LACHER_VERRE) == LACHER_VERRE) {
-        Lacher_verre();
+        Lacher_verres();
         actionPince &= ~LACHER_VERRE;
     }
     led=0;

@@ -27,13 +27,12 @@
 #include "ax12.h"
 #include "atp-mother.h"
 
-/*
- *
- */
 volatile int ready = 0;
 volatile int full  = 0;
 volatile unsigned int nbverres = 0;
 volatile char actionPince = 0;
+volatile unsigned char num_ax;
+volatile unsigned char data;
 
 void Sortir_Pince()
 {
@@ -138,10 +137,10 @@ void Lacher_verres()
 void Ouvrir_pince_bas()
 {
 //Ouvrir pince en position basse :
-        PutAX(AX_BG, AX_GOAL_POSITION, 710);
-        __delay_ms(10);
-        PutAX(AX_BD, AX_GOAL_POSITION, 310);
-        __delay_ms(200);
+    PutAX(AX_BG, AX_GOAL_POSITION, 710);
+    __delay_ms(10);
+    PutAX(AX_BD, AX_GOAL_POSITION, 310);
+    __delay_ms(200);
 }
 
 void Serrer_verre_en_haut()
@@ -156,22 +155,22 @@ volatile int retour=0;
 int Serrer_verre_en_bas()
 {
 //Serrer un verre en position basse :
-	PutAX(AX_BG, AX_GOAL_POSITION, 845);
-        __delay_ms(10);
-        PutAX(AX_BD, AX_GOAL_POSITION, 170);
-        __delay_ms(400);
-        PutAX(AX_BG, AX_GOAL_POSITION, 800);
-        __delay_ms(10);
-        PutAX(AX_BD, AX_GOAL_POSITION, 220);
-        __delay_ms(200);
-        PutAX(AX_BG, AX_GOAL_POSITION, 845);
-        __delay_ms(10);
-        PutAX(AX_BD, AX_GOAL_POSITION, 170);
-        __delay_ms(250);
-        //valeur = 159;
-        num_ax = AX_BD;
-        data = AX_PRESENT_POSITION;
-        GetAXnoWait();
+    PutAX(AX_BG, AX_GOAL_POSITION, 845);
+    __delay_ms(10);
+    PutAX(AX_BD, AX_GOAL_POSITION, 170);
+    __delay_ms(400);
+    PutAX(AX_BG, AX_GOAL_POSITION, 800);
+    __delay_ms(10);
+    PutAX(AX_BD, AX_GOAL_POSITION, 220);
+    __delay_ms(200);
+    PutAX(AX_BG, AX_GOAL_POSITION, 845);
+    __delay_ms(10);
+    PutAX(AX_BD, AX_GOAL_POSITION, 170);
+    __delay_ms(250);
+    //valeur = 159;
+    num_ax = AX_BD;
+    data = AX_PRESENT_POSITION;
+    GetAXnoWait();
 
     int verreok = 0;
     if (retour > 170) verreok = 1;
@@ -180,7 +179,7 @@ int Serrer_verre_en_bas()
 
 void GetAXnoWait()
 {
-    GetAX(num_ax,data);
+    GetAX(num_ax, data);
     //TMR5 = 0;
     while(!responseReadyAX)
         {
@@ -297,7 +296,7 @@ void OnSortirPince() {
 }
 
 void OnChopperVerre() {
-    actionPince |= CHOPPER_VERRRE;
+    actionPince |= CHOPPER_VERRE;
     IFS2bits.SPI2IF = 1;
 }
 

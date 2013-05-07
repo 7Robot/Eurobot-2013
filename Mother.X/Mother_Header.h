@@ -16,8 +16,6 @@
 /* System Level #define Macros                                                */
 /******************************************************************************/
 
-/* TODO Define system operating frequency */
-
 /* Microcontroller MIPs (FCY) */
 #define SYS_FREQ        80000000 //7370000L
 #define FCY             SYS_FREQ/2
@@ -60,10 +58,8 @@
 /* Function Prototypes                                                        */
 /******************************************************************************/
 
-/* TODO User level functions prototypes (i.e. InitApp) go here */
-
-void ConfigureOscillator(void); /* Handles clock switching/osc initialization */
-void InitApp(void);             /* I/O and Peripheral Initialization          */
+void ConfigureOscillator(); /* Handles clock switching/osc initialization */
+void InitApp();             /* I/O and Peripheral Initialization          */
 
 //protos AX12 pince
 void Cinematique_inverse();
@@ -84,11 +80,11 @@ void GetAXnoWait();
 void Set_Vitesse(int);
 void Set_Consigne_Hauteur(long);
 void Set_Asserv_h(float, float);
-void reset_pince(void);
-void Init_PWM(void);
+void reset_pince();
+void Init_PWM();
 void Set_Vitesse_MoteurH(long);
-void pince_en_descente(void);
-void pince_en_montee(void);
+void pince_en_descente();
+void pince_en_montee();
 
 //protos bras
 void DoOnBougie();

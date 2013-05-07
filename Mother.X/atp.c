@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "atp.h"
+#include "atp-mother.h"
 #include "Mother_Header.h"
 
 #if SEND_PRIO <= RECV_PRIO

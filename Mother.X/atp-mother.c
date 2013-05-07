@@ -1,6 +1,7 @@
 // Generated from version 1305070329 of semantic
 
 #include "atp.h"
+#include "atp-mother.h"
 
 
 void SendError() {

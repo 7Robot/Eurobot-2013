@@ -32,8 +32,8 @@ volatile char actionBras = 0;
  *                 Bougies                       *
  *************************************************/
 
-void PosInitBougies(int Bot){
-    if(Bot==1){
+void PosInitBougies(int Bot) {
+    if(Bot==1) {
         PutAX(AX_BOUGIES_3, AX_GOAL_POSITION, 0x0358);
         __delay_ms(100);
         PutAX(AX_BOUGIES_2, AX_GOAL_POSITION, 0x029C);
@@ -48,18 +48,18 @@ void PosInitBougies(int Bot){
 
 }
 
-void DoHitTopBougie(){
-        PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0207);
-        __delay_ms(10);
-        PutAX(AX_BOUGIES_2, AX_GOAL_POSITION, 0x0234);
-        __delay_ms(10);
-        PutAX(AX_BOUGIES_3, AX_GOAL_POSITION, 0x0158);
-        __delay_ms(500);
-        PosInitBougies(0);
-        SendBougiesHitTopConfirm();
+void DoHitTopBougie() {
+    PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0207);
+    __delay_ms(10);
+    PutAX(AX_BOUGIES_2, AX_GOAL_POSITION, 0x0234);
+    __delay_ms(10);
+    PutAX(AX_BOUGIES_3, AX_GOAL_POSITION, 0x0158);
+    __delay_ms(500);
+    PosInitBougies(0);
+    SendBougiesHitTopConfirm();
 }
 
-void DoHitBotBougie(){
+void DoHitBotBougie() {
     PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0207);
     __delay_ms(10);
     PutAX(AX_BOUGIES_3, AX_GOAL_POSITION, 0x034E);
@@ -72,50 +72,48 @@ void DoHitBotBougie(){
     SendBougiesHitBotConfirm();
 }
 
-void DoOffBougie(){
-
-        PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0141);
-        __delay_ms(50);
-        PutAX(AX_BOUGIES_2, AX_GOAL_POSITION, 0x00D2);
-        __delay_ms(10);
-        PutAX(AX_BOUGIES_3, AX_GOAL_POSITION, 0x00AD);
-        __delay_ms(800);
-        PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0086);
-        __delay_ms(100);
-        SendBougiesOffConfirm();
+void DoOffBougie() {
+    PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0141);
+    __delay_ms(50);
+    PutAX(AX_BOUGIES_2, AX_GOAL_POSITION, 0x00D2);
+    __delay_ms(10);
+    PutAX(AX_BOUGIES_3, AX_GOAL_POSITION, 0x00AD);
+    __delay_ms(800);
+    PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0086);
+    __delay_ms(100);
+    SendBougiesOffConfirm();
 }
 
-void DoOnBougie(){
-
-        PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0207);
-        __delay_ms(500);
-        PutAX(AX_BOUGIES_2, AX_GOAL_POSITION, 0x029C);
-        __delay_ms(600);
-        PutAX(AX_BOUGIES_3, AX_GOAL_POSITION, 0x0180);
-        __delay_ms(500);
-        //PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0207);
-        //__delay_ms(100);
-        SendBougiesOnConfirm();
+void DoOnBougie() {
+    PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0207);
+    __delay_ms(500);
+    PutAX(AX_BOUGIES_2, AX_GOAL_POSITION, 0x029C);
+    __delay_ms(600);
+    PutAX(AX_BOUGIES_3, AX_GOAL_POSITION, 0x0180);
+    __delay_ms(500);
+    //PutAX(AX_BOUGIES_1, AX_GOAL_POSITION, 0x0207);
+    //__delay_ms(100);
+    SendBougiesOnConfirm();
 }
 
 // ATP
 
-void OnBougiesOn(){
+void OnBougiesOn() {
     actionBras |= BOUGIE_ON;
     IFS2bits.SPI2IF = 1;
 }
 
-void OnBougiesHitTop(){
+void OnBougiesHitTop() {
    actionBras |= BOUGIE_TOP;
    IFS2bits.SPI2IF = 1;
 }
 
-void OnBougiesHitBot(){
+void OnBougiesHitBot() {
     actionBras |= BOUGIE_BOT;
     IFS2bits.SPI2IF = 1;
 }
 
-void OnBougiesOff(){ //DONE
+void OnBougiesOff() { //DONE
     actionBras |= BOUGIE_OFF;
     IFS2bits.SPI2IF = 1;
 }
