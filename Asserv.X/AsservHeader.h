@@ -76,11 +76,10 @@ void Set_Asserv_O(float, float, float);
 void Set_Asserv_D(float, float, float);
 void Set_Asserv_T(float, float, float);
 
-void Set_Position(float, float);           // permet une mise à jour de la position, du robot
 void Set_Angle(float);
 void Set_X_Angle(float, float);
 void Set_Y_Angle(float, float);
-void Set_Postion_Angle(float, float, float);  // remet totalement à jour la position
+void Set_Position_Angle(float, float, float);  // remet totalement à jour la position
 void Get_Position(float*, float*, float*);       // renvoie la position actuelle du robot
 float Get_Angle(void);
 float Get_Distance_Obj(float, float);          //renvoie la distance entre la consigne et la position actuelle
@@ -98,6 +97,8 @@ void Incremente_Position(int16_t, int16_t, volatile float*, volatile float*, vol
  void Set_Consigne_Omega(float);
  void Set_Consigne_Courbe(float, float);
  void Mise_A_Jour_Consignes(void);
+
+ void Set_Epsilons(float, float, float, float);
 
 
 //float sin_lut(float);   // prends un nombre en radians, en renvoie son sinus

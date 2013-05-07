@@ -81,6 +81,18 @@ void OnSetCourbe(float v, float omega);
 
 void OnSetDist(float dist);
 
+void OnSetEpsilons(float d, float di, float t, float ti);
+
+void OnSetOdoTheta(float theta);
+
+void OnSetOdoXTheta(float x, float theta);
+
+void OnSetOdoXY(float x, float y);
+
+void OnSetOdoXYTheta(float x, float y, float theta);
+
+void OnSetOdoYTheta(float y, float theta);
+
 void OnSetOmega(float omega);
 
 void OnSetPos(float x, float y);

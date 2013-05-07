@@ -24,7 +24,7 @@
 volatile float PosX = 0.0, PosY = 0.0, Theta = 0.0;
 
 
-void Set_Position(float NewX, float NewY)           // permet une mise à jour de la position, du robot
+void OnSetOdoXY(float NewX, float NewY)           // permet une mise à jour de la position, du robot
 {
     PosX = NewX;
     PosY = NewY;
@@ -47,7 +47,7 @@ void Set_Y_Angle(float NewY, float NewTheta)
     Theta = NewTheta;
 }
 
-void Set_Postion_Angle(float NewX, float NewY, float NewTheta)  // remet totalement à jour la position
+void Set_Position_Angle(float NewX, float NewY, float NewTheta)  // remet totalement à jour la position
 {
     Theta = NewTheta;
     PosX = NewX;
@@ -96,7 +96,25 @@ void Incremente_Position(int16_t Diff_D, int16_t Diff_G, volatile float *Vitesse
     //PosX = 0;
 }
 
+void OnSetOdoTheta(float theta)
+{
+    Set_Angle(theta);
+}
 
+void OnSetOdoXTheta(float x, float theta)
+{
+    Set_X_Angle(x, theta);
+}
+
+void OnSetOdoXYTheta(float x, float y, float theta)
+{
+    Set_Position_Angle(x, y, theta);
+}
+
+void OnSetOdoYTheta(float y, float theta)
+{
+    Set_Y_Angle(y, theta);
+}
 
 
 

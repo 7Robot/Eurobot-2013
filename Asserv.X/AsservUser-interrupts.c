@@ -141,7 +141,7 @@ void InitApp(void)
     volatile float Consigne_PosX = 0, Consigne_PosY = 0, Consigne_Thet = 0;
     volatile char Mode_Consigne = 0;
     volatile char etat =0;
-    volatile float Distance_Obj = 0;
+    volatile float Epsilon_D, Epsilon_DI, Epsilon_T, Epsilon_TI;
 
     //Coeffs vitesse
     volatile float KPv = 0, KDv = 0, KIv = 0;
@@ -203,6 +203,12 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
         // Dérivé de l'erreur de position
         Diff_Distance_point = Diff_Distance_Old - Diff_Distance_Actu;
         Diff_Theta_point = Diff_Theta_Old - Diff_Theta_Actu;
+
+        if(fabs(Diff_Distance_Actu) < Epsilon_D && fabs(Diff_Distance_All) < Epsilon_DI && fabs(Diff_Theta_Actu) < Epsilon_T && fabs(Diff_Theta_All) < Epsilon_TI)
+        {
+            Stop();
+            SendDone();
+        }
 
             if (Diff_Distance_All > 1500.0)
             {   Diff_Distance_All = 1500.0;  Overshoot = 1;  }
@@ -401,13 +407,13 @@ void Set_Rampe_Distance(float Consigne)
 
 void Set_Rampe_Angle(float Consigne)
 {
-
     Consigne_Theta = Consigne;
     Mode_Consigne = 3;
 }
 
 void Set_Consigne_Distance(float Consigne)
 {
+    Distance_Actu = 0;
     Consigne_Theta = Get_Angle();
     Consigne_Distance = Consigne;
     Mode_Consigne = 4;
@@ -415,6 +421,7 @@ void Set_Consigne_Distance(float Consigne)
 
 void Set_Consigne_Angle(float Consigne)
 {
+    Distance_Actu = 0;
     Consigne_Distance = 0;
     Consigne_Theta = Consigne;
     Mode_Consigne = 5;
@@ -424,7 +431,6 @@ void Set_Consigne_Position(float Consigne_X, float Consigne_Y)
 {
     Consigne_PosX = Consigne_X;
     Consigne_PosY = Consigne_Y;
-    Distance_Obj = Get_Distance_Obj(Consigne_PosX, Consigne_PosY);
     Mode_Consigne = 6;
 }
 
@@ -489,6 +495,8 @@ void OnSetAsservO(float KPo_new, float KIo_new, float KDo_new) { Set_Asserv_O(KP
 void OnSetAsservT(float KPt_new, float KIt_new, float KDt_new) { Set_Asserv_T(KPt_new, KDt_new, KIt_new); }
 void OnSetAsservV(float KPv_new, float KIv_new, float KDv_new) { Set_Asserv_V(KPv_new, KDv_new, KIv_new); }
 
+void OnSetEpsilons(float d, float di, float t, float ti) { Set_Epsilons(d, di, t, ti); }
+
 /****************** Coefs asserv ******************************/
 
 void Set_Asserv_V(float KPv_new, float KDv_new, float KIv_new)
@@ -523,4 +531,10 @@ void Set_Asserv_T(float KPt_new, float KDt_new, float KIt_new)
     KIt = KIt_new;
 }
 
-
+void Set_Epsilons(float E_D, float E_DI, float E_T, float E_TI)
+{
+    Epsilon_D = E_D;
+    Epsilon_DI =E_DI;
+    Epsilon_T = E_T;
+    Epsilon_TI = E_TI;
+}

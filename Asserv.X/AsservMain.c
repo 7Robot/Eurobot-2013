@@ -56,10 +56,12 @@ int16_t main(void)
     AtpInit();
     SendId(5);
 
-    Set_Asserv_D(600,10,1);
-    Set_Asserv_T(300,10,0);
-    Set_Asserv_V(100,10,1);
-    Set_Asserv_O(100,10,1);
+    Set_Epsilons(0.1,0.1,0.1,0.1);
+
+    Set_Asserv_D(600,50,1);
+    Set_Asserv_T(30,5,0);
+    Set_Asserv_V(100,5,1);
+    Set_Asserv_O(100,5,1);
 
     Stop();
 
