@@ -56,6 +56,12 @@ unsigned int U1STAvalue;
 unsigned int sptime;
 unsigned int period;
 
+unsigned char adv = 0;
+volatile int go = 0;
+int adv1[taille_uart] = {0,1,0,1,1,1,1,1};
+int adv2[taille_uart] = {1,0,0,1,1,1,1,1};
+volatile int b[8];
+
 int16_t main(void)
 {
 
@@ -71,8 +77,9 @@ int16_t main(void)
     TRISAbits.TRISA1 = 0; //  LED1
     _TRISB2 = 1;
     _TRISB3 = 1;
+    _TRISC7 = 1;
 
-    _TRISC1 = 1; //pin de CN9 qui recoit le TX donc rx
+    _TRISC1 = 1; //pin de CN9 qui recoit le TX
 
     UnlockRP; // Unlock registers.
     _RP16R = 3; // U1TX sur RP16
@@ -81,7 +88,6 @@ int16_t main(void)
     ConfigIntCN(CHANGE_INT_ON & CHANGE_INT_PRI_4 & 0xFF000200); /*Interrupt sur CN9*/
     
     CloseUART1();
-    ConfigIntUART1(UART_RX_INT_DIS & UART_TX_INT_DIS);
     
     OpenUART1(UART_EN & UART_IDLE_CON & UART_IrDA_DISABLE & UART_MODE_FLOW
         & UART_UEN_00 & UART_DIS_WAKE & UART_DIS_LOOPBACK
@@ -92,6 +98,8 @@ int16_t main(void)
         & UART_ADR_DETECT_DIS & UART_RX_OVERRUN_CLEAR,
           baud);
 
+    ConfigIntUART1(UART_RX_INT_DIS & UART_RX_INT_PR3 &
+UART_TX_INT_DIS & UART_TX_INT_PR3);
 
     OpenTimer1(T1_ON & T1_IDLE_STOP & T1_GATE_OFF & T1_PS_1_64 & T1_SYNC_EXT_OFF & T1_SOURCE_INT, 0x1FFF);
     ConfigIntTimer1(T1_INT_PRIOR_2 & T1_INT_ON);
@@ -109,9 +117,41 @@ int16_t main(void)
 
     while(1)
     {
-        WriteUART1(adversaire1);
-        while(BusyUART1());
-        __delay_ms(20);
-    }
+        if (1)
+        {
+            WriteUART1(adv);
+            while(BusyUART1());
+            __delay_ms(10);
+        }
+        else if (!_RC7 && !go)
+            {
+                __delay_us(bit_periode_us/2); // Se place au millieu du bit de Start
+                int i;
+                for(i = 0 ; i<taille_uart ; i++)
+                {
+                    __delay_us(bit_periode_us); // Passe au bit suivant
+                    b[i] = _RC7;
+                }
+                __delay_us(bit_periode_us); // Sort de la trame envoyee
 
+                if (b == adv1)
+                {
+                    adv = adversaire2;
+                    __delay_ms(5);
+                    go = 1;
+                }
+                else if (b == adv2)
+                {
+                    adv = adversaire1;
+                    __delay_ms(5);
+                    go = 1;
+                }
+        }
+        else
+        {
+            led1 = !led1;
+            led2 = !led1;
+            __delay_ms(500)
+        }
+    }
 }

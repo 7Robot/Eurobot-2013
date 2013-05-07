@@ -26,6 +26,7 @@
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "TurretUser.h"    /* User funct/params, such as InitApp              */
+#include "atp.h"
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
@@ -43,6 +44,7 @@
 #include <pwm12.h>
 #include <libpic30.h>
 #include <timer.h>
+#include "atp-turret.h"
 
 // Declarations de variable globales
 volatile unsigned char marche;
@@ -77,6 +79,8 @@ int16_t main(void)
     /* Initialize IO ports and peripherals */
     InitApp();
     AtpInit();
+    __delay_ms(500);
+    SendId(BOARD_ID);
 
     marche = 1;
     int recu = 0;
