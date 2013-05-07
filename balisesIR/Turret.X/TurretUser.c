@@ -1,7 +1,7 @@
 /*
 * Turret dsPIC33F
 * Compiler : Microchip xC16
-* �C : 33FJ64MC802
+* dsPIC33FJ64MC802
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -58,30 +58,29 @@ void ConfigureOscillator(void) /* Handles clock switching/osc initialization */
 
 void InitApp(void)
 {
-    //Si on a un interrupteur sur la pin RB5 (par exemple), on la met en entrée
+    //On a un interrupteur sur la pin RC2, on la met en entrée
     _TRISC2 = 1;
     //Et on active la pullup qui va bien (registres CNPU1 et CNPU2)
-    _CN10PUE = 1;
+    _CN10PUE = 1; // not sure
 
     _TRISA0 = 0; //led 1
     _TRISA1 = 0; //led 2
-    led1 = 1;   // affichage recepteur 1 - adversaire 1
-    led2 = 1;   // adversaire 2
-
+    led1 = 0; 
+    led2 = 0;
     _TRISC9 = 1;  // TSOP1
     _TRISB5 = 1;  // TSOP2
-    _TRISB6 = 1; // ...
-    _TRISB7 = 1;
-    _TRISB8 = 1;
-    _TRISB9 = 1;
-    _TRISB10 = 1;
-    _TRISB11 = 1;
-    _TRISC7 = 1;
-    _TRISC8 = 1;
-    _TRISA7 = 1;
-    _TRISA8 = 1;
-    _TRISC3 = 1;
-    _TRISC4 = 1;
-    _TRISC5 = 1;
+    _TRISB6 = 1;  // TSOP3
+    _TRISB7 = 1;  // TSOP4
+    _TRISB8 = 1;  // TSOP5
+    _TRISB9 = 1;  // TSOP6
+    _TRISB10 = 1;  // TSOP7
+    _TRISB11 = 1;  // TSOP8
+    _TRISC7 = 1;  // TSOP9
+    _TRISC8 = 1;  // TSOP10
+    _TRISA7 = 1;  // TSOP11
+    _TRISA8 = 1;  // TSOP12
+    _TRISC3 = 1;  // TSOP13
+    _TRISC4 = 1;  // TSOP14
+    _TRISC5 = 1;  // TSOP15
     _TRISC6 = 1; // TSOP16
 }
