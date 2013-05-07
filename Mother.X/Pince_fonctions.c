@@ -34,8 +34,6 @@ volatile int ready = 0;
 volatile int full  = 0;
 volatile unsigned int nbverres = 0;
 volatile char actionPince = 0;
-unsigned char num_ax;
-unsigned char data;
 
 void Sortir_Pince()
 {
@@ -154,6 +152,7 @@ void Serrer_verre_en_haut()
     __delay_ms(400);
 }
 
+volatile int retour=0;
 int Serrer_verre_en_bas()
 {
 //Serrer un verre en position basse :
@@ -168,29 +167,28 @@ int Serrer_verre_en_bas()
         PutAX(AX_BG, AX_GOAL_POSITION, 845);
         __delay_ms(10);
         PutAX(AX_BD, AX_GOAL_POSITION, 170);
-        __delay_ms(10);
-        int valeur;
+        __delay_ms(250);
+        //valeur = 159;
         num_ax = AX_BD;
         data = AX_PRESENT_POSITION;
-        valeur = 159;
-        //valeur = GetAXnoWait();
+        GetAXnoWait();
 
     int verreok = 0;
-    if (valeur < 160) verreok = 1;
+    if (retour > 170) verreok = 1;
     return verreok;
 }
 
-int GetAXnoWait()
+void GetAXnoWait()
 {
-    int valeur=0;
-    GetAX(num_ax, data);
+    GetAX(num_ax,data);
+    //TMR5 = 0;
     while(!responseReadyAX)
         {
-        T5CONbits.TON = 1;
+    //    T5CONbits.TON = 1;
         }
-    valeur = (responseAX.params[1]*256 + responseAX.params[0]);
-
-    return valeur;
+    retour = (responseAX.params[1]*256 + responseAX.params[0]);
+    //T5CONbits.TON = 0;
+    //TMR5 = 0;
 }
 
 void Serrer_stockage()

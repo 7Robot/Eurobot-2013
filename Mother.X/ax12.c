@@ -83,7 +83,7 @@ void PushBufferAX(byte len, byte* buf) {
 /* Finish a command packet by sending the checksum. */
 void PushFooterAX() {
     PushUART(~checksumAX);
-    while (BusyUART1()); // UART1 Transmit Shift Register Empty
+    while (BusyUART2()); // UART1 Transmit Shift Register Empty
     SetRX();
 }
 

@@ -66,28 +66,29 @@ int16_t main(void)
     Set_Asserv_h(1.1, 0);
     Set_Vitesse(1500);
 
-    //__delay_ms(2000);
-    //Sortir_Pince();
-    Ouvrir_pince_bas();
+//    //__delay_ms(2000);
+//    Sortir_Pince();
+   // OnBougiesOn();
     //__delay_ms(3000);
-    //Chopper_verre();
-
-    //Set_Consigne_Hauteur(1500); //mi hauteur
-    //__delay_ms(3000);
-    //Chopper_verre();
-    //__delay_ms(3000);
-    //Chopper_verre();
-    //__delay_ms(3000);
-    //Chopper_verre();
-    //Set_Consigne_Hauteur(2700); //full hauteur
-    //__delay_ms(3000);
-    //Lacher_verres();
+    //OnBougiesHitBot();
+//    Chopper_verre();
+//
+//    //Set_Consigne_Hauteur(1500); //mi hauteur
+//    __delay_ms(3000);
+//    Chopper_verre();
+//    __delay_ms(3000);
+//    Chopper_verre();
+//    __delay_ms(3000);
+//    Chopper_verre();
+//    //Set_Consigne_Hauteur(2700); //full hauteur
+//    __delay_ms(3000);
+//    Lacher_verres();
 
     while(1)
     {
-    //Set_Consigne_Hauteur(1000); //mi hauteur
-
         //Cinematique_inverse();
+    //Set_Consigne_Hauteur(1000); //mi hauteur
+        
         //Set_Consigne_Hauteur(2500); //mi hauteur
         //__delay_ms(2000);
         led = !led;
