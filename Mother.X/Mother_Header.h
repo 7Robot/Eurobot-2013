@@ -1,7 +1,7 @@
 /*
 * Template dsPIC33F
 * Compiler : Microchip xC16
-* �C : 33FJ64MC804
+* µC : 33FJ64MC804
 * Juillet 2012
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -77,3 +77,5 @@ void Set_Vitesse_MoteurH(long);
 void pince_en_descente(void);
 void pince_en_montee(void);
 
+// From Bras_AX12
+extern volatile char actionAx;
