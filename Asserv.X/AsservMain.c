@@ -59,8 +59,9 @@ int16_t main(void)
     SendId(5);
 
     Set_Asserv_D(600,10,0.1);
-    Set_Asserv_T(400,10,0.1);
-    Set_Asserv_O(0.8,0,0);
+    Set_Asserv_T(300,10,0.1);
+    Set_Asserv_V(100,10,1);
+    Set_Asserv_O(100,10,1);
 
     //Set_Consigne_Position(0.5,1);
 

@@ -92,8 +92,6 @@ void Incremente_Position(int16_t, int16_t, volatile float*, volatile float*, vol
  void Mise_A_Jour_Consignes(void);
 
 
-
-
 //float sin_lut(float);   // prends un nombre en radians, en renvoie son sinus
 //float cos_lut(float);   // prends un nombre en radians, en renvoie son cosinus
 
