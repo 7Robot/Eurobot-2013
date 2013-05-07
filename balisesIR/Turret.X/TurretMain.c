@@ -44,6 +44,7 @@
 #include <pwm12.h>
 #include <libpic30.h>
 #include <timer.h>
+#include "atp-turret.h"
 
 // Declarations de variable globales
 volatile unsigned int i;
@@ -73,8 +74,10 @@ int16_t main(void)
     /* Initialize IO ports and peripherals */
     InitApp();
     AtpInit();
+    __delay_ms(500);
+    SendId(BOARD_ID);
 
-    
+
     int recu = 0;
 
     int y;
