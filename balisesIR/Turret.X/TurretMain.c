@@ -1,7 +1,7 @@
 /*
 * Turret dsPIC33F
 * Compiler : Microchip xC16
-* �C : 33FJ64MC802
+* dsPIC33FJ64MC804
 * Avril 2013
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -47,6 +47,9 @@
 // Declarations de variable globales
 volatile unsigned int i;
 volatile unsigned int j;
+volatile unsigned int adversaire;
+volatile unsigned int distance;
+volatile unsigned int direction;
 int adversaire1[taille_uart] = {0,1,0,1,1,1,1,1};
 int adversaire2[taille_uart] = {1,0,0,1,1,1,1,1};
 int reperage[nombre_recepteurs]; // Contient : 0 non recu, 1 adversaire1, 2 adversaire2 pour chaque TSOP
@@ -56,6 +59,9 @@ int donnees[nombre_recepteurs*taille_uart];
 void acquisition(int donnees[]);
 int comparer(int donnees[], int recepteur);
 void lissage(void);
+int who (int reperage[]);
+int howFar (int reperage[], int adversaire);
+int wichDirection (int reperage[], int adversaire);
 
 int16_t main(void)
 {
@@ -76,13 +82,13 @@ int16_t main(void)
         led2 = !led1;
         __delay_ms(200);
     }
-    __delay_ms(2000);
+    __delay_ms(1000);
 
     while(1)
     {
-	// Detection du bit de Start
-        if ((TSOP1 == 0) || (TSOP2 == 0) || (TSOP3 == 0) || (TSOP4 == 0) || (TSOP5 == 0) || (TSOP6 == 0) || (TSOP7 == 0) || (TSOP8 == 0) || 
-            (TSOP9 == 0) || (TSOP10 == 0) || (TSOP11 == 0) || (TSOP12 == 0) || (TSOP13 == 0) || (TSOP14 == 0) || (TSOP15 == 0) || (TSOP16 == 0))
+		// Detection du bit de Start
+        if (!TSOP1 || !TSOP2 || !TSOP3 || !TSOP4 || !TSOP5 || !TSOP6 || !TSOP7 || !TSOP8 || 
+            !TSOP9 || !TSOP10 || !TSOP11 || !TSOP12 || !TSOP13 || !TSOP14 || !TSOP15 || !TSOP16)
         {
             __delay_us(bit_periode_us/2); // Se place au millieu du bit de Start
             acquisition(donnees);
@@ -94,9 +100,12 @@ int16_t main(void)
         {
             for(j = 0 ; j < nombre_recepteurs ; j++)
             {
-        	reperage[j] += comparer(donnees, j);
+        	reperage[j] = comparer(donnees, j);
             }
             lissage(); // Corrige les recepteurs defaillants
+			adversaire = who(reperage); // Indique si on vient de recevoir adversaire 1 ou 2
+			distance = howFar(reperage, adversaire); // Donne le nombre de TSOP allumes
+			direction = wichDirection(reperage, adversaire); // de 0 TSOP0 a 32 TSOP16
             recu = 0;
         }
     }
@@ -108,8 +117,8 @@ void acquisition(int donnees[])
     for(i = 0 ; i<taille_uart ; i++)
     {
 	__delay_us(bit_periode_us); // Passe au bit suivant
-        donnees[i] = TSOP1;
-        donnees[taille_uart+i] = TSOP2;
+    donnees[i] = TSOP1;
+    donnees[taille_uart+i] = TSOP2;
 	donnees[2*taille_uart+i] = TSOP3;
 	donnees[3*taille_uart+i] = TSOP4;
 	donnees[4*taille_uart+i] = TSOP5;
@@ -175,4 +184,70 @@ void lissage(void)
 	{
 		reperage[nombre_recepteurs-1] = reperage[nombre_recepteurs-2];
 	}
+}
+
+int who (int reperage[])
+{
+	int k = 0, sortie = 0;
+	while(!reperage[k] && k < nombre_recepteurs) k++;
+	sortie = reperage[k];
+	return sortie;
+}
+
+int howFar (int reperage[], int adversaire)
+{
+	int k = 0, first = 0, last = 0, longueur = 0;
+	if (!reperage[0]) // TSOP0 ne reçoit rien
+	{
+		while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
+		first = k;
+		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
+		last = k;
+		longueur = last - first;
+	}
+	else if (!reperage[nombre_recepteurs-1]  && reperage[0] == adversaire) // TSOP0 est first
+	{
+		k++;
+		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
+		// last = k;
+		longueur = k;
+	}
+	else	// TSOP0 est entre first et last
+	{
+		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
+		last = k;
+		while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
+		first = k;
+		longueur = (last + nombre_recepteurs - first) % nombre_recepteurs;
+	}
+	return longueur;
+}
+
+int wichDirection (int reperage[], int adversaire)
+{
+	int k = 0, first = 0, last = 0, angle = 0;
+	if (!reperage[0]) // TSOP0 ne reçoit rien
+	{
+		while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
+		first = k;
+		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
+		last = k;
+		angle = last + first;
+	}
+	else if (!reperage[nombre_recepteurs-1]  && reperage[0] == adversaire) // TSOP0 est first
+	{
+		k++;
+		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
+		// last = k;
+		angle = k;
+	}
+	else	// TSOP0 est entre first et last
+	{
+		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
+		last = k;
+		while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
+		first = k;
+		angle = (last + nombre_recepteurs + first) % (2*nombre_recepteurs);
+	}
+	return angle;
 }
