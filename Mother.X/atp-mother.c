@@ -1,4 +1,4 @@
-// Generated from version 1305070300 of semantic
+// Generated from version 1305070329 of semantic
 
 #include "atp.h"
 
@@ -111,11 +111,66 @@ void SendBougiesOnConfirm() {
     SendBytes(bytes, 3);
 }
 
+void SendStartLaisseState(unsigned char state) {
+    char bytes[] = {
+        129,
+        41,
+        1,
+        state,
+        128
+    };
+    SendBytes(bytes, 5);
+}
+
 // You should redefine this function
 __attribute__((weak)) void OnChopperVerre() {}
 
+void SendEmergencyState(unsigned char emergency_state) {
+    char bytes[] = {
+        129,
+        21,
+        1,
+        emergency_state,
+        128
+    };
+    SendBytes(bytes, 5);
+}
+
+// You should redefine this function
+__attribute__((weak)) void OnGetEmergencyState() {}
+
 // You should redefine this function
 __attribute__((weak)) void OnGetNombreVerres() {}
+
+// You should redefine this function
+__attribute__((weak)) void OnGetStartLaisseState() {}
+
+void SendGetSwitchOneState() {
+    char bytes[] = {
+        129,
+        30,
+        128
+    };
+    SendBytes(bytes, 3);
+}
+
+void SendGetSwitchThreeState() {
+    char bytes[] = {
+        129,
+        34,
+        128
+    };
+    SendBytes(bytes, 3);
+}
+
+void SendGetSwitchTwoState() {
+    char bytes[] = {
+        129,
+        32,
+        128
+    };
+    SendBytes(bytes, 3);
+}
 
 // You should redefine this function
 __attribute__((weak)) void OnLacherVerres() {}
@@ -134,6 +189,39 @@ void SendNombreVerres(unsigned int n) {
 
 // You should redefine this function
 __attribute__((weak)) void OnSortirPince() {}
+
+void SendSwitchOne(unsigned char state) {
+    char bytes[] = {
+        129,
+        31,
+        1,
+        state,
+        128
+    };
+    SendBytes(bytes, 5);
+}
+
+void SendSwitchThree(unsigned char state) {
+    char bytes[] = {
+        129,
+        35,
+        1,
+        state,
+        128
+    };
+    SendBytes(bytes, 5);
+}
+
+void SendSwitchTwo(unsigned char state) {
+    char bytes[] = {
+        129,
+        33,
+        1,
+        state,
+        128
+    };
+    SendBytes(bytes, 5);
+}
 
 
 int AtpDecode(int id,
@@ -173,8 +261,16 @@ int AtpDecode(int id,
         OnChopperVerre();
         return 1;
     }
+    if (id == 20) {
+        OnGetEmergencyState();
+        return 1;
+    }
     if (id == 4) {
         OnGetNombreVerres();
+        return 1;
+    }
+    if (id == 40) {
+        OnGetStartLaisseState();
         return 1;
     }
     if (id == 3) {

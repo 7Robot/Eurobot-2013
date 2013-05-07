@@ -1,4 +1,4 @@
-// Generated from version 1305062032 of semantic
+// Generated from version 1305070329 of semantic
 
 #include "atp.h"
 
@@ -61,6 +61,19 @@ void SendTest(unsigned char B, unsigned int H, unsigned long int I, char b, int 
         128
     };
     SendBytes(bytes, 28);
+}
+
+void SendSICKValue(unsigned char id, unsigned char value) {
+    char bytes[] = {
+        129,
+        151,
+        1,
+        id,
+        1,
+        value,
+        128
+    };
+    SendBytes(bytes, 7);
 }
 
 void SendAngle(float theta) {
@@ -173,6 +186,17 @@ void SendAsservV(float KPv, float KIv, float KDv) {
     SendBytes(bytes, 18);
 }
 
+void SendBackBumperState(unsigned char state) {
+    char bytes[] = {
+        129,
+        141,
+        1,
+        state,
+        128
+    };
+    SendBytes(bytes, 5);
+}
+
 void SendCourbe(float v, float omega) {
     char bytes[] = {
         129,
@@ -217,6 +241,9 @@ __attribute__((weak)) void OnGetAsservT() {}
 __attribute__((weak)) void OnGetAsservV() {}
 
 // You should redefine this function
+__attribute__((weak)) void OnGetBackBumperState() {}
+
+// You should redefine this function
 __attribute__((weak)) void OnGetCourbe() {}
 
 // You should redefine this function
@@ -224,6 +251,9 @@ __attribute__((weak)) void OnGetOmega() {}
 
 // You should redefine this function
 __attribute__((weak)) void OnGetPos() {}
+
+// You should redefine this function
+__attribute__((weak)) void OnGetSICKValue(unsigned char id) {}
 
 // You should redefine this function
 __attribute__((weak)) void OnGetVit() {}
@@ -303,6 +333,9 @@ __attribute__((weak)) void OnSetOmega(float omega) {}
 __attribute__((weak)) void OnSetPos(float x, float y) {}
 
 // You should redefine this function
+__attribute__((weak)) void OnSetThreshold(unsigned char id, float threshold) {}
+
+// You should redefine this function
 __attribute__((weak)) void OnSetVit(float v) {}
 
 // You should redefine this function
@@ -360,6 +393,10 @@ int AtpDecode(int id,
         OnGetAsservV();
         return 1;
     }
+    if (id == 140) {
+        OnGetBackBumperState();
+        return 1;
+    }
     if (id == 71) {
         OnGetCourbe();
         return 1;
@@ -370,6 +407,10 @@ int AtpDecode(int id,
     }
     if (id == 31) {
         OnGetPos();
+        return 1;
+    }
+    if (id == 150) {
+        OnGetSICKValue(ucharv[0]);
         return 1;
     }
     if (id == 51) {
@@ -422,6 +463,10 @@ int AtpDecode(int id,
     }
     if (id == 30) {
         OnSetPos(floatv[0], floatv[1]);
+        return 1;
+    }
+    if (id == 152) {
+        OnSetThreshold(ucharv[0], floatv[0]);
         return 1;
     }
     if (id == 50) {

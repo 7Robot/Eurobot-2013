@@ -1,4 +1,4 @@
-// Generated from version 1305070300 of semantic
+// Generated from version 1305070329 of semantic
 
 #ifndef _MOTHER_H_
 #define _MOTHER_H_
@@ -33,15 +33,35 @@ void OnBougiesOn();
 
 void SendBougiesOnConfirm();
 
+void SendStartLaisseState(unsigned char state);
+
 void OnChopperVerre();
 
+void SendEmergencyState(unsigned char emergency_state);
+
+void OnGetEmergencyState();
+
 void OnGetNombreVerres();
+
+void OnGetStartLaisseState();
+
+void SendGetSwitchOneState();
+
+void SendGetSwitchThreeState();
+
+void SendGetSwitchTwoState();
 
 void OnLacherVerres();
 
 void SendNombreVerres(unsigned int n);
 
 void OnSortirPince();
+
+void SendSwitchOne(unsigned char state);
+
+void SendSwitchThree(unsigned char state);
+
+void SendSwitchTwo(unsigned char state);
 
 
 int AtpDecode(int id,
