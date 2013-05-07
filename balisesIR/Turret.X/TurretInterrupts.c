@@ -119,3 +119,12 @@
 /******************************************************************************/
 #include <ports.h>
 
+void OnOn () {
+}
+
+void OnOff () {
+}
+
+void OnGetPos(unsigned char id) {
+    SendPos(id, 42, 42);
+}

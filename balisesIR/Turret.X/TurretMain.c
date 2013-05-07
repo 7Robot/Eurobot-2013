@@ -71,6 +71,7 @@ int16_t main(void)
 
     /* Initialize IO ports and peripherals */
     InitApp();
+    AtpInit();
 
     
     int recu = 0;

@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Beacon dsPIC33F
 * Compiler : Microchip xC16
 * �C : 33FJ64MC804
