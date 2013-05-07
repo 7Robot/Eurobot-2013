@@ -1,4 +1,4 @@
-// Generated from version 1305070329 of semantic
+// Generated from version 1305071419 of semantic
 
 #ifndef _ASSERV_H_
 #define _ASSERV_H_

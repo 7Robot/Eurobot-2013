@@ -1,4 +1,4 @@
-// Generated from version 1305070329 of semantic
+// Generated from version 1305071419 of semantic
 
 #ifndef _MOTHER_H_
 #define _MOTHER_H_
@@ -54,6 +54,8 @@ void SendGetSwitchTwoState();
 void OnLacherVerres();
 
 void SendNombreVerres(unsigned int n);
+
+void SendPasDeVerreEvent();
 
 void OnSortirPince();
 

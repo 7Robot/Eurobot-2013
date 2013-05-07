@@ -1,7 +1,6 @@
-// Generated from version 1305070329 of semantic
+// Generated from version 1305071419 of semantic
 
 #include "atp.h"
-#include "atp-mother.h"
 
 
 void SendError() {
@@ -186,6 +185,15 @@ void SendNombreVerres(unsigned int n) {
         128
     };
     SendBytes(bytes, 6);
+}
+
+void SendPasDeVerreEvent() {
+    char bytes[] = {
+        129,
+        6,
+        128
+    };
+    SendBytes(bytes, 3);
 }
 
 // You should redefine this function
