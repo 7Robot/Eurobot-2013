@@ -89,7 +89,7 @@ void Chopper_verre()
             }
             else
             {
-                SendPasDeVerreEvent()
+                SendPasDeVerreEvent();
                 Ouvrir_pince_bas();
             }
         }
