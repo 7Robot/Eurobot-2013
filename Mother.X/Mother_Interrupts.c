@@ -1,7 +1,7 @@
 /*
 * Template dsPIC33F
 * Compiler : Microchip xC16
-* �C : 33FJ64MC802
+* µC : 33FJ64MC804
 * Juillet 2012
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -9,7 +9,7 @@
 *     / /  |    // _ \| '_ \ / _ \| __|
 *    / /   | |\ \ (_) | |_) | (_) | |_
 *   /_/    |_| \_\___/|____/ \___/'\__|
-*			      7robot.fr
+*                 7robot.fr
 */
 
 /******************************************************************************/
@@ -19,16 +19,16 @@
 #include <p33Fxxxx.h>      /* Includes device header file                     */
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
-#include <timer.h>
-#include <qei.h>           /* Includes qei functions */
+#include <qei.h>           /* Includes qei functions                          */
+#include <timer.h>         /* Include timer fonctions                         */
 #include <uart.h>
-#include <libpic30.h>
 #include "ax12.h"
-#include "PinceHeader.h"  /* Function / Parameters                           */
+#include <libpic30.h>
+#include "Pince_Header.h"
 
-/*****************************************************************************/
-/*                            Global variables                               */
-/*****************************************************************************/
+/******************************************************************************/
+/*                            Global variables                                */
+/******************************************************************************/
 extern unsigned char num_ax;
 extern unsigned char data;
 
@@ -36,7 +36,7 @@ extern unsigned char data;
 /* User Functions                                                             */
 /******************************************************************************/
 
-void ConfigureOscillator(void)
+void ConfigureOscillator()
 {
     // Configure PLL prescaler, PLL postscaler, PLL divisor
     PLLFBDbits.PLLDIV = 41; // M=43
@@ -45,7 +45,7 @@ void ConfigureOscillator(void)
     // Fosc = M/(N1.N2)*Fin
 }
 
-void InitApp(void)
+void InitApp()
 {
     _TRISA0 = 0; //led en sortie
     _TRISA1 = 0;
@@ -88,16 +88,16 @@ void InitApp(void)
 //    _TRISB15 = 1;
 //    _CN11PUE = 1;
 
-   OpenUART1(UART_EN & UART_IDLE_CON & UART_IrDA_DISABLE & UART_MODE_FLOW
+    OpenUART2(UART_EN & UART_IDLE_CON & UART_IrDA_DISABLE & UART_MODE_FLOW
         & UART_UEN_00 & UART_DIS_WAKE & UART_DIS_LOOPBACK
         & UART_DIS_ABAUD & UART_UXRX_IDLE_ONE & UART_BRGH_SIXTEEN
         & UART_NO_PAR_8BIT & UART_1STOPBIT,
           UART_INT_TX_BUF_EMPTY & UART_IrDA_POL_INV_ZERO
         & UART_SYNC_BREAK_DISABLED & UART_TX_ENABLE & UART_TX_BUF_NOT_FUL & UART_INT_RX_CHAR
         & UART_ADR_DETECT_DIS & UART_RX_OVERRUN_CLEAR,
-          BRGVALAX12);
+          BRGVAL);
 
-    ConfigIntUART1(UART_RX_INT_PR4 & UART_RX_INT_EN
+    ConfigIntUART2(UART_RX_INT_PR4 & UART_RX_INT_EN
                  & UART_TX_INT_PR4 & UART_TX_INT_DIS);
 
     OpenTimer2(T2_ON & T2_GATE_OFF & T2_PS_1_256 & T2_32BIT_MODE_OFF & T2_SOURCE_INT, 1500);
@@ -115,7 +115,12 @@ void InitApp(void)
     _QEB1R = 6;     //Module QEI 1 phase B sur RB6
     POS1CNT = 0;
 
-    // activation de la priorite des interruptions
+    // TODO: Nim: je ne sais pas à quoi servent les trois lignes qui suivent.
+    IFS2bits.SPI2IF = 0; // Flag SPI2 Event Interrupt Priority
+    IPC8bits.SPI2IP = 2; // Priority SPI2 Event Interrupt Priority
+    IEC2bits.SPI2IE = 1; //Enable SPI2 Event Interrupt Priority
+
+    // activation de la priorité des interruptions
     _NSTDIS = 0;
 }
 
@@ -203,8 +208,7 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 
 //AX12 INTS
 /*************************************************
- *          RX Interrupt
- *
+ *          RX Interrupt                         *
  *************************************************/
 
 
@@ -217,8 +221,7 @@ void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void){
 }
 
 /*************************************************
- *          TX Interrupt
- *
+ *          TX Interrupt                         *
  *************************************************/
 
 
@@ -264,7 +267,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _U1TXInterrupt(void)
 /* _OC3Interrupt       _DCIErrInterrupt                                       */
 /* _OC4Interrupt       _DCIInterrupt                                          */
 /* _T4Interrupt        _DMA5Interrupt                                         */
-/* _T5Interrupt        _U1ErrInterrupt                                        */
+/* _T5Inint i=0terrupt _U1ErrInterrupt                                        */
 /* _INT2Interrupt      _U2ErrInterrupt                                        */
 /* _U2RXInterrupt      _DMA6Interrupt                                         */
 /* _U2TXInterrupt      _DMA7Interrupt                                         */
