@@ -34,27 +34,25 @@ responseAXtype responseAX;
 
 void SetTX() {
     __builtin_write_OSCCONL(OSCCON & 0xBF);
-    _U1RXR = 31;
-     _RP25R = 3;  // RP25 (pin 14) = U1TX (p.167)
+    _U2RXR = 31;
+    _RP25R = 0b00101;  // RP25 = U2TX (p.167)
     __builtin_write_OSCCONL(OSCCON | 0x40);
-    //CNPU2bits.CN27PUE = 0;
 }
 
 void SetRX() {
     __builtin_write_OSCCONL(OSCCON & 0xBF);
      _RP25R = 0;
-    _U1RXR = 25; // RP25 (pin 14) = U1RX (p.165)
+    _U2RXR = 25; // RP25 = U2RX (p.165)
     __builtin_write_OSCCONL(OSCCON | 0x40);
-    //CNPU2bits.CN27PUE = 1; // Enable pull up.
 }
 
 /******************************************************************************
  * Functions to read and write command and return packets
  ******************************************************************************/
 
-void PushUART1(byte b) {
-    while (U1STAbits.UTXBF); // UART1 TX Buffer Full
-    WriteUART1(b);
+void PushUART(byte b) {
+    while (U2STAbits.UTXBF); // UART2 TX Buffer Full
+    WriteUART2(b);
     checksumAX += b;
 }
 
@@ -65,26 +63,26 @@ void PushUART1(byte b) {
 void PushHeaderAX(byte id, byte len, byte inst) {
     SetTX();
 
-    PushUART1(0xFF);
-    PushUART1(0xFF);
+    PushUART(0xFF);
+    PushUART(0xFF);
 
     checksumAX = 0; // The first two bytes don't count.
-    PushUART1(id);
-    PushUART1(len + 2); // Bytes to go : instruction + buffer (len) + checksum.
-    PushUART1(inst);
+    PushUART(id);
+    PushUART(len + 2); // Bytes to go : instruction + buffer (len) + checksum.
+    PushUART(inst);
 }
 
 /* Write a buffer of given length to the body of a command packet. */
 void PushBufferAX(byte len, byte* buf) {
     byte i;
     for (i = 0; i < len; i++) {
-        PushUART1(buf[i]);
+        PushUART(buf[i]);
     }
 }
 
 /* Finish a command packet by sending the checksum. */
 void PushFooterAX() {
-    PushUART1(~checksumAX);
+    PushUART(~checksumAX);
     while (BusyUART1()); // UART1 Transmit Shift Register Empty
     SetRX();
 }
@@ -93,8 +91,8 @@ int expected = 0;
 int received = 0;
 /**/
 void InterruptAX() {
-    while(DataRdyUART1()) {
-        byte b = ReadUART1();
+    while(DataRdyUART2()) {
+        byte b = ReadUART2();
 
         if(posAX == -5 && b == 0xFF)
             posAX = -4;
@@ -141,21 +139,21 @@ void PingAX(byte id) {
 
 void ReadAX(byte id, byte address, byte len) {
     PushHeaderAX(id, 2, AX_INST_READ_DATA);
-    PushUART1(address);
-    PushUART1(len);
+    PushUART(address);
+    PushUART(len);
     PushFooterAX();
 }
 
 void WriteAX(byte id, byte address, byte len, byte* buf) {
     PushHeaderAX(id, 1 + len, AX_INST_WRITE_DATA);
-    PushUART1(address);
+    PushUART(address);
     PushBufferAX(len, buf);
     PushFooterAX();
 }
 
 void RegWriteAX(byte id, byte address, byte len, byte* buf) {
     PushHeaderAX(id, 1 + len, AX_INST_REG_WRITE);
-    PushUART1(address);
+    PushUART(address);
     PushBufferAX(len, buf);
     PushFooterAX();
 }

@@ -1,7 +1,7 @@
 /*
 * Template dsPIC33F
 * Compiler : Microchip xC16
-* µC : 33FJ64MC804
+* ï¿½C : 33FJ64MC804
 * Juillet 2012
 *    ____________      _           _
 *   |___  /| ___ \    | |         | |
@@ -24,10 +24,7 @@
 #include <uart.h>
 #include "ax12.h"
 #include <libpic30.h>
-
-
-#define BAUDRATE 57600
-#define BRGVAL ((FCY / BAUDRATE / 16) - 1)
+#include "atp-mother.h"
 
 #define AX_BOUGIES_1 13
 #define AX_BOUGIES_2 10
@@ -48,12 +45,6 @@
 
 
 volatile char actionAx =0;
-
-
-extern void InterruptAX(void);
-
-
-
 
 
 /*************************************************
@@ -113,7 +104,7 @@ void DoHitBotBougie(){
     SendBougiesHitBotConfirm();
 }
 
-//Position pliée bras AX Bougies
+//Position pliï¿½e bras AX Bougies
 void OnBougiesOff(){ //DONE
     actionAx |= BOUGIE_OFF;
     IFS2bits.SPI2IF = 1;
@@ -131,7 +122,7 @@ void DoOffBougie(){
         SendBougiesOffConfirm();
 }
 
-//Position dépliée bras AX Bougies
+//Position dï¿½pliï¿½e bras AX Bougies
 void OnBougiesOn(){
     actionAx |= BOUGIE_ON;
     IFS2bits.SPI2IF = 1;
@@ -150,15 +141,6 @@ void DoOnBougie(){
         SendBougiesOnConfirm();
 }
 
-/*************************************************
- *          RX Interrupt                         *
- *************************************************/
-
-
-void __attribute__((interrupt, no_auto_psv)) _U2RXInterrupt(void){
-    InterruptAX();
-    _U2RXIF = 0;      // On baisse le FLAG
-}
 
 void __attribute__((interrupt, no_auto_psv)) _SPI2Interrupt(void){
     led=1;

@@ -117,7 +117,7 @@ extern responseAXtype responseAX;
  */
 void SetTX(void);
 void SetRX(void);
-void PushUART1(byte b);
+void PushUART(byte b);
 void InterruptAX(void);
 
 void PushHeaderAX(byte id, byte len, byte inst);

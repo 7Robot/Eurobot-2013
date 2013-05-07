@@ -24,7 +24,7 @@
 #include <uart.h>
 #include "ax12.h"
 #include <libpic30.h>
-#include "Pince_Header.h"
+#include "Mother_Header.h"
 
 /******************************************************************************/
 /*                            Global variables                                */
@@ -60,33 +60,29 @@ void InitApp()
     _ODCB10 = 1; //open drain RB10 PWM1H3
 
      //Le microswicth sur la pin RC5 (par exemple), on la met en entrée
-    _TRISC5 = 1;
+    _TRISC5 = 1; //bumper bas de pince
     //Et on active la pullup qui va bien (registres CNPU1 et CNPU2)
     _CN26PUE = 1;
 
     _ODCC9 = 1; // Open drain sur la pin RC9 (pour les AX12)
 
-    //TRUCS EN PLUS POUR FAIRE MARCHER LES TESTS //
+    _TRISA4 = 1;
+    _TRISA8 = 1;
+    _TRISA9 = 1;
+    _TRISB2 = 1; //RTS ?
+    _TRISB3 = 1; //FLush ?
+    _TRISA2 = 1; //CLK12 ?
 
-//    _TRISC0 = 1;
-//    _TRISC1 = 1;
-//    _TRISC2 = 1;
-//    _TRISA3 = 1;
-//    _TRISA4 = 1;
-//    _TRISA8 = 1;
-//    _TRISA9 = 1;
-//    _TRISB2 = 1;
-//    _TRISB3 = 1;
-//    _TRISB4 = 1;
-//
-//    _TRISB12 = 1;//switchs avec pullups
-//    _CN14PUE = 1;
-//    _TRISB13 = 1;
-//    _CN13PUE = 1;
-//    _TRISB14 = 1;
-//    _CN12PUE = 1;
-//    _TRISB15 = 1;
-//    _CN11PUE = 1;
+    _TRISB4 = 1; // Arret d'urgence
+    _CN1PUE = 1; // avec pullup
+    _TRISB12 = 1; // switch 1
+    _CN14PUE = 1; // avec pullup
+    _TRISB13 = 1; // switch 2
+    _CN13PUE = 1; // avec pullup
+    _TRISB14 = 1; // switch 3
+    _CN12PUE = 1; // avec pullup
+    _TRISB15 = 1; // Laisse
+    _CN11PUE = 1; // avec pullup
 
     OpenUART2(UART_EN & UART_IDLE_CON & UART_IrDA_DISABLE & UART_MODE_FLOW
         & UART_UEN_00 & UART_DIS_WAKE & UART_DIS_LOOPBACK
@@ -95,7 +91,7 @@ void InitApp()
           UART_INT_TX_BUF_EMPTY & UART_IrDA_POL_INV_ZERO
         & UART_SYNC_BREAK_DISABLED & UART_TX_ENABLE & UART_TX_BUF_NOT_FUL & UART_INT_RX_CHAR
         & UART_ADR_DETECT_DIS & UART_RX_OVERRUN_CLEAR,
-          BRGVAL);
+          BRGVALAX12);
 
     ConfigIntUART2(UART_RX_INT_PR4 & UART_RX_INT_EN
                  & UART_TX_INT_PR4 & UART_TX_INT_DIS);
@@ -113,9 +109,8 @@ void InitApp()
 
     _QEA1R = 5;     //Module QEI 1 phase A sur RB5
     _QEB1R = 6;     //Module QEI 1 phase B sur RB6
-    POS1CNT = 0;
+    POS1CNT = 0; //valeur QEI
 
-    // TODO: Nim: je ne sais pas à quoi servent les trois lignes qui suivent.
     IFS2bits.SPI2IF = 0; // Flag SPI2 Event Interrupt Priority
     IPC8bits.SPI2IP = 2; // Priority SPI2 Event Interrupt Priority
     IEC2bits.SPI2IE = 1; //Enable SPI2 Event Interrupt Priority
@@ -212,12 +207,12 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
  *************************************************/
 
 
-void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void){
+void __attribute__((interrupt, no_auto_psv)) _U2RXInterrupt(void){
 
     led = led ^ 1;
     InterruptAX();
 
-    _U1RXIF = 0;      // On baisse le FLAG
+    _U2RXIF = 0;      // On baisse le FLAG
 }
 
 /*************************************************
@@ -225,10 +220,10 @@ void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void){
  *************************************************/
 
 
-void __attribute__((__interrupt__, no_auto_psv)) _U1TXInterrupt(void)
+void __attribute__((__interrupt__, no_auto_psv)) _U2TXInterrupt(void)
 {
 
-   IFS0bits.U1TXIF = 0; // clear TX interrupt flag
+   _U2TXIF = 0; // clear TX interrupt flag
 
 }
 

@@ -19,6 +19,8 @@
 #include <libpic30.h>
 #include <uart.h>
 #include "ax12.h"
+#include "atp-mother.h"
+#include "atp.h"
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
@@ -33,8 +35,9 @@
 // Select Oscillator and switching.
 _FOSCSEL(FNOSC_FRCPLL & IESO_OFF);
 // Select clock.
-// TODO: IOL1WAY_OFF ? (Nim)
-_FOSC(POSCMD_NONE & OSCIOFNC_ON & IOL1WAY_ON & FCKSM_CSDCMD);
+// IOL1WAY_OFF (IMPORTANT, ce registre bloque le remappage des pins qui ne peux
+// etre fait qu'une seule fois, il faut donc le mettre à OFF pour les AX12 !!
+_FOSC(POSCMD_NONE & OSCIOFNC_ON & IOL1WAY_OFF & FCKSM_CSDCMD);
 // Watchdog Timer.
 _FWDT(FWDTEN_OFF);
 // Select debug channel.
@@ -53,9 +56,6 @@ int16_t main(void)
     Init_PWM();
     responseReadyAX = 0;
 
-    // TODO: Nim: C’est quoi ça ?
-    ODCBbits.ODCB7 = 1;
-
     __delay_ms(10);
     PutAX(AX_BROADCAST, AX_MOVING_SPEED, 250);
     __delay_ms(10);
@@ -67,20 +67,21 @@ int16_t main(void)
     Set_Vitesse(1500);
 
     //__delay_ms(2000);
-    Sortir_Pince();
-    __delay_ms(3000);
-    Chopper_verre();
+    //Sortir_Pince();
+    Ouvrir_pince_bas();
+    //__delay_ms(3000);
+    //Chopper_verre();
 
     //Set_Consigne_Hauteur(1500); //mi hauteur
-     __delay_ms(3000);
-    Chopper_verre();
-    __delay_ms(3000);
-    Chopper_verre();
-    __delay_ms(3000);
-    Chopper_verre();
+    //__delay_ms(3000);
+    //Chopper_verre();
+    //__delay_ms(3000);
+    //Chopper_verre();
+    //__delay_ms(3000);
+    //Chopper_verre();
     //Set_Consigne_Hauteur(2700); //full hauteur
-    __delay_ms(3000);
-    Lacher_verres();
+    //__delay_ms(3000);
+    //Lacher_verres();
 
     while(1)
     {

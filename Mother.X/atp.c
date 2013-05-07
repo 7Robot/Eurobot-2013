@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "atp.h"
-#include "AsservHeader.h"
+#include "Mother_Header.h"
 
 #if SEND_PRIO <= RECV_PRIO
 #error "SEND_PRIO must be strictely superior than RECV_PRIO"
@@ -32,7 +32,7 @@ typedef struct {
 static volatile buffer buffers[SEND_PRIO];
 static volatile int runLevel;
 
-// Variables de réceptions
+// Variables de rï¿½ceptions
 
 static int packetState;
 static int packetId;
@@ -69,7 +69,7 @@ void AtpInit() {
     }
     runLevel = -1;
 
-    // Init des variables de réception
+    // Init des variables de rï¿½ception
     packetState = 1;
     packetId = 0;
     packetDataType = 0;
@@ -83,7 +83,7 @@ void AtpInit() {
     intc = 0;
     floatc = 0;
 
-    // Init du port série
+    // Init du port sï¿½rie
 
     OpenUART1(UART_EN & UART_IDLE_CON & UART_IrDA_DISABLE & UART_MODE_FLOW
         & UART_UEN_00 & UART_DIS_WAKE & UART_DIS_LOOPBACK
@@ -141,8 +141,8 @@ void AtpInit() {
     ConfigIntUART1(config);
 
     __builtin_write_OSCCONL(OSCCON & 0xBF);
-     _RP5R = 3; // RP5 (pin 14) = U1TX (p.167)
-    _U1RXR = 6; // RP6 (pin 15) = U1RX (p.165)
+     _RP16R = 3; // RP16 = U1TX (p.167) sur mother
+    _U1RXR = 17; // RP17  = U1RX (p.165) sur mother
     __builtin_write_OSCCONL(OSCCON | 0x40);
 }
 
