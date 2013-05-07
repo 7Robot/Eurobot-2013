@@ -25,6 +25,9 @@
 #define adversaire1     0xFA
 #define adversaire2     0xF9
 
+#define bit_periode_us      100
+#define taille_uart         8
+
 #define led1            _LATA0
 #define led2            _LATA1
 

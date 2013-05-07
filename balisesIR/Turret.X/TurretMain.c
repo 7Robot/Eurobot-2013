@@ -47,11 +47,16 @@
 #include "atp-turret.h"
 
 // Declarations de variable globales
+volatile unsigned char marche;
 volatile unsigned int i;
 volatile unsigned int j;
-volatile unsigned int adversaire;
-volatile unsigned int distance;
-volatile unsigned int direction;
+volatile unsigned char adversaire;
+volatile unsigned char distance;
+volatile unsigned char direction;
+volatile unsigned char direction1;
+volatile unsigned char direction2;
+volatile unsigned char distance1;
+volatile unsigned char distance2;
 int adversaire1[taille_uart] = {0,1,0,1,1,1,1,1};
 int adversaire2[taille_uart] = {1,0,0,1,1,1,1,1};
 int reperage[nombre_recepteurs]; // Contient : 0 non recu, 1 adversaire1, 2 adversaire2 pour chaque TSOP
@@ -75,7 +80,7 @@ int16_t main(void)
     InitApp();
     AtpInit();
 
-
+    marche = 1;
     int recu = 0;
 
     int y;
@@ -109,7 +114,36 @@ int16_t main(void)
             lissage(); // Corrige les recepteurs defaillants
 			adversaire = who(reperage); // Indique si on vient de recevoir adversaire 1 ou 2
 			distance = howFar(reperage, adversaire); // Donne le nombre de TSOP allumes
-			direction = wichDirection(reperage, adversaire); // de 0 TSOP0 a 32 TSOP16
+			direction = wichDirection(reperage, adversaire)/2; // de 0 TSOP0 a 16 TSOP16
+			switch(adversaire)
+			case 0 :
+				break;
+			case 1 : // On vient de detecter adversaire 1
+				if((distance != distance1) || (direction != direction1))
+				{
+					if(marche)		SendPos(1, distance, direction);
+					distance1 = distance;
+					direction1 = direction;
+				}
+				else
+				{
+					break;
+				}
+				break;
+			case 2 : // On vient de detecter adversaire 2
+				if((distance != distance2) || (direction != direction2))
+				{
+					if(marche)		SendPos(2, distance, direction);
+					distance1 = distance;
+					direction1 = direction;
+				}
+				else
+				{
+					break;
+				}
+				break;
+			default:
+				break;
             recu = 0;
         }
     }

@@ -120,12 +120,17 @@
 #include <ports.h>
 #include "atp-turret.h"
 
-void OnOn () {
+void OnOn ()
+{
+	marche = 1;
 }
 
-void OnOff () {
+void OnOff ()
+{
+	marche = 0;
 }
 
 void OnGetPos(unsigned char id) {
-    SendPos(id, 42, 42);
+    if (id == 1)		SendPos(1, distance1, direction1);
+	else				SendPos(2, distance2, direction2);
 }

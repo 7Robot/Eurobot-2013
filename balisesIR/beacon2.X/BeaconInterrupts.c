@@ -119,7 +119,6 @@
 /******************************************************************************/
 #include <ports.h>
 #include "BeaconSystem.h"
-#include <uart.h>
 #include <libpic30.h>
 
 unsigned int duty = 1;
@@ -127,31 +126,6 @@ unsigned int uart_on = 1;
 
 extern unsigned char adv;
 extern int go;
-
-void __attribute__((interrupt,auto_psv)) _U1RXInterrupt(void)
- {
-    unsigned char b;
-    while(DataRdyUART2())
-    {
-        b = ReadUART2();
-    }
-    if (b == adversaire1)
-    {
-        adv = adversaire2;
-        __delay_ms(5);
-        go = 1;
-        ConfigIntUART1(UART_RX_INT_DIS);
-    }
-    else if (b == adversaire2)
-    {
-        adv = adversaire1;
-        __delay_ms(5);
-        go = 1;
-        ConfigIntUART1(UART_RX_INT_DIS);
-    }
-    
-     _U1RXIF = 0;
-}
 
 void _ISR _T1Interrupt(void)
 {
@@ -172,22 +146,22 @@ void _ISR _INT1Interrupt(void)
 
 void _ISR _CNInterrupt(void)
 {
-    _CNIF = 0;
-    
+   _CNIF = 0;
+
    if (_RC1)
    {
        led1 = 1;
        led2 = 0;
        SetDCMCPWM1(1,0,0);
    }
-   else
+   else if (!_RC1)
    {
        led1 = 0;
        led2 = 1;
        SetDCMCPWM1(1,6,0);
        //SetDCMCPWM1(1,86,0);
    }
-    
+
 }
  
  
