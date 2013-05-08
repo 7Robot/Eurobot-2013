@@ -30,6 +30,23 @@ void Set_Position(float NewX, float NewY)           // permet une mise à jour de
     PosY = NewY;
 }
 
+void Set_Angle(float NewTheta)
+{
+    Theta = NewTheta;
+}
+
+void Set_X_Angle(float NewX, float NewTheta)
+{
+    PosX = NewX;
+    Theta = NewTheta;
+}
+
+void Set_Y_Angle(float NewY, float NewTheta)
+{
+    PosY = NewY;
+    Theta = NewTheta;
+}
+
 void Set_Postion_Angle(float NewX, float NewY, float NewTheta)  // remet totalement à jour la position
 {
     Theta = NewTheta;
@@ -49,12 +66,12 @@ float Get_Angle(void)
     return Theta;
 }
 
-float Get_Consigne_Distance (float Consigne_PosX, float Consigne_PosY)            //renvoie la distance entre la consigne et la position actuelle
+float Get_Distance_Obj (float Consigne_PosX, float Consigne_PosY)            //renvoie la distance entre la consigne et la position actuelle
 {
     return sqrt(pow(PosX - Consigne_PosX, 2) + pow(PosY - Consigne_PosY, 2));
 }
 
-float Get_Consigne_Angle (float Consigne_PosX, float Consigne_PosY)             //renvoie l'angle entre la consigne et la position actuelle
+float Get_Angle_Obj (float Consigne_PosX, float Consigne_PosY)             //renvoie l'angle entre la consigne et la position actuelle
 {
     //return atan((Consigne_PosX - PosX)/(Consigne_PosY - PosY));
     return atan2(Consigne_PosX - PosX, Consigne_PosY - PosY);
@@ -67,12 +84,13 @@ void Incremente_Position(int16_t Diff_D, int16_t Diff_G, volatile float *Vitesse
     Avancement = (float)((Diff_D * METER_BY_TICD) + (Diff_G * METER_BY_TICG)) * 0.5;       // distance en metres parcourue par le milieu du robot
     *Vitesse = Avancement*100; // correpond à une vitesse en m/s: intervale de temps fixe (10ms)
     Rotation = (float)(Diff_D * METER_BY_TICD - Diff_G * METER_BY_TICG)/ LARGEUR_ROBOT;    // delta theta du robot
-    *Omega = Rotation;         //correspond à une vitesse angulaire en ??
+    *Omega = Rotation*100;         //correspond à une vitesse angulaire en ??
 
     *Distance += Avancement;
     PosX += Avancement * sin(Theta);
     PosY += Avancement * cos(Theta);
     Theta += Rotation;
+    //Theta = (fmodf((Theta + PI),(2*PI)))-PI;
 
     *Angle = Theta;
     //PosX = 0;

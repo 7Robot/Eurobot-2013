@@ -12,6 +12,8 @@
 *                 7robot.fr
 */
 
+#include "atp.h"
+
 /******************************************************************************/
 /* System Level #define Macros                                                */
 /******************************************************************************/
@@ -43,9 +45,21 @@
 #define METER_BY_TICG 0.00004
 #define LARGEUR_ROBOT 0.291       // 29.1cm entre encodeurs droite et gauche
 
-#define VITESSE_MAX 500
-#define VITESSE_MIN 200
-#define CONSIGNE_MIN 30
+#define PI 3.14159265359
+
+#define CONSIGNE_MAX 800
+#define CONSIGNE_MIN 200
+#define CONSIGNE_NULLE 30
+
+#define VITESSE_MAX 1
+#define OMEGA_MAX 10
+
+#define ACCELERATION_V 2
+#define DECELERATION_V 2
+#define ACCELERATION_O 0.5
+#define DECELERATION_O 0.5
+
+#define SIGN(a) ((a<0)?-1:1)
 
 /******************************************************************************/
 /* Function Prototypes                                                        */
@@ -63,13 +77,20 @@ void Set_Asserv_D(float, float, float);
 void Set_Asserv_T(float, float, float);
 
 void Set_Position(float, float);           // permet une mise à jour de la position, du robot
+void Set_Angle(float);
+void Set_X_Angle(float, float);
+void Set_Y_Angle(float, float);
 void Set_Postion_Angle(float, float, float);  // remet totalement à jour la position
 void Get_Position(float*, float*, float*);       // renvoie la position actuelle du robot
 float Get_Angle(void);
-float Get_Consigne_Distance(float, float);          //renvoie la distance entre la consigne et la position actuelle
-float Get_Consigne_Angle(float, float);             //renvoie l'angle entre la consigne et la position actuelle
+float Get_Distance_Obj(float, float);          //renvoie la distance entre la consigne et la position actuelle
+float Get_Angle_Obj(float, float);             //renvoie l'angle entre la consigne et la position actuelle
 void Incremente_Position(int16_t, int16_t, volatile float*, volatile float*, volatile float*, volatile float*);     // recoie les tics, incremente la position, renvoie la vitesse et l'angle (pour l'asserv)
 
+ void Stop(void);
+ void Set_Rampe_Position(float, float);
+ void Set_Rampe_Distance(float);
+ void Set_Rampe_Angle(float);
  void Set_Consigne_Distance(float);
  void Set_Consigne_Angle(float);
  void Set_Consigne_Position(float, float);

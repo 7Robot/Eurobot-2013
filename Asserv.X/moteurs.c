@@ -36,24 +36,6 @@ void Init_PWM(void)
 	/**** PTPER: PWM Time Base Period Register ****/
 	PTPERbits.PTPER = 500; // Period Value bits
 
-
-/*
-    // voir section 14 PWM DSPIC33F de microchip
-    P1TCON = 0x8000;        // demarre le PWM1
-    P1TPER = 0x01F4;        // defini la periode de PWM à 1000 coup d'horloge
-    P1SECMP = 0;            // "desactive" le SPECIAL EVENT ...
-
-    //A REVOIR : FAIT FONCTIONNER AUSSI LES PINS L
-    PWM1CON1 = 0x033;       // defini que les 2 pin H en sortie
-    PWM1CON2 = 0x0000;      // defini les moments d'update des registres
-    P1DTCON1 = 0;           // disable les dead-time
-    P1DTCON2 = 0;           // idem
-    P1FLTACON = 0;          // disable le faultA
-    //P1FLTBCON = 0;            // disable le faultB  (inulite)
-
-    // A REVOIR AUSSI : TOUCHE AUX PINS 3...
-    P1OVDCON = 0x3F00;      //  Override
-    */
     P1DC1 = 0;
     P1DC2 = 0;          // rapport cycliques nuls pour les moteurs
 
@@ -78,8 +60,9 @@ void Set_Vitesse_MoteurD(float Consigne)
         DIRB1 = 0;
     }
 
-    if (Consigne < VITESSE_MIN && Consigne > CONSIGNE_MIN)          Consigne = VITESSE_MIN;
-    if (Consigne > VITESSE_MAX)      Consigne = VITESSE_MAX;
+    if (Consigne < CONSIGNE_NULLE) Consigne = 0;
+    else if (Consigne < CONSIGNE_MIN && Consigne > CONSIGNE_NULLE)          Consigne = CONSIGNE_MIN;
+    else if (Consigne > CONSIGNE_MAX)      Consigne = CONSIGNE_MAX;
     P1DC1 = (int)(Consigne);
 }
 
@@ -97,9 +80,9 @@ void Set_Vitesse_MoteurG(float Consigne)
         DIRB2 = 0;
     }
 
-
-    if (Consigne < VITESSE_MIN && Consigne > CONSIGNE_MIN)          Consigne = VITESSE_MIN;
-    if (Consigne > VITESSE_MAX)      Consigne = VITESSE_MAX;
+    if (Consigne < CONSIGNE_NULLE) Consigne = 0;
+    else if (Consigne < CONSIGNE_MIN && Consigne > CONSIGNE_NULLE)          Consigne = CONSIGNE_MIN;
+    else if (Consigne > CONSIGNE_MAX)      Consigne = CONSIGNE_MAX;
     P1DC2 = (int)(Consigne);
 
 }

@@ -78,8 +78,6 @@ int16_t main(void)
     /* Initialize IO ports and peripherals */
     InitApp();
     AtpInit();
-    __delay_ms(500);
-    SendId(BOARD_ID);
 
     marche = 1;
     int recu = 0;
@@ -92,6 +90,7 @@ int16_t main(void)
         __delay_ms(200);
     }
     __delay_ms(1000);
+    SendId(BOARD_ID);
 
     while(1)
     {
