@@ -32,21 +32,6 @@
 /* Global Variable Declaration                                                */
 /******************************************************************************/
 
-/* i.e. uint16_t <variable_name>; */
-
-/******************************************************************************/
-/* Main Program                                                               */
-/******************************************************************************/
-#include <uart.h>
-#include <ports.h>
-#include <adc.h>
-#include <libpic30.h>
-#include <pwm12.h>
-#include <libpic30.h>
-#include <timer.h>
-#include "atp-turret.h"
-
-// Declarations de variable globales
 volatile unsigned char marche;
 volatile unsigned int i;
 volatile unsigned int j;
@@ -61,6 +46,20 @@ int adversaire1[taille_uart] = {0,1,0,1,1,1,1,1};
 int adversaire2[taille_uart] = {1,0,0,1,1,1,1,1};
 int reperage[nombre_recepteurs]; // Contient : 0 non recu, 1 adversaire1, 2 adversaire2 pour chaque TSOP
 int donnees[nombre_recepteurs*taille_uart];
+
+/* i.e. uint16_t <variable_name>; */
+
+/******************************************************************************/
+/* Main Program                                                               */
+/******************************************************************************/
+#include <uart.h>
+#include <ports.h>
+#include <adc.h>
+#include <libpic30.h>
+#include <pwm12.h>
+#include <libpic30.h>
+#include <timer.h>
+#include "atp-turret.h"
 
 // Prototypes des fonctions
 void acquisition(int donnees[]);
@@ -112,11 +111,12 @@ int16_t main(void)
         	reperage[j] = comparer(donnees, j);
             }
             lissage(); // Corrige les recepteurs defaillants
-			adversaire = who(reperage); // Indique si on vient de recevoir adversaire 1 ou 2
-			distance = howFar(reperage, adversaire); // Donne le nombre de TSOP allumes
-			direction = wichDirection(reperage, adversaire)/2; // de 0 TSOP0 a 16 TSOP16
-			switch(adversaire)
-			case 0 :
+            adversaire = who(reperage); // Indique si on vient de recevoir adversaire 1 ou 2
+            distance = howFar(reperage, adversaire); // Donne le nombre de TSOP allumes
+            direction = wichDirection(reperage, adversaire)/2; // de 0 TSOP0 a 16 TSOP16
+            switch(adversaire)
+                        {
+                        case 0 :
 				break;
 			case 1 : // On vient de detecter adversaire 1
 				if((distance != distance1) || (direction != direction1))
@@ -144,6 +144,7 @@ int16_t main(void)
 				break;
 			default:
 				break;
+                        }
             recu = 0;
         }
     }
@@ -288,4 +289,20 @@ int wichDirection (int reperage[], int adversaire)
 		angle = (last + nombre_recepteurs + first) % (2*nombre_recepteurs);
 	}
 	return angle;
+}
+
+void OnOn ()
+{
+	marche = 1;
+}
+
+void OnOff ()
+{
+	marche = 0;
+}
+
+void OnGetPos(unsigned char id)
+{
+    if (id == 1)		SendPos(1, distance1, direction1);
+	else			SendPos(2, distance2, direction2);
 }
