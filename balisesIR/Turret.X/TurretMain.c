@@ -112,8 +112,37 @@ int16_t main(void)
             }
             lissage(); // Corrige les recepteurs defaillants
             adversaire = who(reperage); // Indique si on vient de recevoir adversaire 1 ou 2
-            distance = howFar(reperage, adversaire); // Donne le nombre de TSOP allumes
-            direction = wichDirection(reperage, adversaire)/2; // de 0 TSOP0 a 16 TSOP16
+            
+			// DISTANCE ET DIRECTION /////////////////////////////////////////////////////
+			int k = 0, first = 0, last = 0, distance = 0, direction = 0;
+			if (!reperage[0]) // TSOP0 ne reçoit rien
+			{
+				while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
+				first = k;
+				while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
+				last = k;
+				distance = last - first;
+				direction = (last + first) /2;
+			}
+			else if (!reperage[nombre_recepteurs-1]  && reperage[0] == adversaire) // TSOP0 est first
+			{
+				k++;
+				while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
+				// last = k;
+				distance = k;
+				direction = k /2;
+			}
+			else	// TSOP0 est entre first et last
+			{
+				while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
+				last = k;
+				while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
+				first = k;
+				distance = (last + nombre_recepteurs - first) % nombre_recepteurs;
+				direction = ((last + nombre_recepteurs + first) % (2*nombre_recepteurs)) /2;
+			}
+			// FIN DISTANCE ET ANGLE //////////////////////////////////////////////
+			
             switch(adversaire)
                         {
                         case 0 :
@@ -150,6 +179,7 @@ int16_t main(void)
     }
 }
 
+// FONCTIONS DE TRAITEMENT ///////////////////////////////////////////////
 
 void acquisition(int donnees[])
 {
@@ -233,63 +263,7 @@ int who (int reperage[])
 	return sortie;
 }
 
-int howFar (int reperage[], int adversaire)
-{
-	int k = 0, first = 0, last = 0, longueur = 0;
-	if (!reperage[0]) // TSOP0 ne reçoit rien
-	{
-		while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
-		first = k;
-		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
-		last = k;
-		longueur = last - first;
-	}
-	else if (!reperage[nombre_recepteurs-1]  && reperage[0] == adversaire) // TSOP0 est first
-	{
-		k++;
-		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
-		// last = k;
-		longueur = k;
-	}
-	else	// TSOP0 est entre first et last
-	{
-		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
-		last = k;
-		while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
-		first = k;
-		longueur = (last + nombre_recepteurs - first) % nombre_recepteurs;
-	}
-	return longueur;
-}
-
-int wichDirection (int reperage[], int adversaire)
-{
-	int k = 0, first = 0, last = 0, angle = 0;
-	if (!reperage[0]) // TSOP0 ne reçoit rien
-	{
-		while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
-		first = k;
-		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
-		last = k;
-		angle = last + first;
-	}
-	else if (!reperage[nombre_recepteurs-1]  && reperage[0] == adversaire) // TSOP0 est first
-	{
-		k++;
-		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
-		// last = k;
-		angle = k;
-	}
-	else	// TSOP0 est entre first et last
-	{
-		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
-		last = k;
-		while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
-		first = k;
-		angle = (last + nombre_recepteurs + first) % (2*nombre_recepteurs);
-	}
-	return angle;
-}
+// FONCTIONS ATP ///////////////////////////////////////////////
 
 void OnOn ()
 {
@@ -304,5 +278,5 @@ void OnOff ()
 void OnGetPos(unsigned char id)
 {
     if (id == 1)		SendPos(1, distance1, direction1);
-	else			SendPos(2, distance2, direction2);
+	else				SendPos(2, distance2, direction2);
 }
