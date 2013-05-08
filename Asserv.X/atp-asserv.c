@@ -351,6 +351,9 @@ __attribute__((weak)) void OnSetOmega(float omega) {}
 __attribute__((weak)) void OnSetPos(float x, float y) {}
 
 // You should redefine this function
+__attribute__((weak)) void OnSetSeuils(unsigned int distance, unsigned int angle) {}
+
+// You should redefine this function
 __attribute__((weak)) void OnSetThreshold(unsigned char id, float threshold) {}
 
 // You should redefine this function
@@ -505,6 +508,10 @@ int AtpDecode(int id,
     }
     if (id == 30) {
         OnSetPos(floatv[0], floatv[1]);
+        return 1;
+    }
+    if (id == 139) {
+        OnSetSeuils(ushortv[0], ushortv[1]);
         return 1;
     }
     if (id == 152) {

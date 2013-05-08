@@ -97,6 +97,8 @@ void OnSetOmega(float omega);
 
 void OnSetPos(float x, float y);
 
+void OnSetSeuils(unsigned int distance, unsigned int angle);
+
 void OnSetThreshold(unsigned char id, float threshold);
 
 void OnSetVit(float v);
