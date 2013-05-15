@@ -35,9 +35,16 @@
 volatile unsigned char marche;
 volatile unsigned int i;
 volatile unsigned int j;
+//
 volatile unsigned char adversaire;
 volatile unsigned char distance;
 volatile unsigned char direction;
+//
+volatile unsigned char direction1tab[3];
+volatile unsigned char direction2tab[3];
+volatile unsigned char distance1tab[3];
+volatile unsigned char distance2tab[3];
+//
 volatile unsigned char direction1;
 volatile unsigned char direction2;
 volatile unsigned char distance1;
@@ -71,7 +78,7 @@ int wichDirection (int reperage[], int adversaire);
 
 int16_t main(void)
 {
-
+	AD1PCFGL = 0x1FF; // Il est 5h, le robot s’éveille	
     /* Configure the oscillator for the device */
     ConfigureOscillator();
 
@@ -90,6 +97,8 @@ int16_t main(void)
         __delay_ms(200);
     }
     __delay_ms(1000);
+	led1 = 0;
+	led2 = 0;
     SendId(BOARD_ID);
 
     while(1)
@@ -101,18 +110,13 @@ int16_t main(void)
             __delay_us(bit_periode_us/2); // Se place au millieu du bit de Start
             acquisition(donnees);
             __delay_us(bit_periode_us); // Sort de la trame envoyee
-            recu = 1;
-        }
-
-        if(recu)
-        {
             for(j = 0 ; j < nombre_recepteurs ; j++)
             {
         	reperage[j] = comparer(donnees, j);
             }
             lissage(); // Corrige les recepteurs defaillants
             adversaire = who(reperage); // Indique si on vient de recevoir adversaire 1 ou 2
-            
+			if (!adversaire) continue; // Cas de fausse detection
 			// DISTANCE ET DIRECTION /////////////////////////////////////////////////////
 			int k = 0, first = 0, last = 0, distance = 0, direction = 0;
 			if (!reperage[0]) // TSOP0 ne reçoit rien
@@ -144,13 +148,19 @@ int16_t main(void)
 			// FIN DISTANCE ET ANGLE //////////////////////////////////////////////
 			
             switch(adversaire)
-                        {
-                        case 0 :
+            {
+            case 0 :
 				break;
 			case 1 : // On vient de detecter adversaire 1
-				if((distance != distance1) || (direction != direction1))
+				distance1tab[2] = distance1tab[1];
+				direction1tab[2] = direction1tab[1];
+				distance1tab[1] = distance1tab[0];
+				direction1tab[1] = direction1tab[0];
+				distance1tab[0] = distance;
+				direction1tab[0] = direction;
+				if(((distance1tab[2] != distance1tab[1]) || (direction1tab[2] != direction1tab[1])) && distance1tab[0] == distance1tab[1] && direction1tab[0] == direction1tab[1])
 				{
-					if(marche)		SendPos(1, distance, direction);
+					if (marche)	SendPos(1, distance, direction);
 					distance1 = distance;
 					direction1 = direction;
 				}
@@ -160,11 +170,17 @@ int16_t main(void)
 				}
 				break;
 			case 2 : // On vient de detecter adversaire 2
-				if((distance != distance2) || (direction != direction2))
+				distance2tab[2] = distance2tab[1];
+				direction2tab[2] = direction2tab[1];
+				distance2tab[1] = distance2tab[0];
+				direction2tab[1] = direction2tab[0];
+				distance2tab[0] = distance;
+				direction2tab[0] = direction;
+				if(((distance2tab[2] != distance2tab[1]) || (direction2tab[2] != direction2tab[1])) && distance2tab[0] == distance2tab[1] && direction2tab[0] == direction2tab[1])
 				{
-					if(marche)		SendPos(2, distance, direction);
-					distance1 = distance;
-					direction1 = direction;
+					if (marche)	SendPos(2, distance, direction);
+					distance2 = distance;
+					direction2 = direction;
 				}
 				else
 				{
@@ -208,7 +224,6 @@ void acquisition(int donnees[])
 int comparer(int donnees[], int recepteur)
 {
     int adversaire = 0;
-
     // Detection Adversaire 1
     for(i = 0 ; i < taille_uart-1 ; i++)
     {
@@ -217,10 +232,9 @@ int comparer(int donnees[], int recepteur)
 	if(i == taille_uart-1 && donnees[recepteur*taille_uart+i] == adversaire1[i])
 	{
 		adversaire = 1;
-                led2 = 0;
-                led1 = 1;
+        led1 = 1;
+        led2 = 0;
 	}
-
 	// Detection Adversaire 2
     for(i = 0 ; i<taille_uart-1; i++)
     {
@@ -229,10 +243,9 @@ int comparer(int donnees[], int recepteur)
 	if(i == taille_uart-1 && donnees[recepteur*taille_uart+i] == adversaire2[i])
 	{
 		adversaire = 2;
-                led1 = 0;
-                led2 = 1;
+        led1 = 0;
+        led2 = 1;
 	}
-	
     return adversaire;
 }
 
