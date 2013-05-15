@@ -140,8 +140,10 @@ void InitApp(void)
     volatile float Consigne_Vitesse = 0.0, Consigne_Omega = 0.0, Consigne_Distance = 0.0, Consigne_Theta = 0.0, Consigne_Theta2 = 0.0;
     volatile float Consigne_PosX = 0, Consigne_PosY = 0, Consigne_Thet = 0;
     volatile char Mode_Consigne = 0;
+    volatile char Mode_Distance = 0;
+    volatile char Mode_Angle = 0;
     volatile char etat =0;
-    volatile float Distance_Obj = 0;
+    volatile float Epsilon_D, Epsilon_DI, Epsilon_T, Epsilon_TI;
 
     //Coeffs vitesse
     volatile float KPv = 0, KDv = 0, KIv = 0;
@@ -159,10 +161,14 @@ void InitApp(void)
     volatile float KPt = 0, KDt = 0, KIt = 0;
     volatile float Theta_Actu = 0;
     volatile float Diff_Theta_Actu = 0, Diff_Theta_Old = 0, Diff_Theta_All = 0, Diff_Theta_point = 0;
+    // Seuil termes intégraux distance et angle
+    volatile float overshootDistance = 1500;
+    volatile float overshootAngle = 1500;
+
 
 void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
 {
-    float Consigne_Commune, Consigne_Diff, Consigne_Vitesse_Commune, Consigne_Vitesse_Diff;
+    float Consigne_Commune, Consigne_Diff;
     char Overshoot = 0;
 
     // On lit l'encodeur droit (qui est en fait le gauche)
@@ -183,96 +189,337 @@ void __attribute__((interrupt,auto_psv)) _T2Interrupt(void)
     Incremente_Position(diffd, diffg, &Vitesse_Actu, &Omega_Actu, &Distance_Actu, &Theta_Actu);
 
     //On choisit le mode de déplacement et on met à jour les consignes si besoin
-    Mise_A_Jour_Consignes();
+    //Mise_A_Jour_Consignes();
+    Gen_Consignes();
 
-    if(Mode_Consigne == 0)
-    {
-        Set_Vitesse_MoteurG(0);
-        Set_Vitesse_MoteurD(0);
+    // CONSIGNE COMMUNE
+    if (Mode_Distance == 1) { // Asserv en distance (relative)
+        Diff_Distance_Actu = Consigne_Distance - Distance_Actu; // erreur
+        Diff_Distance_All += Diff_Distance_Actu; // intégrale
+        Diff_Distance_point = Diff_Distance_Old - Diff_Distance_Actu; // dérivé
+
+        if (Diff_Distance_All > overshootDistance)
+        {   Diff_Distance_All = overshootDistance;  Overshoot = 1;  }
+        if (Diff_Distance_All < -overshootDistance)
+        {   Diff_Distance_All = -overshootDistance; Overshoot = 1;  } // 1500 = 3m/S * 1/2 seconde ? 1000 coups d'interupti/s
+
+        // Calcul des consignes de position
+        Consigne_Commune = KPd * Diff_Distance_Actu + KId * Diff_Distance_All + KDd * Diff_Distance_point;
+
+        Diff_Distance_Old = Diff_Distance_Actu;
+    } else if (Mode_Distance == 2) { // Asserv en vitesse
+        Diff_Vitesse_Actu = Consigne_Vitesse - Vitesse_Actu; // erreur
+        Diff_Vitesse_All += Diff_Vitesse_Actu; // intégrale
+        Diff_Vitesse_point = Diff_Vitesse_Old - Diff_Vitesse_Actu; // dérivé
+
+        /*if (Diff_Vitesse_All > overshootDistance)
+        {   Diff_Distance_All = overshootDistance;  Overshoot = 1;  }
+        if (Diff_Distance_All < -overshootDistance)
+        {   Diff_Distance_All = -overshootDistance; Overshoot = 1;  } // 1500 = 3m/S * 1/2 seconde ? 1000 coups d'interupti/s
+        */
+
+        // Calcul des consignes de position
+        Consigne_Commune = KPv * Diff_Vitesse_Actu + KIv * Diff_Vitesse_All + KDv * Diff_Vitesse_point;
+
+        Diff_Vitesse_Old = Diff_Vitesse_Actu;
+    } else {
+        Consigne_Commune = 0;
     }
-    else if(Mode_Consigne < 6)//      PID sur la position     //
-    {
-        // Calcul de l'erreur de position
-        Diff_Distance_Actu = Consigne_Distance - Distance_Actu;
-        Diff_Theta_Actu = Consigne_Theta - Theta_Actu;
-
-        // Intégral de l'erreur de position
-        Diff_Distance_All += Diff_Distance_Actu;
+    
+    // CONSIGNE DIFF
+    if (Mode_Angle == 1) { // Asserv en position (absolue)
+        Diff_Theta_Actu = Consigne_Theta - Get_Angle();
         Diff_Theta_All += Diff_Theta_Actu;
-
-        // Dérivé de l'erreur de position
-        Diff_Distance_point = Diff_Distance_Old - Diff_Distance_Actu;
         Diff_Theta_point = Diff_Theta_Old - Diff_Theta_Actu;
 
-            if (Diff_Distance_All > 1500.0)
-            {   Diff_Distance_All = 1500.0;  Overshoot = 1;  }
-            if (Diff_Distance_All < -1500.0)
-            {   Diff_Distance_All = -1500.0; Overshoot = 1;  } // 1500 = 3m/S * 1/2 seconde ? 1000 coups d'interupti/s
-            if (Diff_Theta_All > 1500.0)
-            {   Diff_Theta_All = 1500.0;    Overshoot = 1;  }
-            if (Diff_Theta_All < -1500.0)
-            {   Diff_Theta_All = -1500.0;   Overshoot = 1;  }       // 1500 ~=  PI * 1/2 seconde ? 1000 coups d'interrupt/s
+        if (Diff_Theta_All > overshootAngle)
+        {   Diff_Theta_All = overshootAngle;    Overshoot = 1;  }
+        if (Diff_Theta_All < -overshootAngle)
+        {   Diff_Theta_All = -overshootAngle;   Overshoot = 1;  }       // 1500 ~=  PI * 1/2 seconde ? 1000 coups d'interrupt/s
 
-
-
-        // Calcul des consignes de poisition
-        Consigne_Commune = KPd * Diff_Distance_Actu + KId * Diff_Distance_All + KDd * Diff_Distance_point;
         Consigne_Diff = KPt * Diff_Theta_Actu + KIt * Diff_Theta_All + KDt * Diff_Theta_point;
-
-        //Consigne_Diff *= Distance_Actu/Distance_Obj;
-
-        Diff_Omega_Actu = Consigne_Diff - Omega_Actu;
-        Diff_Omega_All += Diff_Omega_Actu;
-        Diff_Omega_point = Diff_Omega_Old - Diff_Omega_Actu;
-        Consigne_Vitesse_Diff = KPo * Diff_Omega_Actu + KIo * Diff_Omega_All + KDo * Diff_Omega_point;
-
-        // Calcul des consignes moteurs
-        Set_Vitesse_MoteurD(Consigne_Commune - Consigne_Vitesse_Diff); //ou Diff/2
-        Set_Vitesse_MoteurG(Consigne_Commune + Consigne_Vitesse_Diff);
-    }
-
-    else //      PID sur la vitesse     //
-    {
-        // Calcul de l'erreur de vitesse
-        Diff_Vitesse_Actu = Consigne_Vitesse - Vitesse_Actu;
+        
+        Diff_Theta_Old = Diff_Theta_Actu;
+    } else if (Mode_Angle == 2) { // Asserv en vitesse
         Diff_Omega_Actu = Consigne_Omega - Omega_Actu;
-
-        // Intégral de l'erreur de vitesse
-        Diff_Vitesse_All += Diff_Vitesse_Actu;
         Diff_Omega_All += Diff_Omega_Actu;
-
-        // Dérivé de l'erreur de vitesse
-        Diff_Vitesse_point = Diff_Vitesse_Old - Diff_Vitesse_Actu;
         Diff_Omega_point = Diff_Omega_Old - Diff_Omega_Actu;
 
-            if (Diff_Vitesse_All > 1500.0)
-            {   Diff_Vitesse_All = 1500.0;  Overshoot = 1;  }
-            if (Diff_Vitesse_All < -1500.0)
-            {   Diff_Vitesse_All = -1500.0; Overshoot = 1;  } // 1500 = 3m/S * 1/2 seconde ? 1000 coups d'interupti/s
-            if (Diff_Omega_All > 1500.0)
-            {   Diff_Omega_All = 1500.0;    Overshoot = 1;  }
-            if (Diff_Omega_All < -1500.0)
-            {   Diff_Omega_All = -1500.0;   Overshoot = 1;  }       // 1500 ~=  PI * 1/2 seconde ? 1000 coups d'interrupt/s
+        /*if (Diff_Theta_All > overshootAngle)
+        {   Diff_Theta_All = overshootAngle;    Overshoot = 1;  }
+        if (Diff_Theta_All < -overshootAngle)
+        {   Diff_Theta_All = -overshootAngle;   Overshoot = 1;  }       // 1500 ~=  PI * 1/2 seconde ? 1000 coups d'interrupt/s
+        */
 
+        Consigne_Diff = KPo * Diff_Omega_Actu + KIo * Diff_Omega_All + KDo * Diff_Omega_point;
 
-
-        // Calcul des consignes de vitesse
-        Consigne_Vitesse_Commune = KPv * Diff_Vitesse_Actu + KIv * Diff_Vitesse_All + KDv * Diff_Vitesse_point;
-        Consigne_Vitesse_Diff = KPo * Diff_Omega_Actu + KIo * Diff_Omega_All + KDo * Diff_Omega_point;
-
-        // Calcul des consignes moteurs
-        Set_Vitesse_MoteurD(Consigne_Vitesse_Commune - Consigne_Vitesse_Diff); //ou Diff/2
-        Set_Vitesse_MoteurG(Consigne_Vitesse_Commune + Consigne_Vitesse_Diff);
+        Diff_Omega_Old = Diff_Omega_Actu;
+    } else {
+        Consigne_Diff = 0;
     }
 
-    // Mise à jour de la precedente valeur (pour le terme differentiel)
-    Diff_Vitesse_Old = Diff_Vitesse_Actu;
-    Diff_Omega_Old = Diff_Omega_Actu;
-    Diff_Distance_Old = Diff_Distance_Actu;
-    Diff_Theta_Old = Diff_Theta_Actu;
+
+    if(Mode_Distance && Mode_Angle) {
+        SendError();
+        SendCourbe(Diff_Distance_Actu, Diff_Theta_Actu);
+        SendCourbe(Diff_Distance_point, Diff_Theta_point);
+        SendCourbe(Diff_Distance_All, Diff_Theta_All);
+        SendCourbe(Diff_Vitesse_Actu, Diff_Omega_Actu);
+        SendCourbe(Diff_Vitesse_point, Diff_Omega_point);
+        SendCourbe(Diff_Vitesse_All, Diff_Omega_All);
+        SendCourbe(Consigne_Commune, Consigne_Diff);
+        SendCourbe(Consigne_Commune+Consigne_Diff,Consigne_Commune-Consigne_Diff);
+    }
+    if (Mode_Distance == 1 && Mode_Angle == 1
+            && fabs(Diff_Distance_Actu) < Epsilon_D && fabs(Diff_Distance_All) < Epsilon_DI
+            && fabs(Diff_Theta_Actu) < Epsilon_T && fabs(Diff_Theta_All) < Epsilon_TI) {
+        Stop();
+    }
+
+    Set_Vitesse_MoteurD(Consigne_Commune - Consigne_Diff);
+    Set_Vitesse_MoteurG(Consigne_Commune + Consigne_Diff);
 
     _T2IF = 0;      // On baisse le FLAG
 }
+
+void Gen_Consignes()
+{
+    switch (Mode_Consigne) {
+        case 1: // Asserv position
+            Consigne_Distance = Get_Distance_Obj(Consigne_PosX, Consigne_PosY);
+            Consigne_Theta = Get_Angle_Obj(Consigne_PosX, Consigne_PosY) - Get_Angle();
+            //if (Consigne_Theta > PI) Consigne_Theta -= 2*PI;
+            //else if (Consigne_Theta < PI) Consigne_Theta += 2*PI;
+
+            if (fabs(Consigne_Distance) < Epsilon_D && fabs(Consigne_Theta) < Epsilon_T) {
+                Stop();
+                return;
+            }
+
+            if(fabs(Consigne_Theta) > PI/2) Consigne_Distance = -Consigne_Distance;
+            
+            
+            float Dist_Freinage_D = pow(Vitesse_Actu, 2)/(2*DECELERATION_V);
+            if (fabs(Consigne_Distance) <= Dist_Freinage_D) {
+                Consigne_Vitesse -= SIGN(Consigne_Distance)*(DECELERATION_V/100);
+            } else if (fabs(Consigne_Vitesse) < VITESSE_MAX) {
+                Consigne_Vitesse += SIGN(Consigne_Distance)*(ACCELERATION_V/100);
+            }
+
+            float Dist_Freinage_T = pow(Omega_Actu, 2)/(2*DECELERATION_O);
+
+            Consigne_Omega = 0;
+
+            OnGetPos();
+            SendCourbe(Consigne_Distance, Consigne_Theta);
+            SendCourbe(Consigne_Vitesse, Consigne_Omega);
+            
+            break;
+    }
+}
+
+/******************* Modes **********************************/
+
+void Set_Mode_Distance(char mode) {
+    switch (mode) {
+        case 1:
+            Distance_Actu = 0;
+            Diff_Distance_Old = Consigne_Distance;
+            Diff_Distance_All = 0;
+            break;
+        case 2:
+            Diff_Vitesse_Old = Consigne_Vitesse - Vitesse_Actu;
+            Diff_Vitesse_All = 0;
+            break;
+    }
+    Mode_Distance = mode;
+}
+
+void Set_Mode_Angle(char mode) {
+    switch (mode) {
+        case 1:
+            Diff_Theta_Old = Consigne_Theta - Get_Angle();
+            Diff_Theta_All = 0;
+            break;
+        case 2:
+            Diff_Omega_Old = Consigne_Omega - Omega_Actu;
+            Diff_Omega_All = 0;
+            break;
+    }
+    Mode_Angle = mode;
+}
+
+/******************* Consignes ******************************/
+
+void Stop() {
+    Mode_Consigne = 0;
+    Set_Mode_Distance(0);
+    Set_Mode_Angle(0);
+    SendDone();
+}
+
+void Set_Rampe_Position(float ConsigneX, float ConsigneY)
+{
+    Consigne_PosX = ConsigneX;
+    Consigne_PosY = ConsigneY;
+    Mode_Consigne = 1;
+}
+
+void Set_Rampe_Distance(float Consigne)
+{
+    //A verifier
+    Distance_Actu = 0;
+    etat = 0;
+    Consigne_Distance = Consigne;
+    Consigne_Theta = Get_Angle();
+    Mode_Consigne = 2;
+}
+
+void Set_Rampe_Angle(float Consigne)
+{
+    Consigne_Theta = Consigne;
+    Mode_Consigne = 3;
+}
+
+
+void Set_Consigne_Position(float Consigne_X, float Consigne_Y)
+{
+    Consigne_PosX = Consigne_X;
+    Consigne_PosY = Consigne_Y;
+    Mode_Consigne = 6;
+}
+
+
+/****************** Bridge ATP ******************************/
+
+void OnStop() {
+    Stop();
+}
+
+// GETs position
+void OnGetPos() {
+    float x, y, theta;
+    Get_Position(&x, &y, &theta);
+    SendPos(x, y, theta);
+}
+void OnGetAngle() { SendAngle(Theta_Actu); }
+
+// GETs vitesse
+void OnGetVit() { SendVit(Vitesse_Actu); }
+void OnGetOmega() { SendOmega(Omega_Actu); }
+void OnGetCourbe() { SendCourbe(Vitesse_Actu, Omega_Actu); }
+
+// SETs position
+//void OnSetPos(float x, float y) { Set_Consigne_Position(x, y); }
+//void OnSetAngle(float theta) { Set_Consigne_Angle(theta); }
+//void OnSetDist(float dist) { Set_Consigne_Distance(dist); }
+void OnSetAngle(float theta) {
+    Consigne_Distance = 0;
+    Set_Mode_Distance(1);
+    Consigne_Theta = theta;
+    Set_Mode_Angle(1);
+}
+void OnSetDist(float dist) {
+    Consigne_Distance = dist;
+    Set_Mode_Distance(1);
+    Consigne_Theta = Get_Angle();
+    Set_Mode_Angle(1);
+}
+void OnSetPos(float x, float y) {
+    Consigne_PosX = x;
+    Consigne_PosY = y;
+    Mode_Consigne = 1;
+    Consigne_Vitesse = Vitesse_Actu;
+    Set_Mode_Distance(2);
+    Consigne_Omega = Omega_Actu;
+    Set_Mode_Angle(2);
+}
+
+// SETs vitesse
+/*void OnSetVit(float v) { Set_Consigne_Vitesse(v); }
+void OnSetOmega(float omega) { Set_Consigne_Omega(omega); }
+void OnSetCourbe(float v, float omega) { Set_Consigne_Courbe(v, omega); }*/
+void OnSetVit(float v) {
+    Consigne_Vitesse = v;
+    Set_Mode_Distance(2);
+    Consigne_Theta = Get_Angle();
+    Set_Mode_Angle(1);
+}
+void OnSetOmega(float omega) {
+    Consigne_Distance = 0;
+    Set_Mode_Distance(1);
+    Consigne_Omega = omega;
+    Set_Mode_Angle(2);
+}
+void OnSetCourbe(float v, float omega) {
+    Consigne_Vitesse = v;
+    Set_Mode_Distance(2);
+    Consigne_Omega = omega;
+    Set_Mode_Angle(2);
+}
+
+// GETs coefs
+void OnGetAsservD() { SendAsservD(KPd, KId, KDd); }
+void OnGetAsservO() { SendAsservO(KPo, KIo, KDo); }
+void OnGetAsservT() { SendAsservT(KPt, KIt, KDt); }
+void OnGetAsservV() { SendAsservV(KPv, KIv, KDv); }
+
+// SETs coefs
+void OnSetAsservD(float KPd_new, float KId_new, float KDd_new) { Set_Asserv_D(KPd_new, KDd_new, KId_new); }
+void OnSetAsservO(float KPo_new, float KIo_new, float KDo_new) { Set_Asserv_O(KPo_new, KDo_new, KIo_new); }
+void OnSetAsservT(float KPt_new, float KIt_new, float KDt_new) { Set_Asserv_T(KPt_new, KDt_new, KIt_new); }
+void OnSetAsservV(float KPv_new, float KIv_new, float KDv_new) { Set_Asserv_V(KPv_new, KDv_new, KIv_new); }
+
+void OnSetEpsilons(float d, float di, float t, float ti) { Set_Epsilons(d, di, t, ti); }
+
+/****************** Coefs asserv ******************************/
+
+void Set_Asserv_V(float KPv_new, float KDv_new, float KIv_new)
+{
+    //Coeffs de l'asserv sur la vitesse linéaire
+    KPv = KPv_new;
+    KDv = KDv_new;
+    KIv = KIv_new;
+}
+
+void Set_Asserv_O(float KPo_new, float KDo_new, float KIo_new)
+{
+    //Coeffs de l'asserv sur la vitesse angulaire
+    KPo = KPo_new;
+    KDo = KDo_new;
+    KIo = KIo_new;
+}
+
+void Set_Asserv_D(float KPd_new, float KDd_new, float KId_new)
+{
+    //Coeffs de l'asserv sur la distance
+    KPd = KPd_new;
+    KDd = KDd_new;
+    KId = KId_new;
+}
+
+void Set_Asserv_T(float KPt_new, float KDt_new, float KIt_new)
+{
+    //Coeffs de l'asserv sur theta
+    KPt = KPt_new;
+    KDt = KDt_new;
+    KIt = KIt_new;
+}
+
+void Set_Epsilons(float E_D, float E_DI, float E_T, float E_TI)
+{
+    Epsilon_D = E_D;
+    Epsilon_DI =E_DI;
+    Epsilon_T = E_T;
+    Epsilon_TI = E_TI;
+}
+
+
+void OnSetSeuils(unsigned int distance, unsigned int angle) {
+    //overshootDistance = distance;
+    //overshootAngle = angle;
+}
+
 
 void Mise_A_Jour_Consignes(void)
 {
@@ -283,7 +530,7 @@ void Mise_A_Jour_Consignes(void)
         float Dist_Freinage_D;
         float Dist_Freinage_T;
 
-        case 1:
+        case 1: //
 
             D = Get_Distance_Obj(Consigne_PosX, Consigne_PosY);
             Alpha = Get_Angle_Obj(Consigne_PosX, Consigne_PosY) - Get_Angle();
@@ -372,155 +619,8 @@ void Mise_A_Jour_Consignes(void)
             Consigne_Distance = Get_Distance_Obj(Consigne_PosX, Consigne_PosY);
             Consigne_Theta = Get_Angle_Obj(Consigne_PosX, Consigne_PosY) - Get_Angle();
             if(fabs(Consigne_Theta) > PI/2) Consigne_Distance = -Consigne_Distance;
-                        
+
+            break;
+
     }
 }
-
-/******************* Consignes ******************************/
-
-void Stop() {
-    Mode_Consigne = 0;
-}
-
-void Set_Rampe_Position(float ConsigneX, float ConsigneY)
-{
-    Consigne_PosX = ConsigneX;
-    Consigne_PosY = ConsigneY;
-    Mode_Consigne = 1;
-}
-
-void Set_Rampe_Distance(float Consigne)
-{
-    //A verifier
-    Distance_Actu = 0;
-    etat = 0;
-    Consigne_Distance = Consigne;
-    Consigne_Theta = Get_Angle();
-    Mode_Consigne = 2;
-}
-
-void Set_Rampe_Angle(float Consigne)
-{
-
-    Consigne_Theta = Consigne;
-    Mode_Consigne = 3;
-}
-
-void Set_Consigne_Distance(float Consigne)
-{
-    Consigne_Theta = Get_Angle();
-    Consigne_Distance = Consigne;
-    Mode_Consigne = 4;
-}
-
-void Set_Consigne_Angle(float Consigne)
-{
-    Consigne_Distance = 0;
-    Consigne_Theta = Consigne;
-    Mode_Consigne = 5;
-}
-
-void Set_Consigne_Position(float Consigne_X, float Consigne_Y)
-{
-    Consigne_PosX = Consigne_X;
-    Consigne_PosY = Consigne_Y;
-    Distance_Obj = Get_Distance_Obj(Consigne_PosX, Consigne_PosY);
-    Mode_Consigne = 6;
-}
-
-void Set_Consigne_Vitesse(float Consigne)
-{
-    Consigne_Vitesse = Consigne;
-    Mode_Consigne = 7;
-}
-
-void Set_Consigne_Omega(float Consigne)
-{
-    Consigne_Omega = Consigne;
-    Mode_Consigne = 8;
-}
-
-void Set_Consigne_Courbe(float Consigne_V, float Consigne_O)
-{
-    Consigne_Vitesse = Consigne_Vitesse;
-    Consigne_Omega = Consigne_Omega;
-    Mode_Consigne = 9;
-}
-
-/****************** Bridge ATP ******************************/
-
-void OnStop() {
-    Mode_Consigne = 0;
-    SendDone();
-}
-
-// GETs position
-void OnGetPos() {
-    float x, y, theta;
-    Get_Position(&x, &y, &theta);
-    SendPos(x, y, theta);
-}
-void OnGetAngle() { SendAngle(Theta_Actu); }
-
-// GETs vitesse
-void OnGetVit() { SendVit(Vitesse_Actu); }
-void OnGetOmega() { SendOmega(Omega_Actu); }
-void OnGetCourbe() { SendCourbe(Vitesse_Actu, Omega_Actu); }
-
-// SETs position
-void OnSetPos(float x, float y) { Set_Consigne_Position(x, y); }
-void OnSetAngle(float theta) { Set_Consigne_Angle(theta); }
-void OnSetDist(float dist) { Set_Consigne_Distance(dist); }
-
-// SETs vitesse
-void OnSetVit(float v) { Set_Consigne_Vitesse(v); }
-void OnSetOmega(float omega) { Set_Consigne_Omega(omega); }
-void OnSetCourbe(float v, float omega) { Set_Consigne_Courbe(v, omega); }
-
-// GETs coefs
-void OnGetAsservD() { SendAsservD(KPd, KId, KDd); }
-void OnGetAsservO() { SendAsservO(KPo, KIo, KDo); }
-void OnGetAsservT() { SendAsservT(KPt, KIt, KDt); }
-void OnGetAsservV() { SendAsservV(KPv, KIv, KDv); }
-
-// SETs coefs
-void OnSetAsservD(float KPd_new, float KId_new, float KDd_new) { Set_Asserv_D(KPd_new, KDd_new, KId_new); }
-void OnSetAsservO(float KPo_new, float KIo_new, float KDo_new) { Set_Asserv_O(KPo_new, KDo_new, KIo_new); }
-void OnSetAsservT(float KPt_new, float KIt_new, float KDt_new) { Set_Asserv_T(KPt_new, KDt_new, KIt_new); }
-void OnSetAsservV(float KPv_new, float KIv_new, float KDv_new) { Set_Asserv_V(KPv_new, KDv_new, KIv_new); }
-
-/****************** Coefs asserv ******************************/
-
-void Set_Asserv_V(float KPv_new, float KDv_new, float KIv_new)
-{
-    //Coeffs de l'asserv sur la vitesse linéaire
-    KPv = KPv_new;
-    KDv = KDv_new;
-    KIv = KIv_new;
-}
-
-void Set_Asserv_O(float KPo_new, float KDo_new, float KIo_new)
-{
-    //Coeffs de l'asserv sur la vitesse angulaire
-    KPo = KPo_new;
-    KDo = KDo_new;
-    KIo = KIo_new;
-}
-
-void Set_Asserv_D(float KPd_new, float KDd_new, float KId_new)
-{
-    //Coeffs de l'asserv sur la distance
-    KPd = KPd_new;
-    KDd = KDd_new;
-    KId = KId_new;
-}
-
-void Set_Asserv_T(float KPt_new, float KDt_new, float KIt_new)
-{
-    //Coeffs de l'asserv sur theta
-    KPt = KPt_new;
-    KDt = KDt_new;
-    KIt = KIt_new;
-}
-
-

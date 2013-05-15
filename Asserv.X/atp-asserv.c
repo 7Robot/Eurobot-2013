@@ -327,10 +327,31 @@ __attribute__((weak)) void OnSetCourbe(float v, float omega) {}
 __attribute__((weak)) void OnSetDist(float dist) {}
 
 // You should redefine this function
+__attribute__((weak)) void OnSetEpsilons(float d, float di, float t, float ti) {}
+
+// You should redefine this function
+__attribute__((weak)) void OnSetOdoTheta(float theta) {}
+
+// You should redefine this function
+__attribute__((weak)) void OnSetOdoXTheta(float x, float theta) {}
+
+// You should redefine this function
+__attribute__((weak)) void OnSetOdoXY(float x, float y) {}
+
+// You should redefine this function
+__attribute__((weak)) void OnSetOdoXYTheta(float x, float y, float theta) {}
+
+// You should redefine this function
+__attribute__((weak)) void OnSetOdoYTheta(float y, float theta) {}
+
+// You should redefine this function
 __attribute__((weak)) void OnSetOmega(float omega) {}
 
 // You should redefine this function
 __attribute__((weak)) void OnSetPos(float x, float y) {}
+
+// You should redefine this function
+__attribute__((weak)) void OnSetSeuils(unsigned int distance, unsigned int angle) {}
 
 // You should redefine this function
 __attribute__((weak)) void OnSetThreshold(unsigned char id, float threshold) {}
@@ -457,12 +478,40 @@ int AtpDecode(int id,
         OnSetDist(floatv[0]);
         return 1;
     }
+    if (id == 138) {
+        OnSetEpsilons(floatv[0], floatv[1], floatv[2], floatv[3]);
+        return 1;
+    }
+    if (id == 18) {
+        OnSetOdoTheta(floatv[0]);
+        return 1;
+    }
+    if (id == 15) {
+        OnSetOdoXTheta(floatv[0], floatv[1]);
+        return 1;
+    }
+    if (id == 17) {
+        OnSetOdoXY(floatv[0], floatv[1]);
+        return 1;
+    }
+    if (id == 19) {
+        OnSetOdoXYTheta(floatv[0], floatv[1], floatv[2]);
+        return 1;
+    }
+    if (id == 16) {
+        OnSetOdoYTheta(floatv[0], floatv[1]);
+        return 1;
+    }
     if (id == 60) {
         OnSetOmega(floatv[0]);
         return 1;
     }
     if (id == 30) {
         OnSetPos(floatv[0], floatv[1]);
+        return 1;
+    }
+    if (id == 139) {
+        OnSetSeuils(ushortv[0], ushortv[1]);
         return 1;
     }
     if (id == 152) {
@@ -479,4 +528,3 @@ int AtpDecode(int id,
     }
     return 0;
 }
-

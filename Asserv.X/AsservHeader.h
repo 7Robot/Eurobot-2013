@@ -51,13 +51,13 @@
 #define CONSIGNE_MIN 200
 #define CONSIGNE_NULLE 30
 
-#define VITESSE_MAX 1
-#define OMEGA_MAX 10
+#define VITESSE_MAX 0.4
+#define OMEGA_MAX 0.3
 
-#define ACCELERATION_V 2
-#define DECELERATION_V 2
-#define ACCELERATION_O 0.5
-#define DECELERATION_O 0.5
+#define ACCELERATION_V 0.05
+#define DECELERATION_V 0.05
+#define ACCELERATION_O 0.1
+#define DECELERATION_O 0.1
 
 #define SIGN(a) ((a<0)?-1:1)
 
@@ -76,16 +76,16 @@ void Set_Asserv_O(float, float, float);
 void Set_Asserv_D(float, float, float);
 void Set_Asserv_T(float, float, float);
 
-void Set_Position(float, float);           // permet une mise à jour de la position, du robot
-void Set_Angle(float);
-void Set_X_Angle(float, float);
-void Set_Y_Angle(float, float);
-void Set_Postion_Angle(float, float, float);  // remet totalement à jour la position
+void OnSetOdoTheta(float);
+void OnSetXTheta(float, float);
+void OnSetOdoYTheta(float, float);
+void OnSetOdoXYTheta(float, float, float);  // remet totalement à jour la position
 void Get_Position(float*, float*, float*);       // renvoie la position actuelle du robot
 float Get_Angle(void);
 float Get_Distance_Obj(float, float);          //renvoie la distance entre la consigne et la position actuelle
 float Get_Angle_Obj(float, float);             //renvoie l'angle entre la consigne et la position actuelle
 void Incremente_Position(int16_t, int16_t, volatile float*, volatile float*, volatile float*, volatile float*);     // recoie les tics, incremente la position, renvoie la vitesse et l'angle (pour l'asserv)
+void Gen_Consignes();
 
  void Stop(void);
  void Set_Rampe_Position(float, float);
@@ -98,6 +98,9 @@ void Incremente_Position(int16_t, int16_t, volatile float*, volatile float*, vol
  void Set_Consigne_Omega(float);
  void Set_Consigne_Courbe(float, float);
  void Mise_A_Jour_Consignes(void);
+
+ void Set_Epsilons(float, float, float, float);
+
 
 
 //float sin_lut(float);   // prends un nombre en radians, en renvoie son sinus
