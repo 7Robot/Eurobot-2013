@@ -54,6 +54,9 @@ int adversaire2[taille_uart] = {1,0,0,1,1,1,1,1};
 int reperage[nombre_recepteurs]; // Contient : 0 non recu, 1 adversaire1, 2 adversaire2 pour chaque TSOP
 int donnees[nombre_recepteurs*taille_uart];
 
+volatile unsigned char moy_dist = 0;
+volatile unsigned char moy_dir = 0;
+
 /* i.e. uint16_t <variable_name>; */
 
 /******************************************************************************/
@@ -75,10 +78,11 @@ void lissage(void);
 int who (int reperage[]);
 int howFar (int reperage[], int adversaire);
 int wichDirection (int reperage[], int adversaire);
+void preSendPos(unsigned char adv, unsigned char dist, unsigned char direction);
 
 int16_t main(void)
 {
-	AD1PCFGL = 0x1FF; // Il est 5h, le robot s’éveille	
+    AD1PCFGL = 0x1FF; // Il est 5h, le robot s eveille
     /* Configure the oscillator for the device */
     ConfigureOscillator();
 
@@ -116,80 +120,85 @@ int16_t main(void)
             }
             lissage(); // Corrige les recepteurs defaillants
             adversaire = who(reperage); // Indique si on vient de recevoir adversaire 1 ou 2
-			if (!adversaire) continue; // Cas de fausse detection
-			// DISTANCE ET DIRECTION /////////////////////////////////////////////////////
-			int k = 0, first = 0, last = 0, distance = 0, direction = 0;
-			if (!reperage[0]) // TSOP0 ne reçoit rien
-			{
-				while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
-				first = k;
-				while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
-				last = k;
-				distance = last - first;
-				direction = (last + first) /2;
-			}
-			else if (!reperage[nombre_recepteurs-1]  && reperage[0] == adversaire) // TSOP0 est first
-			{
-				k++;
-				while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
-				// last = k;
-				distance = k;
-				direction = k /2;
-			}
-			else	// TSOP0 est entre first et last
-			{
-				while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
-				last = k;
-				while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
-				first = k;
-				distance = (last + nombre_recepteurs - first) % nombre_recepteurs;
-				direction = ((last + nombre_recepteurs + first) % (2*nombre_recepteurs)) /2;
-			}
-			// FIN DISTANCE ET ANGLE //////////////////////////////////////////////
+            if (!adversaire) continue; // Cas de fausse detection
+
+       	// DISTANCE ET DIRECTION /////////////////////////////////////////////////////
+            int k = 0, first = 0, last = 0, distance = 0, direction = 0;
+            if (!reperage[0]) // TSOP0 ne recoit rien
+            {
+            	while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
+            	first = k;
+            	while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
+            	last = k;
+            	distance = last - first;
+            	direction = (last + first) /2;
+            }
+            else if (!reperage[nombre_recepteurs-1]  && reperage[0] == adversaire) // TSOP0 est first
+            {
+            	k++;
+            	while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
+            	// last = k;
+            	distance = k;
+                direction = k /2;
+            }
+            else	// TSOP0 est entre first et last
+            {
+    		while(reperage[k] == adversaire && k < nombre_recepteurs) k++;
+		last = k;
+		while(reperage[k] != adversaire && k < nombre_recepteurs) k++;
+		first = k;
+		distance = (last + nombre_recepteurs - first) % nombre_recepteurs;
+		direction = ((last + nombre_recepteurs + first) % (2*nombre_recepteurs)) /2;
+            }
+	// FIN DISTANCE ET ANGLE //////////////////////////////////////////////
 			
             switch(adversaire)
             {
             case 0 :
-				break;
-			case 1 : // On vient de detecter adversaire 1
-				distance1tab[2] = distance1tab[1];
-				direction1tab[2] = direction1tab[1];
-				distance1tab[1] = distance1tab[0];
-				direction1tab[1] = direction1tab[0];
-				distance1tab[0] = distance;
-				direction1tab[0] = direction;
-				if(((distance1tab[2] != distance1tab[1]) || (direction1tab[2] != direction1tab[1])) && distance1tab[0] == distance1tab[1] && direction1tab[0] == direction1tab[1])
-				{
-					if (marche)	SendPos(1, distance, direction);
-					distance1 = distance;
-					direction1 = direction;
-				}
-				else
-				{
-					break;
-				}
-				break;
-			case 2 : // On vient de detecter adversaire 2
-				distance2tab[2] = distance2tab[1];
-				direction2tab[2] = direction2tab[1];
-				distance2tab[1] = distance2tab[0];
-				direction2tab[1] = direction2tab[0];
-				distance2tab[0] = distance;
-				direction2tab[0] = direction;
-				if(((distance2tab[2] != distance2tab[1]) || (direction2tab[2] != direction2tab[1])) && distance2tab[0] == distance2tab[1] && direction2tab[0] == direction2tab[1])
-				{
-					if (marche)	SendPos(2, distance, direction);
-					distance2 = distance;
-					direction2 = direction;
-				}
-				else
-				{
-					break;
-				}
-				break;
-			default:
-				break;
-                        }
+            break;
+
+            case 1 : // On vient de detecter adversaire 1
+		distance1tab[2] = distance1tab[1];
+		direction1tab[2] = direction1tab[1];
+		distance1tab[1] = distance1tab[0];
+		direction1tab[1] = direction1tab[0];
+		distance1tab[0] = distance;
+		direction1tab[0] = direction;
+		if(((distance1tab[2] != distance1tab[1]) || (direction1tab[2] != direction1tab[1])) && distance1tab[0] == distance1tab[1] && direction1tab[0] == direction1tab[1])
+		{
+                    if (marche)	preSendPos(1, distance, direction);
+                    distance1 = distance;
+                    direction1 = direction;
+		}
+		else
+		{
+                    break;
+		}
+            break;
+
+            case 2 : // On vient de detecter adversaire 2
+                if (distance == 0) break;
+                distance2tab[2] = distance2tab[1];
+                direction2tab[2] = direction2tab[1];
+                distance2tab[1] = distance2tab[0];
+                direction2tab[1] = direction2tab[0];
+                distance2tab[0] = distance;
+                direction2tab[0] = direction;
+                if(((distance2tab[2] != distance2tab[1]) || (direction2tab[2] != direction2tab[1])) && distance2tab[0] == distance2tab[1] && direction2tab[0] == direction2tab[1])
+                {
+                    if (marche)	preSendPos(2, direction, distance);
+                    distance2 = distance;
+                    direction2 = direction;
+                }
+                else
+                {
+                    break;
+                }
+		break;
+
+            default:
+                break;
+            }
             recu = 0;
         }
     }
@@ -276,6 +285,19 @@ int who (int reperage[])
 	return sortie;
 }
 
+unsigned char pre_dir;
+unsigned char pre_dist;
+
+void preSendPos(unsigned char adv, unsigned char dist, unsigned char dir)
+{
+    if ((pre_dir == dir || (pre_dir-1)%16 == dir || (pre_dir+1)%16 == dir || abs(pre_dist - dist) > 5)
+        && (pre_dist == dist || pre_dist-1 == dist || pre_dist+1 == dist || abs((pre_dir - dir)%16) > 5)) return;
+    
+    SendPos(adv, dist, dir);
+    pre_dir = dir;
+    pre_dist = dist;
+}
+
 // FONCTIONS ATP ///////////////////////////////////////////////
 
 void OnOn ()
@@ -291,5 +313,5 @@ void OnOff ()
 void OnGetPos(unsigned char id)
 {
     if (id == 1)		SendPos(1, distance1, direction1);
-	else				SendPos(2, distance2, direction2);
+	else			SendPos(2, distance2, direction2);
 }

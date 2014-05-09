@@ -15,8 +15,8 @@
 #define led1            _LATA0
 #define led2            _LATA1
 
-#define TSOP1			_RC9
-#define TSOP2			_RB5
+#define TSOP1		_RC9
+#define TSOP2		_RB5
 #define TSOP3           _RB6
 #define TSOP4           _RB7
 #define TSOP5           _RB8
