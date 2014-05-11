@@ -166,7 +166,7 @@ int16_t main(void)
 		direction1tab[0] = direction;
 		if(((distance1tab[2] != distance1tab[1]) || (direction1tab[2] != direction1tab[1])) && distance1tab[0] == distance1tab[1] && direction1tab[0] == direction1tab[1])
 		{
-                    if (marche)	preSendPos(1, distance, direction);
+                    if (marche)	preSendPos1(1, distance, direction);
                     distance1 = distance;
                     direction1 = direction;
 		}
@@ -186,7 +186,7 @@ int16_t main(void)
                 direction2tab[0] = direction;
                 if(((distance2tab[2] != distance2tab[1]) || (direction2tab[2] != direction2tab[1])) && distance2tab[0] == distance2tab[1] && direction2tab[0] == direction2tab[1])
                 {
-                    if (marche)	preSendPos(2, direction, distance);
+                    if (marche)	preSendPos2(2, direction, distance);
                     distance2 = distance;
                     direction2 = direction;
                 }
@@ -285,17 +285,30 @@ int who (int reperage[])
 	return sortie;
 }
 
-unsigned char pre_dir;
-unsigned char pre_dist;
+unsigned char pre_dir1;
+unsigned char pre_dist1;
 
-void preSendPos(unsigned char adv, unsigned char dist, unsigned char dir)
+void preSendPos1(unsigned char adv, unsigned char dist, unsigned char dir)
 {
-    if ((pre_dir == dir || (pre_dir-1)%16 == dir || (pre_dir+1)%16 == dir || abs(pre_dist - dist) > 5)
-        && (pre_dist == dist || pre_dist-1 == dist || pre_dist+1 == dist || abs((pre_dir - dir)%16) > 5)) return;
+    if ((pre_dir1 == dir || (pre_dir1-1)%16 == dir || (pre_dir1+1)%16 == dir || abs(pre_dist1 - dist) > 5)
+        && (pre_dist1 == dist || pre_dist1-1 == dist || pre_dist1+1 == dist || abs((pre_dir1 - dir)%16) > 5)) return;
     
     SendPos(adv, dist, dir);
-    pre_dir = dir;
-    pre_dist = dist;
+    pre_dir1 = dir;
+    pre_dist1 = dist;
+}
+
+unsigned char pre_dir2;
+unsigned char pre_dist2;
+
+void preSendPos2(unsigned char adv, unsigned char dist, unsigned char dir)
+{
+    if ((pre_dir2 == dir || (pre_dir2-1)%16 == dir || (pre_dir2+1)%16 == dir || abs(pre_dist2 - dist) > 5)
+        && (pre_dist2 == dist || pre_dist2-1 == dist || pre_dist2+1 == dist || abs((pre_dir2 - dir)%16) > 5)) return;
+
+    SendPos(adv, dist, dir);
+    pre_dir2 = dir;
+    pre_dist2 = dist;
 }
 
 // FONCTIONS ATP ///////////////////////////////////////////////
